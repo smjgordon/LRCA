@@ -1,0 +1,241 @@
+* {
+	font-family: Verdana, Arial, Helvetica, sans-serif;
+	margin: 0;
+	padding: 0;
+}
+#mainNav ul {
+	margin: 0 0 1em;
+	list-style: none;
+	padding: 0;
+}
+#mainNav1 {
+	float: left;
+}
+#mainNav2 {
+	float: right;
+}
+#mainNav li {
+	display: inline-block;
+	margin: 0;
+}
+#mainNav li a {
+	text-decoration: none;
+	display: block;
+	color: black;
+	border-top: 2px solid white;
+	border-left: 2px solid white;
+	border-right: 2px solid #999999;
+	border-bottom: 2px solid #999999;
+	padding: 5px 10px;
+	background-color: #cccccc;
+}
+#mainNav+* {
+	clear: both;
+}
+
+#mainBody {
+	position: relative;
+	top: 1em;
+	width: 100%;
+	padding: 0 1em;
+}
+
+#subNav {
+	position: absolute;
+	left: 1em;
+	width: 13em;
+}
+
+#subNav ul {
+	list-style: none;
+	padding: 0;
+}
+#subNav li {
+	margin: 0;
+}
+#subNav li a {
+	border-top: 1px solid #999999;
+	border-bottom: 1px solid #999999;
+	padding: 5px 0;
+	text-decoration: none;
+	display: block;
+	color: inherit;
+}
+#subNav li a:hover {
+	background-color: #cccccc;
+	color: black;
+}
+#subNav ul+ul {
+	margin-top: 2em;
+}
+
+#subBody {
+	position: absolute;
+	left: 15em;
+	right: 1em;
+}
+/*#subNav p+p {
+	margin-top: 0.8em;
+}*/
+
+table {
+	border-collapse: collapse;
+}
+
+table+table, table+p {
+	margin-top: 1em;
+}
+
+th, td {
+	padding: 2px 5px;
+}
+
+.standings {
+	/*width: 100%;*/
+	border-top: 1px solid #999999;
+	border-bottom: 1px solid #999999;
+}
+.standings thead {
+	border-bottom: 1px solid #999999;
+}	
+.standings th, .standings td {
+	text-align: left;
+}
+.standings th:first-child, .standings td:first-child, .standings th+th+th, .standings td+td+td {
+	width: 2.5em;
+	text-align: center;
+}
+.standings th:first-child+th, .standings td:first-child+td {
+	padding-right: 2em;
+}
+.standings th, .standings tr:nth-child(even) {
+	background-color: #dddddd;
+}
+
+.fixtures .date {
+	width: 8em;
+}
+.fixtures .homeTeam {
+	text-align: right;
+	width: 12em;
+}
+.fixtures .awayTeam {
+	text-align: left;
+	width: 12em;
+}
+.result thead, .result tfoot {
+	border-top: 1px solid #999999;
+	border-bottom: 1px solid #999999;
+}
+
+.result td.board, .result td.colour, .result td.grade, .result td.score {
+	text-align: center;
+}
+.result .board, .result .colour {
+	width: 2em;
+}
+.result .grade {
+	width: 2.5em;
+}
+.result .name {
+	width: 13em;
+}
+
+.homeScore {
+	width: 2em;
+	text-align: right;
+	padding-right: 0;
+}
+td.dash {
+	text-align: center;
+}
+.awayScore {
+	width: 2em;
+	text-align: left;
+	padding-left: 0;
+}
+
+.rp .board {
+	width: 4em;
+}
+.rp .homeScore, .rp .awayScore {
+	width: 1em;
+}
+
+.players {
+	border-top: 1px solid #999999;
+	border-bottom: 1px solid #999999;
+}
+.players thead {
+	border-bottom: 1px solid #999999;
+}
+.players th, .players tr:nth-child(even) {
+	background-color: #dddddd;
+}
+.players .grade, .players .cat {
+	text-align: center;
+}
+.players .ecfCode {
+	width: 6em;
+}
+.players .name {
+	width: 14em;
+}
+.players .club {
+	width: 11em;
+}
+
+.performance td+td {
+	text-align: center;
+}
+.performance th:first-child {
+	text-align: left;
+}
+
+.tabForm p {
+	margin-bottom: 0.8em;
+}
+
+.tabForm label {
+	display: inline-block;
+	text-align: right;
+	margin-right: 0.2em;
+	width: 12em;
+}
+.tabForm input {
+	display: inline-block;
+}
+
+h2+*{
+	margin-top: 1em;
+}
+*+h3 {
+	margin-top: 1em;
+	margin-bottom: 0.5em;
+}
+h2+h3.sub {
+	margin-top: 0.1em;
+	margin-bottom: 1em;
+}
+
+li {
+	margin-left: 3em;
+}
+
+.error {
+	color: red;
+}
+
+p.error {
+	margin-bottom: 0.8em;
+}
+
+.devNotice {
+	border: 1px solid #009900;
+	background-color: #ccffcc;
+	padding: 1em;
+	margin: 1em 2em 1em 0;
+}
+p+p {
+	margin-top: 0.8em;
+}
