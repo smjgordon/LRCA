@@ -10,21 +10,24 @@ class ReportableException extends Exception {
 }
 
 class ModelAccessException extends Exception {
-	const BadClubName   = 10;
-	const BadClubId     = 11;
-	const BadTeamId     = 20;
-	const BadDivisionId = 30;
-	const BadRoundId    = 40;
-	const BadFixtureId  = 50;
+	const BadClubId        = 10;
+	const BadClubName      = 11;
+	const BadTeamId        = 20;
+	const BadDivisionId    = 30;
+	const BadRoundId       = 40;
+	const BadFixtureId     = 50;
+	const BadPlayerId      = 60;
+	const BadPlayerEcfCode = 62;
+	const BadGradeId       = 70;
 	
 	public function __construct($code, $customData = null, $previous = null) {
 		switch ($code) {
-			case self::BadClubName:
-				$message = "Club name not found: $customData";
-				break;
-				
 			case self::BadClubId:
 				$message = "Club ID not found: $customData";
+				break;
+				
+			case self::BadClubName:
+				$message = "Club name not found: $customData";
 				break;
 				
 			case self::BadTeamId:
@@ -37,6 +40,18 @@ class ModelAccessException extends Exception {
 				
 			case self::BadRoundId:
 				$message = "Round ID not found: $customData";
+				break;
+				
+			case self::BadPlayerId:
+				$message = "Player ID not found: $customData";
+				break;
+				
+			case self::BadPlayerEcfCode:
+				$message = "Player ECF code not found: $customData";
+				break;
+				
+			case self::BadGradeId:
+				$message = "Grade ID code not found: $customData";
 				break;
 		}
 		

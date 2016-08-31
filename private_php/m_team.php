@@ -30,28 +30,44 @@ class Team {
 
 		if ($row = $stmt->fetch()) {
 			$result = new Team();
-			$result->loadFromDbRow($row);
+			$result->populateFromDbRow($row);
 			return $result;
 		} else {
 			throw new ModelAccessException(ModelAccessException::BadTeamId, $id);
 		}
 	}
 
+	// TODO: come up with a more generic way of doing this
+	public static function rankingOrder($team1, $team2) {
+		if ($team1->adjustedPoints > $team2->adjustedPoints) return -1;
+		if ($team1->adjustedPoints < $team2->adjustedPoints) return 1;
+		if ($team1->gpd > $team2->gpd) return -1;
+		if ($team1->gpd < $team2->gpd) return 1;
+		return 0;
+	}
+	
 	public function __construct() {
 		$this->status = TeamStatus::Active;
 	}
 
 	public function id() { return $this->_id; }
 
-	public $division, $club, $sequence, $name, $status;
+	public $division, $club, $sequence, $name, $status, $played, $won, $drawn, $lost, $gpd, $rawPoints, $adjustedPoints;
 
-	private function loadFromDbRow($row) {
+	private function populateFromDbRow($row) {
 		$this->_id = $row['team_id'];
 		$this->division = new IdWrapper($row['division_id']);
 		$this->club = new IdWrapper($row['club_id']);
 		$this->sequence = $row['sequence'];
 		$this->name = $row['name'];
 		$this->status = $row['status'];
+		$this->played = $row['played'];
+		$this->won = $row['won'];
+		$this->drawn = $row['drawn'];
+		$this->lost = $row['lost'];
+		$this->gpd = $row['gpd'];
+		$this->rawPoints = $row['raw_points'];
+		$this->adjustedPoints = $row['adjusted_points'];
 	}
 
 	private $_id;

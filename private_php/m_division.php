@@ -1,6 +1,8 @@
 <?php
 require_once 'p_server.php';
 require_once 'p_section.php';
+require_once 'm_team.php';
+require_once 'm_round.php';
 require_once 'p_exceptions.php';
 
 class Division {
@@ -15,6 +17,7 @@ class Division {
 		if ($row = $stmt->fetch()) {
 			$result = new Division();
 			$result->populateFromDbRow($row);
+			return $result;
 		} else {
 			throw new ModelAccessException(ModelAccessException::BadDivisionId, $id);
 		}
@@ -43,6 +46,57 @@ class Division {
 		}
 		return $result;
 	}
+	
+	public function playedMatchRounds() {
+		$this->loadRounds();
+		
+		$result = [];
+		foreach ($this->rounds as $round) {
+			if ($round->anyPlayed) $result[] = $round;
+		}
+		return $result;
+	}
+	
+	public function loadTeams() {
+		global $Database;
+		
+		if (!$this->_teamsLoaded) {
+			$this->teams = [];
+			$stmt = $Database->prepare('
+				SELECT team_id
+				FROM team
+				WHERE division_id = ?
+				ORDER BY name');
+			$stmt->execute([$this->_id]);
+			while ($row = $stmt->fetch()) $this->teams[] = Team::loadById($row['team_id']);
+			
+			$this->_teamsLoaded = true;
+		}
+	}
+	
+	public function rankedTeams() {
+		$this->loadTeams();
+		$result = $this->teams;
+		usort($result, 'Team::rankingOrder');
+		return $result;
+	}
+	
+	public function loadRounds() {
+		global $Database;
+		
+		if (!$this->_roundsLoaded) {			
+			$this->rounds = [];
+			$stmt = $Database->prepare('
+				SELECT round_id
+				FROM round
+				WHERE division_id = ?
+				ORDER BY sequence');
+			$stmt->execute([$this->_id]);
+			while ($row = $stmt->fetch()) $this->rounds[] = Round::loadById($row['round_id']);
+			
+			$this->_roundsLoaded = true;
+		}
+	}
 
 	private function populateFromDbRow($row) {
 		$this->_id = $row['division_id'];
@@ -59,7 +113,7 @@ class Division {
 		$this->requireGrade = !!$row['require_grade'];
 	}
 
-	private $_id;
+	private $_id, $_teamsLoaded, $_roundsLoaded;
 
 	public function save($silentFail = false) {
 		global $Database;
@@ -88,7 +142,7 @@ class Division {
 	public function dump() {
 		echo "<p>Division ID: $this->_id; Section: ", $this->section->displayName(), "; Name: $this->name; ",
 			"URL name: $this->urlName; Match style: $this->matchStyle; ",
-			"Breakdown: $this->breakdown; Format: $this->format; Require grade: $this->requireGrade</p>";
+			"Breakdown: $this->breakdown; Format: $this->format; Require grade: ", (integer) $this->requireGrade, '</p>';
 	}
 
 	public function recursiveDump() {

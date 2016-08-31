@@ -38,12 +38,6 @@ abstract class BoardDefaultReason {
 	const IllegalBoardOrder = 2;
 }
 
-abstract class GradeType {
-	const Standard = 0;
-	const Rapid = 1;
-	const LrcaRapid = 2;
-}
-
 abstract class SessionStatus {
 	const Failed = 0;
 	const Active = 1;

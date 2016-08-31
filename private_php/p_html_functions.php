@@ -1,5 +1,5 @@
 <?php
-// TODO: refactor
+// TODO: implement new naming convention
 function formatScore($score) {
 	if ($score == 0.5) return '½';
 	return ((integer) $score) . (($score * 2) % 2 == 1 ? '½' : '');

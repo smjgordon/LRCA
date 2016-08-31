@@ -7,7 +7,7 @@ abstract class SystemSettings {
 	static $ccEmail = 'Stewart Gordon <smjg@iname.com>';
 	
 	static $summerYear = 2016;
-	static $winterYear = 2015;
-	static $currentSeason = Season::Summer;
+	static $winterYear = 2016;
+	static $currentSeason = Season::BothDefaultSummer;
 }
 ?>
