@@ -40,7 +40,7 @@ pageHeader('Log In');
 	
 	<!--<p>If you have previously reset your password but it doesn't work now, I may have refreshed the database.&nbsp; If this is the case, please just reset your password again.</p>-->
 	
-	<p>All registered users will be notified by email when the site is live.</p>
+	<p>All registered users will be notified by email when the site is launched.</p>
 </div>
 
 <?php if ($error) { ?>

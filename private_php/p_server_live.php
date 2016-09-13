@@ -18,5 +18,5 @@ try {
 	errorPage(500);
 }
 
-$canSendEmail = true;
+$CanSendEmail = true;
 ?>

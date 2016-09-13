@@ -33,7 +33,7 @@ if (isset($_POST['email']) && trim($_POST['email']) == '') {
 				$emailSubject = 'Welcome to the new LRCA Results Website';
 				$emailMessage = 'Dear ' . $user->forename() . ",
 
-The new LRCA Results Website is now live, and can be found here:
+The new LRCA Results Website has now been launched, and can be found here:
 
 http://lrca.stewartsplace.org.uk/
 
@@ -43,9 +43,10 @@ note are:
 same division
 - Features that require you to be logged in, such as result
 submission, will appear only when you actually are logged in
-- Submission and approval are accessed through a single link, which
-takes you to a page where you will select the match for which you
-wish to submit or approve a result and then enter the required data
+- Submission and approval are accessed through a single 'My Fixtures'
+link, which takes you to a page where you will select the match for
+which you wish to submit or approve a result and then enter the
+required data
 
 You will need to set a password for your user account.  This may be
 either the same password you used on the old results website or a new

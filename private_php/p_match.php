@@ -130,7 +130,8 @@ abstract class Match {
 						<td class="homeScore"><?php echo formatScore($this->homeHandicap); ?></td>
 						<td class="dash">–</td>
 						<td class="awayScore"><?php echo formatScore($this->awayHandicap); ?></td>
-						<td colspan="3"></td>
+						<td colspan="2"></td>
+						<td></td>
 					</tr>
 				<?php } ?>
 				<tr>

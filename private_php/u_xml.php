@@ -13,5 +13,18 @@ abstract class XmlUtils {
 		if (!is_numeric($value)) throw new ReportableException($exceptionMessage);
 		return (int) $value;
 	}
+	
+	public static function readDate($attribute, $exceptionMessage) {
+		$dateStr = (string) $attribute;
+		if ($dateStr == '') throw new ReportableException($exceptionMessage);
+
+		if (preg_match('/^[12][09][0-9][0-9]-[01][0-9]-[0123][0-9]$/', $dateStr)) {
+			$value = strtotime($dateStr);
+			// strtotime accepts some nonsensical dates, so converting back to check it's valid
+			if ($dateStr != date('Y-m-d', $value)) $value = null;
+		}
+		if (!$value) throw new ReportableException($exceptionMessage);
+		return $value;
+	}
 }
 ?>

@@ -31,7 +31,7 @@ function pageHeader($title) {
 		</ul>
 		<ul id="mainNav2">
 			<?php if ($CurrentUser) { ?>
-				<?php echo $CurrentUser->fullName(), ' – ', $CurrentUser->clubName(); ?>
+				<li class="loggedInUser"><?php echo $CurrentUser->fullName(), ' – ', $CurrentUser->clubName(); ?></li>
 				<li><a href="logout.php">Log Out</a></li>
 			<?php } else { ?>
 				<li><a href="login.php">Log In</a></li>

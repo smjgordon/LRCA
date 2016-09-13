@@ -104,14 +104,14 @@ pageHeader($pageTitle);
 	?> Grades</h3>
 
 	<table class="players">
-		<col class="ecfCode" />
-		<col class="name" />
+		<colgroup><col class="ecfCode" /></colgroup>
+		<colgroup><col class="name" /></colgroup>
 		<?php if (!$clubID) { ?>
-			<col class="club" />
+			<colgroup><col class="club" /></colgroup>
 		<?php } ?>
 		<colgroup><col class="grade" /><col class="cat" /></colgroup>
 		<colgroup><col class="grade" /><col class="cat" /></colgroup>
-		<col class="grade" />
+		<colgroup><col class="grade" /></colgroup>
 		<thead>
 			<tr>
 				<th rowspan="2">ECF Code</th>

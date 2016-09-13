@@ -32,6 +32,11 @@
 #mainNav+* {
 	clear: both;
 }
+#mainNav li.loggedInUser {
+	position: absolute;
+	right: 0;
+	top: 0.75em;
+}
 
 #mainBody {
 	position: relative;
