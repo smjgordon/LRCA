@@ -5,29 +5,36 @@ require_once 'm_fixture.php';
 require_once 'u_id_wrapper.php';
 
 class Round {
+	private static $instanceCache = [];
+	
 	public static function loadById($id) {
 		global $Database;
-
-		$stmt = $Database->prepare('
-			SELECT DISTINCT r.*, f.status AS any_played
-			FROM round r
-				LEFT JOIN fixture f ON r.round_id = f.round_id AND f.status = 1
-			WHERE r.round_id = ?');
-		$stmt->execute([$id]);
-
-		if ($row = $stmt->fetch()) {
-			$result = new Round();
-			$result->populateFromDbRow($row);
-			return $result;
+		
+		if (isset(Round::$instanceCache[$id])) {
+			return Round::$instanceCache[$id];
 		} else {
-			throw new ModelAccessException(ModelAccessException::BadRoundId, $id);
+			$stmt = $Database->prepare('
+				SELECT DISTINCT r.*, f.status AS any_played
+				FROM round r
+					LEFT JOIN fixture f ON r.round_id = f.round_id AND f.status = 1
+				WHERE r.round_id = ?');
+			$stmt->execute([$id]);
+
+			if ($row = $stmt->fetch()) {
+				$result = new Round();
+				$result->populateFromDbRow($row);
+				Round::$instanceCache[$id] = $result;
+				return $result;
+			} else {
+				throw new ModelAccessException(ModelAccessException::BadRoundId, $id);
+			}
 		}
 	}
 
-	public function id() { return $this->_id; }
-
 	public $division, $sequence, $urlName, $name, $anyPlayed;
 	public $fixtures;
+
+	public function id() { return $this->_id; }
 
 	public function loadFixtures() {
 		global $Database;

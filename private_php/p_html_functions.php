@@ -20,14 +20,17 @@ function formatDate($timestamp, $withYear = true) {
 
 function formatGameResult($result) {
 	switch ($result) {
-		case 1: // 1-0
+		case GameResult::HomeWin: // 1-0
 			echo '<td class="homeScore">1</td><td class="dash">–</td><td class="awayScore">0</td>';
 			break;
-		case 0: // ½-½
+		case GameResult::Draw: // ½-½
 			echo '<td class="homeScore">½</td><td class="dash">–</td><td class="awayScore">½</td>';
 			break;
-		case -1: // 0-1
+		case GameResult::AwayWin: // 0-1
 			echo '<td class="homeScore">0</td><td class="dash">–</td><td class="awayScore">1</td>';
+			break;
+		case GameResult::DoubleDefault: // 0-0
+			echo '<td class="homeScore">0</td><td class="dash">–</td><td class="awayScore">0</td>';
 	}
 }
 
@@ -42,5 +45,12 @@ function renderSelectOption($value, $selectedValue, $displayText) {
 	echo '<option value="', $value, '"';
 	if ($value == $selectedValue) echo ' selected="selected"';
 	echo '>', htmlspecialchars($displayText), '</option>';
+}
+
+function carryForwardPostData() {
+	foreach ($_POST as $key => $value) {
+	?>	<input type="hidden" name="<?php echo htmlspecialchars($key); ?>" value="<?php echo htmlspecialchars($value); ?>" />
+	<?php
+	}
 }
 ?>

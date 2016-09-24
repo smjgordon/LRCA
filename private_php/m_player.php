@@ -9,7 +9,8 @@ class Player {
 		global $Database;
 		
 		$stmt = $Database->prepare('
-			SELECT * FROM club
+			SELECT *
+			FROM club
 			WHERE name = ?');
 		$stmt->execute([$name]);
 		
@@ -63,12 +64,12 @@ class Player {
 	}
 	
 	public function loadGrades($date, $season) {
-		$standardGrade = Grade::loadByPlayer($this->_id, $date, $season, GradeType::Standard)
-			and $standardGrade->player = $this;
-		$rapidGrade = Grade::loadByPlayer($this->_id, $date, $season, GradeType::Rapid)
-			and $rapidGrade->player = $this;
-		$lrcaRapidGrade = Grade::loadByPlayer($this->_id, $date, $season, GradeType::LrcaRapid)
-			and $lrcaRapidGrade->player = $this;
+		$this->standardGrade = Grade::loadByPlayer($this, $date, $season, GradeType::Standard)
+			and $this->standardGrade->player = $this;
+		$this->rapidGrade = Grade::loadByPlayer($this, $date, $season, GradeType::Rapid)
+			and $this->rapidGrade->player = $this;
+		$this->lrcaRapidGrade = Grade::loadByPlayer($this, $date, $season, GradeType::LrcaRapid)
+			and $this->lrcaRapidGrade->player = $this;
 	}
 	
 	public function saveGrades() {
@@ -80,7 +81,7 @@ class Player {
 	private function __construct($row) {
 		$this->_id = $row['player_id'];
 		// OPTIMISE: get index of clubs first
-		$this->club = $row['club_id'] ? Club::loadById($row['club_id']) : null;
+		$this->club = $row['club_id'] > 0 ? Club::loadById($row['club_id']) : null;
 		$this->forename = $row['forename'];
 		$this->surname = $row['surname'];
 		$this->ecfGradingCode = $row['ecf_grading_code'];
@@ -91,6 +92,14 @@ class Player {
 	public $club, $forename, $surname, $ecfGradingCode, $status, $standardGrade, $rapidGrade, $lrcaRapidGrade;
 	private $_id;
 
+	public function fullName() {
+		return $this->forename . ($this->forename && $this->surname ? ' ' : '') . $this->surname;
+	}
+	
+	public function fullNameFiling() {
+		return $this->surname . ($this->forename && $this->surname ? ', ' : '') . $this->forename;
+	}
+	
 	// DEBUG
 	public function dump() {
 		echo "<p>Player ID: $this->_id; ECF code: $this->ecfGradingCode; Name: $this->forename $this->surname; ",

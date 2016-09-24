@@ -8,6 +8,6 @@ abstract class SystemSettings {
 	
 	static $summerYear = 2016;
 	static $winterYear = 2016;
-	static $currentSeason = Season::BothDefaultSummer;
+	static $currentSeason = Season::BothDefaultWinter;
 }
 ?>

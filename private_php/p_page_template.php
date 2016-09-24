@@ -23,7 +23,7 @@ function pageHeader($title) {
 				$stmt = $Database->query('SELECT section_id, name, season FROM section');
 				while ($row = $stmt->fetch()) {
 					$year = ($row['season'] == Season::Winter) ? SystemSettings::$winterYear : SystemSettings::$summerYear;
-					print "<li><a href='section.php?year=$year&amp;sid=$row[section_id]'>$row[name]</a></li>";
+					echo "<li><a href='section.php?year=$year&amp;sid=$row[section_id]'>$row[name]</a></li>";
 				}
 			?><li><a href="players.php">Players</a></li
 			><li><a href="archive.php">Archive</a></li
@@ -31,8 +31,12 @@ function pageHeader($title) {
 		</ul>
 		<ul id="mainNav2">
 			<?php if ($CurrentUser) { ?>
-				<li class="loggedInUser"><?php echo $CurrentUser->fullName(), ' – ', $CurrentUser->clubName(); ?></li>
-				<li><a href="logout.php">Log Out</a></li>
+				<li class="loggedInUser"><?php echo $CurrentUser->fullName(), ' – ', $CurrentUser->clubName(); ?></li
+				><?php
+					if ($CurrentUser->hasPermission('can_submit')) {
+						echo '<li><a href="my_fixtures.php">My Fixtures</a></li>';
+					}
+				?><li><a href="logout.php">Log Out</a></li>
 			<?php } else { ?>
 				<li><a href="login.php">Log In</a></li>
 			<?php } ?>

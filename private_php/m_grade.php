@@ -20,11 +20,18 @@ class Grade {
 	}
 
 	public static function loadByPlayer($player, $date, $season, $type) {
+		global $Database;
+		// debug
+		//var_dump($player);
+		//echo $date, ' ', $season, ' ', $type;
+		
 		$stmt = $Database->prepare('
 			SELECT * FROM grade
-			WHERE player_id = ? AND effective_from <= ? AND AND season = ? type = ?
+			WHERE player_id = ? AND effective_from <= ? AND season = ? AND type = ?
 			ORDER BY effective_from DESC');
 		$stmt->execute([$player->id(), date('c', $date), $season, $type]);
+		//var_dump($row); // debug
+		//echo $stmt->rowCount(); // debug
 
 		// we only care about the 1st record (latest effective_from) returned, as this is the one effective as of $date
 		if ($row = $stmt->fetch()) {

@@ -3,7 +3,7 @@
 // (it quacks like a duck, by returning an ID when asked)
 class IdWrapper {
 	public function __construct($id) { $this->_id = $id; }
-	public function id() { return $_id; }
+	public function id() { return $this->_id; }
 	private $_id;
 }
 ?>

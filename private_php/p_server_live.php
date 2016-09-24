@@ -2,6 +2,7 @@
 require_once 'p_error_page.php';
 
 date_default_timezone_set('UTC');
+mb_internal_encoding('utf-8');
 
 try {
 	$dsn = 'mysql:host=127.0.0.1;dbname=stewart_lrca;charset=utf8';

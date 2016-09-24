@@ -2,6 +2,7 @@
 // TODO: finish the new division classes and do away with this
 require_once 'p_section.php';
 require_once 'p_html_functions.php';
+require_once 'p_enumerations.php'; // TODO: do away with this?
 
 class OldDivision {
 	private $id, $name, $breakdown;
@@ -90,7 +91,7 @@ class OldDivision {
 		}
 	}
 }
-
+/*
 abstract class DivisionFormat {
 	const RoundRobinSingle = 1;
 	const RoundRobinDouble = 2;
@@ -101,5 +102,5 @@ abstract class DivisionFormat {
 abstract class Breakdown {
 	const ByMonth = 1;
 	const ByRound = 2;
-}
+}*/
 ?>

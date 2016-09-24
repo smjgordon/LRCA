@@ -1,6 +1,8 @@
 <?php
 require_once 'p_server.php';
 require_once 'p_exceptions.php';
+require_once 'm_fixture.php';
+require_once 'm_team.php';
 
 class Club {
 	public static function loadByName($name) {
@@ -32,7 +34,47 @@ class Club {
 			throw new ModelAccessException(ModelAccessException::BadClubId, $id);
 		}
 	}
+	/*
+	public $fixtures;
+
+	public function loadFixtures() {
+		global $Database;
+
+		if (!$this->_fixturesLoaded) {
+			$this->fixtures = [];
+			$stmt = $Database->prepare('
+				SELECT f.fixture_id
+				FROM fixture f
+					JOIN team ht ON f.home_team_id = ht.team_id
+					JOIN team at ON f.away_team_id = at.team_id
+				WHERE ? IN (ht.club_id, at.club_id)
+				ORDER BY f.fixture_date, f.fixture_id');
+			$stmt->execute([$this->_id]);
+			while ($row = $stmt->fetch()) $this->fixtures[] = Fixture::loadById($row['fixture_id']);
+
+			$this->_fixturesLoaded = true;
+		}
+	}*/
 	
+	public function fixturesPendingSubmission() {
+		global $Database;
+		
+		$fixtures = [];
+		$stmt = $Database->prepare("
+			SELECT f.fixture_id
+			FROM fixture f
+				JOIN team ht ON f.home_team_id = ht.team_id
+				JOIN team at ON f.away_team_id = at.team_id
+			WHERE ? IN (ht.club_id, at.club_id)
+				AND f.status = 0
+				AND addtime(fixture_date, '20:00') <= ?
+			ORDER BY f.fixture_date, f.fixture_id");
+		$stmt->execute([$this->_id, date('c')]);
+		
+		while ($row = $stmt->fetch()) $fixtures[] = Fixture::loadById($row['fixture_id']);
+		return $fixtures;
+	}
+
 	private function __construct($row) {
 		$this->_id = $row['club_id'];
 		$this->name = $row['name'];
@@ -42,7 +84,7 @@ class Club {
 	
 	public function id() { return $this->_id; }
 	public $name, $ecfCode, $status;
-	private $_id;
+	private $_id;//, $_fixturesLoaded;
 }
 
 abstract class ClubStatus {

@@ -3,9 +3,11 @@ require_once 'private_php/p_global.php';
 pageHeader('Fixtures and Results - Leicestershire and Rutland Chess Association');
 ?>
 
-<p>Welcome to the LRCA results website.</p>
+<p>Welcome to the Leicestershire and Rutland Chess Association results website.</p>
 
-<p class="devNotice">At the moment, this website is under construction.&nbsp; As such, functionality is limited.&nbsp; Most of the match data has been migrated from the previous results website; the 2016 Birstall and Harrod Cup data will be on this site once these competitions have finished.&nbsp; Over the next few weeks, the necessary functionality will be implemented in order that the site can be launched ready for the start of the 2016–17 League season.</p>
+<p>This website publishes fixtures and match results for competitions run by the LRCA over the course of a season, primarily the Leicester Chess League and the Summer Cups.&nbsp; Results are automatically published as and when they are submitted by the team captains.</p>
+
+<p class="devNotice">At the moment, this website is almost ready for launch.&nbsp; Outstanding tasks are to migrate the 2016 Birstall and Harrod Cup data and to load in the 2016–17 League fixtures.</p>
 
 <?php
 pageFooter();

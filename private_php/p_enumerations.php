@@ -58,4 +58,24 @@ abstract class PasswordResetKeyStatus {
 	const Expired = 2;
 	const Superseded = 3;
 }
+
+// TODO: move back once p_division.php has been done away with
+abstract class DivisionFormat {
+	const RoundRobinSingle = 1;
+	const RoundRobinDouble = 2;
+	const Swiss = 11;
+	const Knockout = 21;
+}
+
+abstract class Breakdown {
+	const ByMonth = 1;
+	const ByRound = 2;
+}
+
+abstract class GameResult {
+	const DoubleDefault = -2;
+	const AwayWin = -1;
+	const Draw = 0;
+	const HomeWin = 1;
+}
 ?>

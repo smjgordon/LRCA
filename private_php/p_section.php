@@ -4,8 +4,8 @@ require_once 'p_enumerations.php';
 require_once 'p_server.php';
 
 class Section {
-	public $id, $year;
-	private $name, $season;
+	public $id, $year, $season;
+	private $name;
 
 	function __construct($sectionID, $year) {
 		global $Database;

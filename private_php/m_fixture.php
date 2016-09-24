@@ -1,5 +1,6 @@
 <?php
 require_once 'p_server.php';
+require_once 'm_round.php';
 require_once 'p_exceptions.php';
 require_once 'u_id_wrapper.php';
 
@@ -23,14 +24,16 @@ class Fixture {
 
 	public function id() { return $this->_id; }
 
-	public $round, $date;
+	public $round, $division, $date;
 	public $homeTeam, $homeRawScore, $homeAdjustedScore;
 	public $awayTeam, $awayRawScore, $awayAdjustedScore;
 
 	private function populateFromDbRow($row) {
 		$this->_id = $row['fixture_id'];
 
-		$this->round = new IdWrapper($row['round_id']);
+		$this->round = Round::loadById($row['round_id']);
+		$this->division = $this->round->division;
+		
 		$this->homeTeam = $row['home_team_id'] ? Team::loadById($row['home_team_id']) : null;
 		$this->awayTeam = $row['away_team_id'] ? Team::loadById($row['away_team_id']) : null;
 		$this->date = strtotime($row['fixture_date']);

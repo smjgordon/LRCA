@@ -4,6 +4,7 @@ require_once 'p_section.php';
 require_once 'm_team.php';
 require_once 'm_round.php';
 require_once 'p_exceptions.php';
+require_once 'p_enumerations.php'; // TODO: do away with this?
 
 class Division {
 	public static function loadById($id) {
@@ -26,8 +27,25 @@ class Division {
 	public function id() { return $this->_id; }
 
 	public $section, $name, $urlName, $matchStyle, $breakdown, $sequence, $format, $requireGrade;
+	public $minBoards, $maxBoards;
 	public $teams, $rounds;
 
+	public function canPlayPlayer($player) {
+		if ($player->status != PlayerStatus::Active) return false;
+		if (!$this->requireGrade) return true;
+		
+		switch ($this->matchStyle) {
+			case MatchStyle::Standard:
+				$grade = $player->standardGrade;
+				break;
+				
+			case MatchStyle::RapidSame: case MatchStyle::RapidDifferent:
+				$grade = $player->lrcaRapidGrade;
+		}
+		// if the grade object has a non-zero grade value, we are OK
+		return !!($grade->grade);
+	}
+	
 	public function playedMatchMonths() {
 		global $Database;
 
@@ -111,6 +129,8 @@ class Division {
 		$this->sequence = $row['sequence'];
 		$this->format = $row['format'];
 		$this->requireGrade = !!$row['require_grade'];
+		$this->minBoards = $row['min_boards'];
+		$this->maxBoards = $row['max_boards'];
 	}
 
 	private $_id, $_teamsLoaded, $_roundsLoaded;
@@ -151,7 +171,7 @@ class Division {
 		foreach ($this->rounds as $round) $round->recursiveDump();
 	}
 }
-
+/* TODO: move back here
 abstract class DivisionFormat {
 	const RoundRobinSingle = 1;
 	const RoundRobinDouble = 2;
@@ -162,5 +182,5 @@ abstract class DivisionFormat {
 abstract class Breakdown {
 	const ByMonth = 1;
 	const ByRound = 2;
-}
+}*/
 ?>

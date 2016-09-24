@@ -41,7 +41,7 @@
 #mainBody {
 	position: relative;
 	top: 1em;
-	width: 100%;
+	/*width: 100%;*/
 	padding: 0 1em;
 }
 
@@ -146,6 +146,24 @@ th, td {
 	width: 13em;
 }
 
+.resultSubmit thead, .resultSubmit tfoot {
+	border-top: 1px solid #999999;
+	border-bottom: 1px solid #999999;
+}
+
+.resultSubmit td.board, .resultSubmit td.colour, .resultSubmit td.grade, .resultSubmit td.score {
+	text-align: center;
+}
+.resultSubmit .board, .resultSubmit .colour {
+	width: 2em;
+}
+.resultSubmit .grade {
+	width: 2.5em;
+}
+.resultSubmit .name {
+	width: 13em;
+}
+
 .homeScore {
 	width: 2em;
 	text-align: right;
@@ -239,8 +257,12 @@ p.error {
 	border: 1px solid #009900;
 	background-color: #ccffcc;
 	padding: 1em;
-	margin: 1em 2em 1em 0;
+	margin: 1em 0 /*2em*/ 1em 0;
 }
 p+p {
 	margin-top: 0.8em;
+}
+
+pre {
+	font-family: Consolas, Courier New, monospace;
 }

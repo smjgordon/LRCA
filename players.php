@@ -138,7 +138,7 @@ pageHeader($pageTitle);
 				WHERE p.status IN ($playerStatusFilter)";
 
 			if ($clubID) {
-				$sql .= " AND c.club_id = $clubID";
+				$sql .= " AND c.club_id = $clubID"; // this is safe, as $clubID has been forced to integer type
 			}
 
 			$sql .= ' ORDER BY p.surname, p.forename';

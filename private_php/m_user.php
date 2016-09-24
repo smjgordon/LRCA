@@ -4,6 +4,7 @@ require_once 'p_server.php';
 require_once 'p_enumerations.php';
 require_once 'p_exceptions.php';
 require_once 'p_security_functions.php';
+require_once 'm_club.php';
 
 class User {
 	static public function loadByEmail($email) {
@@ -40,6 +41,7 @@ class User {
 			$this->_surname = $row['surname'];
 			$this->_email = $row['email'];
 			$this->_clubID = $row['club_id'];
+			$this->_club = Club::loadById($this->_clubID);
 			$this->_clubName = $row['club_name'];
 			$this->_status = $row['status'];
 
@@ -61,6 +63,7 @@ class User {
 	public function email() { return $this->_email; }
 	public function status() { return $this->_status; }
 	public function clubName() { return $this->_clubName; }
+	public function club() { return $this->_club; }
 	public function hasPermission($perm) { return in_array($perm, $this->_permissions); }
 
 	public function generatePasswordResetKey($days) {
@@ -100,6 +103,7 @@ class User {
 		}
 		if (password_verify($password, $row['hashed_password'])) {
 			$loginTime = time();
+			$loginTimeStr = date('c', $loginTime);
 			$expiryTime = $loginTime + 86400; // session expires 24 hours from now
 
 			// TODO: consider what to do with this - whether to support a persistent login (and if so, for how long)
@@ -108,7 +112,7 @@ class User {
 			// first close any other sessions the user may have
 			$stmt = $Database->prepare('
 				UPDATE session SET status = 4, logout_date = ? WHERE user_id = ?');
-			$stmt->execute([date('c', $loginTime), $this->_id]);
+			$stmt->execute([$loginTimeStr, $this->_id]);
 
 			// now create the new session
 			$sessionKey = generateKey(40);
@@ -118,8 +122,11 @@ class User {
 
 			$stmt->execute([$this->_email, $this->_id,
 				substr($_SERVER['HTTP_USER_AGENT'], 0, 255), $_SERVER['REMOTE_ADDR'],
-				date('c', $loginTime), date('c', $expiryTime), $sessionKey]);
+				$loginTimeStr, date('c', $expiryTime), $sessionKey]);
 
+			$stmt = $Database->prepare('UPDATE user SET last_login = ? WHERE user_id = ?');
+			$stmt->execute([$loginTimeStr, $this->_id]);
+				
 			$Database->commit();
 
 			setcookie('session', $sessionKey);
@@ -135,7 +142,7 @@ class User {
 		}
 	}
 
-	private $_id, $_forename, $_surname, $_email, $_clubID, $_clubName, $_status, $_permissions;
+	private $_id, $_forename, $_surname, $_email, $_club, $_clubID, $_clubName, $_status, $_permissions;
 }
 
 class PasswordResetKey {
