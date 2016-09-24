@@ -61,6 +61,7 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
 		$error = $ex->getMessage();
 
 	} catch (Exception $ex) {
+		//$error = $ex->getMessage(); // debug
 		errorPage(500);
 	}
 }

@@ -31,8 +31,10 @@ class Division {
 	public $teams, $rounds;
 
 	public function canPlayPlayer($player) {
+		
 		if ($player->status != PlayerStatus::Active) return false;
 		if (!$this->requireGrade) return true;
+		if ($player->id() == PlayerId::BoardDefault) return true;
 		
 		switch ($this->matchStyle) {
 			case MatchStyle::Standard:
