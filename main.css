@@ -259,7 +259,7 @@ p.error {
 	padding: 1em;
 	margin: 1em 0 /*2em*/ 1em 0;
 }
-p+p {
+p+p, p+table.result, p+table.resultSubmit {
 	margin-top: 0.8em;
 }
 

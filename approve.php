@@ -18,28 +18,49 @@ try {
 	errorPage(404);
 }
 
-$fixtures = $CurrentUser->club()->fixturesPendingSubmission();
+$fixtures = $CurrentUser->club()->fixturesPendingApproval();
 $loopFixture = null;
 foreach ($fixtures as $loopFixture) {
 	if ($loopFixture->id() == $fixtureId) break;
 }
 // TODO: distinguish failure scenarios:
 // - not the user's club
-// - approved
-// - already submitted by same club
-// - already submitted by other club and not approved - redirect to approval
+// - already approved
+// - not submitted yet
 // - other status - postponed, defaulted, scored bye
-// - no date set for match
 if (!$loopFixture || $fixture->id() != $loopFixture->id()) errorPage(403);
 
 $match = Match::load($fixtureId);
-$submissionBuilt = false;
 $error = null;
 
 if ($_SERVER['REQUEST_METHOD'] == 'POST') {
+	if (@$_POST['confirm'] == 'on') {
+
+		try {
+			$Database->beginTransaction();
+			$match->saveApproval();
+			$Database->commit();
+
+			redirect(HttpStatus::RedirectSeeOther, 'result_approved.php');
+
+		} catch (ReportableException $ex) {
+			$Database->rollBack();
+			$error = $ex->getMessage();
+
+		} catch (Exception $ex) {
+			$Database->rollBack();
+			//$error = $ex->getMessage(); // debug
+			errorPage(500);
+		}
+	} else {
+		$error = 'You must tick "I confirm that the result details are complete and correct" to continue';
+	}
+}
+/*
+if ($_SERVER['REQUEST_METHOD'] == 'POST') {
 	try {
 		if (@$_POST['confirm'] == 'yes') {
-			
+
 			$Database->beginTransaction();
 			try {
 				$match->buildSubmission();
@@ -66,45 +87,27 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
 		errorPage(500);
 	}
 }
-
-pageHeader('Submit Result');
+*/
+pageHeader('Approve Result');
 ?>
 
-<h2>Submit Result</h2>
+<h2>Approve Result</h2>
 
 <?php if ($error) { ?>
 	<p class="error"><?php echo htmlspecialchars($error); ?></p>
 <?php } ?>
 
-<form method="post" action="<?php echo htmlspecialchars($_SERVER['SCRIPT_NAME']); ?>"><?php
-	if ($submissionBuilt) {
-	?>	<p>Please confirm that these details are correct.&nbsp; If you have made a mistake, please use your browser's Back button to return to the submission form.&nbsp; If you are happy that the result is complete and correct, please press Submit again to complete the submission.</p>
-	<?php
-		$match->renderResult();
-	?>
-		<p>
-			<?php carryForwardPostData(); ?>
-			<input type="hidden" name="confirm" value="yes" />
-			<input type="submit" value="Submit" />
-		</p>
-	<?php
-	} else {
-	?>	<p>Please enter the details of the match.</p>
-	<?php
-		$division = Division::loadById($fixture->round->division->id());
-		/*if ($division->minBoards < $division->maxBoards) {
-		?>	<p>If you used fewer than <?php echo $division->maxBoards; ?> boards, please fill in as many boards as you used, starting at the top, and leave the remainder blank.</p>
-		<?php
-		}*/
+<form method="post" action="<?php echo htmlspecialchars($_SERVER['SCRIPT_NAME']); ?>">
+	<p>Please confirm that these details are correct.&nbsp; If there are any errors or omissions, please do not proceed, but contact the <a href="mailto:smjg@iname.com">Results Webmaster</a> with the corrections.</p>
+	<?php $match->renderResult(); ?>
 
-		$match->renderSubmissionForm();
-	?>
-		<p>
-			<input type="hidden" name="fid" value="<?php echo $fixtureId; ?>" />
-			<input type="submit" value="Submit" />
-		</p>
-	<?php
-} ?></form>
+	<p><label><input type="checkbox" name="confirm" /> I confirm that the result details are complete and correct.</p>
+
+	<p>
+		<input type="hidden" name="fid" value="<?php echo $fixtureId; ?>" />
+		<input type="submit" value="Approve" />
+	</p>
+</form>
 
 <?php
 pageFooter();

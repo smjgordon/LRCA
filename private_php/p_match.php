@@ -313,7 +313,7 @@ abstract class Match {
 		$stmt->execute([$awayWin, $draw, $awayLoss, $this->awayAdjustedScore - $this->homeAdjustedScore,
 			$awayPoints, $awayPoints, $this->awayTeamID]);
 	}
-
+	
 	public function generateEmailConfirmation() {
 		global $CurrentUser;
 		
@@ -328,6 +328,17 @@ This is a confirmation of the result you have submitted.
 		emailConfirmation($subject, $message, [$CurrentUser], 'result_submitted.php');
 	}
 
+	public function saveApproval() {
+		global $Database, $CurrentUser;
+		
+		$stmt = $Database->prepare('
+			UPDATE fixture SET
+				approved_user_id = ?, approved_date = ?
+			WHERE fixture_id = ?');
+		$stmt->execute([
+			$CurrentUser->id(), date('c'), $this->id]);
+	}
+	
 	abstract public function renderSubmissionForm();
 	abstract public function buildSubmission();
 

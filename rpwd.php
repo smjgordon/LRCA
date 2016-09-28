@@ -37,35 +37,38 @@ The new LRCA Results Website has now been launched, and can be found here:
 
 http://lrca.stewartsplace.org.uk/
 
-You will notice some differences from the previous site.  A few to
-note are:
-- Each fixtures page leads directly to the results pages for the
-same division
-- Features that require you to be logged in, such as result
-submission, will appear only when you actually are logged in
+You will notice some differences from the previous site.  A few to note
+are:
+- Each fixtures page leads directly to the results pages for the same
+division
+- Features that require you to be logged in, such as result submission,
+will appear only when you actually are logged in
 - Submission and approval are accessed through a single 'My Fixtures'
-link, which takes you to a page where you will select the match for
-which you wish to submit or approve a result and then enter the
-required data
+link, which takes you to a page where you will select the match for which
+you wish to submit or approve a result and then enter the required data
 
-You will need to set a password for your user account.  This may be
-either the same password you used on the old results website or a new
-one.  To set a password, please visit the following page:
+If you have difficulty using this website or you find any bugs, large or
+small, please do not hesitate to contact the Results Webmaster, Stewart
+Gordon, at smjg@iname.com.
+
+You will need to set a password for your user account.  This may be either
+the same password you used on the old results website or a new one.  To
+set a password, please visit the following page:
 
 $url
 
-This link will expire 48 hours after this email was sent.  If you are
-not able to use it within this period, you can still visit the page,
-but you will be prompted to generate a new password reset key which
-will be emailed to you.";
+This link will expire 48 hours after this email was sent.  If you are not
+able to use it within this period, you can still visit the page, but you
+will be prompted to generate a new password reset key which will be
+emailed to you.";
 				break;
 
 			default:
 				$emailSubject = 'Password reset for the LRCA Results Website';
 				$emailMessage = 'Dear ' . $user->forename() . ",
 
-A password reset has been requested for your user account.  To set a
-new password, please visit the following page:
+A password reset has been requested for your user account.  To set a new
+password, please visit the following page:
 
 $url
 

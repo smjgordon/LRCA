@@ -18,9 +18,9 @@ if (isset($_POST['email'])) {
 			$user = User::loadByEmail($email);
 			$user->logIn($password);
 
-			// TODO: create a landing page for a logged-in user
-			// for now, redirect back to the index page
-			redirect(303, './');
+			// redirect to My Fixtures, as this is what the user is most likely to want to use after logging in
+			// TODO: if the user was redirected here from another page, return to that page
+			redirect(303, 'my_fixtures.php');
 		} catch (ReportableException $ex) {
 			$error = $ex->getMessage();
 
@@ -36,12 +36,10 @@ pageHeader('Log In');
 <h2>Log In</h2>
 
 <div class="devNotice">
-	<p>All user accounts that existed as of 10 May have been migrated from the old results website.&nbsp; If you have an account and wish to test the login facility, you can do so after resetting your password using the 'Forgotten your password?' link.&nbsp; No actual functionality for logged-in users is implemented yet.</p>
-	
-	<!--<p>If you have previously reset your password but it doesn't work now, I may have refreshed the database.&nbsp; If this is the case, please just reset your password again.</p>-->
-	
-	<p>All registered users will be notified by email when the site is launched.</p>
+	<p>Everybody who had a user account under the old results website, and every team captain listed in the 2016-17 LRCA Handbook, should have a user account here.&nbsp; In the near future, a facility will be implemented to enable existing users to create new users associated with their clubs.&nbsp; Meanwhile, if you do not have an account and need to submit results for your club, please contact the <a href="mailto:smjg@iname.com">Results Webmaster</a>.</p>
 </div>
+
+<p>Team captains can log in here in order to submit and approve results.</p>
 
 <?php if ($error) { ?>
 	<p class="error"><?php echo htmlspecialchars($error); ?></p>

@@ -75,6 +75,23 @@ class Club {
 		return $fixtures;
 	}
 
+	public function fixturesPendingApproval() {
+		global $Database;
+		
+		$fixtures = [];
+		$stmt = $Database->prepare("
+			SELECT f.fixture_id
+			FROM fixture f
+			WHERE approval_club_id = ?
+				AND f.status IN (1, 3)
+				AND approved_date IS NULL
+			ORDER BY f.fixture_date, f.fixture_id");
+		$stmt->execute([$this->_id]);
+		
+		while ($row = $stmt->fetch()) $fixtures[] = Fixture::loadById($row['fixture_id']);
+		return $fixtures;
+	}
+
 	private function __construct($row) {
 		$this->_id = $row['club_id'];
 		$this->name = $row['name'];

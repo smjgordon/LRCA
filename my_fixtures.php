@@ -33,6 +33,29 @@ if ($fixtures) {
 <?php
 }
 
+$fixtures = $CurrentUser->club()->fixturesPendingApproval();
+if ($fixtures) {
+	$anyFixtures = true;
+?>
+	<h3>Available for Approval</h3>
+	<table class="fixtures">
+		<?php foreach ($fixtures as $fixture) { ?>
+			<tr>
+				<td class="date"><?php
+					echo formatDate($fixture->date);
+				?></td>
+				<td class="homeTeam"><?php echo $fixture->homeTeam ? htmlspecialchars($fixture->homeTeam->name) : 'bye'; ?></td>
+				<td class="homeScore"><?php echo formatScore($fixture->homeAdjustedScore); ?></td>
+				<td class="dash">–</td>
+				<td class="awayScore"><?php echo formatScore($fixture->awayAdjustedScore); ?></td>
+				<td class="awayTeam"><?php echo $fixture->awayTeam ? htmlspecialchars($fixture->awayTeam->name) : 'bye'; ?></td>
+				<td><a href="approve.php?fid=<?php echo $fixture->id(); ?>">Approve</a></td>
+			</tr>
+		<?php } ?>
+	</table>
+<?php
+}
+
 if (!$anyFixtures) {
 ?>
 	<p>You do not currently have any fixtures available for submission.</p>
