@@ -15,6 +15,8 @@ function pageHeaderNoDb($title) {
 	<div id="mainNav">
 		<ul id="mainNav1">
 			<li><a href="./">Home</a></li
+			><li><a href="players.php">Players</a></li
+			><li><a href="barred_players.php">Barred Players</a></li
 			><li><a href="archive.php">Archive</a></li
 			><li><a href="http://www.lrca.org.uk/">Main LRCA Website</a></li>
 		</ul>

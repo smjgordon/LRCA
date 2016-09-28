@@ -185,14 +185,14 @@ td.dash {
 	width: 1em;
 }
 
-.players {
+.players, .barred {
 	border-top: 1px solid #999999;
 	border-bottom: 1px solid #999999;
 }
 .players thead {
 	border-bottom: 1px solid #999999;
 }
-.players th, .players tr:nth-child(even) {
+.players th, .players tr:nth-child(even), .barred tr:nth-child(even) {
 	background-color: #dddddd;
 }
 .players .grade, .players .cat {
@@ -259,10 +259,14 @@ p.error {
 	padding: 1em;
 	margin: 1em 0 /*2em*/ 1em 0;
 }
-p+p, p+table.result, p+table.resultSubmit {
+p+p, p+form p, p+table.result, p+table.resultSubmit {
 	margin-top: 0.8em;
 }
 
 pre {
 	font-family: Consolas, Courier New, monospace;
+}
+
+.barred td:first-child {
+	padding-right: 2em;
 }

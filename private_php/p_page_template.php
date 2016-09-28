@@ -26,6 +26,7 @@ function pageHeader($title) {
 					echo "<li><a href='section.php?year=$year&amp;sid=$row[section_id]'>$row[name]</a></li>";
 				}
 			?><li><a href="players.php">Players</a></li
+			><li><a href="barred_players.php">Barred Players</a></li
 			><li><a href="archive.php">Archive</a></li
 			><li><a href="http://www.lrca.org.uk/">Main LRCA Website</a></li>
 		</ul>
