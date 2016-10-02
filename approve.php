@@ -3,9 +3,6 @@
 // TODO: update once fixture/match are refactored
 require_once 'private_php/p_global.php';
 require_once 'private_php/p_match.php';
-//require_once 'private_php/c_submit.php';
-//require_once 'private_php/m_club.php';
-//require_once 'private_php/p_html_functions.php';
 requireLogin(['can_submit']);
 
 $fixtureId = @$_REQUEST['fid'];
@@ -56,38 +53,7 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
 		$error = 'You must tick "I confirm that the result details are complete and correct" to continue';
 	}
 }
-/*
-if ($_SERVER['REQUEST_METHOD'] == 'POST') {
-	try {
-		if (@$_POST['confirm'] == 'yes') {
 
-			$Database->beginTransaction();
-			try {
-				$match->buildSubmission();
-				$match->saveSubmission();
-				$Database->commit();
-
-				$match->generateEmailConfirmation();
-
-			} catch (Exception $ex) {
-				$Database->rollBack();
-				throw $ex;
-			}
-
-		} else {
-			$match->buildSubmission();
-			$submissionBuilt = true;
-		}
-
-	} catch (ReportableException $ex) {
-		$error = $ex->getMessage();
-
-	} catch (Exception $ex) {
-		//$error = $ex->getMessage(); // debug
-		errorPage(500);
-	}
-}
-*/
 pageHeader('Approve Result');
 ?>
 

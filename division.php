@@ -2,6 +2,7 @@
 require_once 'private_php/p_global.php';
 require_once 'private_php/m_division.php';
 require_once 'private_php/v_html_division.php';
+require_once 'private_php/u_text.php';
 
 $divisionId = @$_GET['did'];
 if (!is_numeric($divisionId)) errorPage(404);

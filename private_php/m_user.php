@@ -20,6 +20,21 @@ class User {
 		}
 	}
 
+	static public function loadbyClub($club, $permission = null) {
+		global $Database;
+		
+		$result = [];
+		
+		$stmt = $Database->prepare('SELECT user_id FROM user WHERE club_id = ? AND status <> 0 ORDER BY surname, forename, user_id');	
+		$stmt->execute([$club->id()]);
+		
+		while ($row = $stmt->fetch()) {
+			$user = new User($row['user_id']);
+			if (!$permission || $user->hasPermission($permission)) $result[] = $user;
+		}
+		return $result;
+	}
+	
 	public function __construct($userID) {
 		global $Database;
 

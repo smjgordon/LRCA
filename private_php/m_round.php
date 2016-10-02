@@ -2,6 +2,7 @@
 require_once 'p_server.php';
 require_once 'p_exceptions.php';
 require_once 'm_fixture.php';
+require_once 'm_division.php';
 require_once 'u_id_wrapper.php';
 
 class Round {
@@ -56,7 +57,7 @@ class Round {
 	private function populateFromDbRow($row) {
 		$this->_id = $row['round_id'];
 
-		$this->division = new IdWrapper($row['division_id']);
+		$this->division = Division::loadById($row['division_id']);
 		$this->sequence = $row['sequence'];
 		$this->urlName = $row['url_name'];
 		$this->name = $row['name'];

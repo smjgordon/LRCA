@@ -2,6 +2,7 @@
 require_once 'private_php/p_global.php';
 require_once 'private_php/p_section.php';
 require_once 'private_php/p_html_functions.php';
+require_once 'private_php/u_text.php';
 
 $playerID = @$_GET['pid'];
 if (!is_numeric($playerID)) errorPage(404);
@@ -42,11 +43,13 @@ if ($row && is_numeric($row['won'])) {
 	<h3>Performance</h3>
 	<table class="performance">
 		<thead>
-			<th scope="col">Section</th>
-			<th scope="col">Played</th>
-			<th scope="col">Won</th>
-			<th scope="col">Drawn</th>
-			<th scope="col">Lost</th>
+			<tr>
+				<th scope="col">Section</th>
+				<th scope="col">Played</th>
+				<th scope="col">Won</th>
+				<th scope="col">Drawn</th>
+				<th scope="col">Lost</th>
+			</tr>
 		</thead>
 		<tfoot>
 				<tr>

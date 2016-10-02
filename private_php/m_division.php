@@ -7,20 +7,26 @@ require_once 'p_exceptions.php';
 require_once 'p_enumerations.php'; // TODO: do away with this?
 
 class Division {
+	private static $instanceCache = [];
+	
 	public static function loadById($id) {
 		global $Database;
 
-		$stmt = $Database->prepare('
-			SELECT * FROM division
-			WHERE division_id = ?');
-		$stmt->execute([$id]);
-
-		if ($row = $stmt->fetch()) {
-			$result = new Division();
-			$result->populateFromDbRow($row);
-			return $result;
+		if (isset(Division::$instanceCache[$id])) {
+			return Division::$instanceCache[$id];
 		} else {
-			throw new ModelAccessException(ModelAccessException::BadDivisionId, $id);
+			$stmt = $Database->prepare('
+				SELECT * FROM division
+				WHERE division_id = ?');
+			$stmt->execute([$id]);
+
+			if ($row = $stmt->fetch()) {
+				$result = new Division();
+				$result->populateFromDbRow($row);
+				return $result;
+			} else {
+				throw new ModelAccessException(ModelAccessException::BadDivisionId, $id);
+			}
 		}
 	}
 

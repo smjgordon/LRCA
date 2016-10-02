@@ -24,7 +24,7 @@ class Fixture {
 
 	public function id() { return $this->_id; }
 
-	public $round, $division, $date;
+	public $round, $division, $date, $status;
 	public $homeTeam, $homeRawScore, $homeAdjustedScore;
 	public $awayTeam, $awayRawScore, $awayAdjustedScore;
 
@@ -61,8 +61,17 @@ class Fixture {
 				$this->date ? date('c', $this->date) : null]);
 			$this->_id = $Database->lastInsertId();
 
-		} else if (!$silentFail) {
-			throw new Exception('Saving to an existing fixture not implemented');
+		} else {
+			$stmt = $Database->prepare('
+				UPDATE fixture SET
+					round_id = ?,
+					home_team_id = ?,
+					away_team_id = ?,
+					fixture_date = ?,
+					status = ?
+				WHERE fixture_id = ?');
+			$stmt->execute([$this->round->id(), $this->homeTeam->id(), $this->awayTeam->id(),
+				$this->date ? date('c', $this->date) : null, $this->status, $this->_id]);
 		}
 	}
 

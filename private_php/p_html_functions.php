@@ -1,23 +1,5 @@
 <?php
 // TODO: implement new naming convention
-function formatScore($score) {
-	if ($score == 0.5) return '½';
-	return ((integer) $score) . (($score * 2) % 2 == 1 ? '½' : '');
-}
-
-function formatGrade($grade) {
-	if (!$grade) return '?';
-	return $grade;
-}
-
-function formatDate($timestamp, $withYear = true) {
-	if ($timestamp) {
-		return date($withYear ? 'd M Y' : 'd M', $timestamp);
-	} else {
-		return '';
-	}
-}
-
 function formatGameResult($result) {
 	switch ($result) {
 		case GameResult::HomeWin: // 1-0

@@ -87,7 +87,7 @@ table {
 	border-collapse: collapse;
 }
 
-table+table, table+p {
+table+table, table+p, table+form>p:first-child {
 	margin-top: 1em;
 }
 
@@ -259,7 +259,7 @@ p.error {
 	padding: 1em;
 	margin: 1em 0 /*2em*/ 1em 0;
 }
-p+p, p+form p, p+table.result, p+table.resultSubmit {
+p+p, p+form p, p+table.result, p+table.fixtures, p+table.resultSubmit {
 	margin-top: 0.8em;
 }
 

@@ -15,7 +15,8 @@ function emailConfirmation($subject, $message, $toUsers, $redirectUri) {
 	if ($CanSendEmail) {
 		mail($toHeader, $subject, $message, 'From: ' . SystemSettings::$fromEmail . '
 Reply-To: ' . SystemSettings::$replyEmail . '
-CC: ' . SystemSettings::$ccEmail);
+CC: ' . SystemSettings::$ccEmail) . '
+Content-type: text/plain; charset=utf-8';
 		redirect(303, $redirectUri);
 
 	} else {

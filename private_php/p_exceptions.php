@@ -42,6 +42,10 @@ class ModelAccessException extends Exception {
 				$message = "Round ID not found: $customData";
 				break;
 				
+			case self::BadFixtureId:
+				$message = "Fixture ID not found: $customData";
+				break;
+				
 			case self::BadPlayerId:
 				$message = "Player ID not found: $customData";
 				break;

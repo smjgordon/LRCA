@@ -3,9 +3,6 @@
 // TODO: update once fixture/match are refactored
 require_once 'private_php/p_global.php';
 require_once 'private_php/p_match.php';
-//require_once 'private_php/c_submit.php';
-//require_once 'private_php/m_club.php';
-//require_once 'private_php/p_html_functions.php';
 requireLogin(['can_submit']);
 
 $fixtureId = @$_REQUEST['fid'];
@@ -46,12 +43,12 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
 				$match->saveSubmission();
 				$Database->commit();
 
-				$match->generateEmailConfirmation();
-
 			} catch (Exception $ex) {
 				$Database->rollBack();
 				throw $ex;
 			}
+			
+			$match->generateEmailConfirmation();
 
 		} else {
 			$match->buildSubmission();
@@ -60,6 +57,7 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
 
 	} catch (ReportableException $ex) {
 		$error = $ex->getMessage();
+		$submissionBuilt = false;
 
 	} catch (Exception $ex) {
 		//$error = $ex->getMessage(); // debug
@@ -76,20 +74,17 @@ pageHeader('Submit Result');
 	<p class="error"><?php echo htmlspecialchars($error); ?></p>
 <?php } ?>
 
-<form method="post" action="<?php echo htmlspecialchars($_SERVER['SCRIPT_NAME']); ?>"><?php
-	if ($submissionBuilt) {
-	?>	<p>Please confirm that these details are correct.&nbsp; If you have made a mistake, please use your browser's Back button to return to the submission form.&nbsp; If you are happy that the result is complete and correct, please press Submit again to complete the submission.</p>
-	<?php
-		$match->renderResult();
-	?>
+<form method="post" action="<?php echo htmlspecialchars($_SERVER['SCRIPT_NAME']); ?>">
+	<?php if ($submissionBuilt) { ?>
+		<p>Please confirm that these details are correct.&nbsp; If you have made a mistake, please use your browser's Back button to return to the submission form.&nbsp; If you are happy that the result is complete and correct, please press Submit again to complete the submission.</p>
+		<?php $match->renderResult(); ?>
 		<p>
 			<?php carryForwardPostData(); ?>
 			<input type="hidden" name="confirm" value="yes" />
 			<input type="submit" value="Submit" />
 		</p>
-	<?php
-	} else {
-	?>	<p>Please enter the details of the match.</p>
+	<?php } else { ?>
+		<p>Please enter the details of the match.</p>
 	<?php
 		$division = Division::loadById($fixture->round->division->id());
 		/*if ($division->minBoards < $division->maxBoards) {
@@ -103,8 +98,8 @@ pageHeader('Submit Result');
 			<input type="hidden" name="fid" value="<?php echo $fixtureId; ?>" />
 			<input type="submit" value="Submit" />
 		</p>
-	<?php
-} ?></form>
+	<?php } ?>
+</form>
 
 <?php
 pageFooter();
