@@ -19,6 +19,8 @@ $stmtPlayers = $Database->prepare("
 	FROM barred_player bp
 		JOIN player p ON bp.player_id = p.player_id
 	WHERE bp.team_id = ?
+		AND bp.start_date <= ?
+		AND (bp.end_date >= ? OR bp.end_date IS NULL)
 	ORDER BY p.surname, p.forename");	
 
 pageHeader('Barred Players');
@@ -31,7 +33,8 @@ pageHeader('Barred Players');
 	while ($currentTeam = $stmtTeams->fetch()) {
 		// this condition will fail when we have just loaded the first team of the next club
 		if ($lastTeam['club_id'] == $currentTeam['club_id']) {
-			$stmtPlayers->execute([$lastTeam['team_id']]);
+			$today = date('c');
+			$stmtPlayers->execute([$lastTeam['team_id'], $today, $today]);
 			
 		?>	<tr>
 				<td><?php echo htmlspecialchars($lastTeam['name']); ?></td>
