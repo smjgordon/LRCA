@@ -180,7 +180,6 @@ abstract class Match {
 		                                    2½ – 1½
 		*/
 		// header line: date and teams
-		//$result = formatDate($this->date, false) . '     ' . str_pad($this->homeTeamName, 25) . '   v    ' . $this->awayTeamName;
 		$result = formatDate($this->date, false) . '     ' . padRight($this->homeTeamName, 25) . '   v    ' . $this->awayTeamName;
 		
 		// body: game results
@@ -191,7 +190,9 @@ abstract class Match {
 
 			switch ($game->adjustedResult) {
 				case GameResult::HomeWin:       $result .= ' 1 - 0  '; break;
-				case GameResult::Draw:          $result .= ' ½ - ½  '; break;
+				// TEMPORARY
+				case GameResult::Draw:          $result .= '0.5-0.5 '; break;
+				//case GameResult::Draw:          $result .= ' ½ - ½  '; break;
 				case GameResult::AwayWin:       $result .= ' 0 - 1  '; break;
 				case GameResult::DoubleDefault: $result .= ' 0 - 0  ';
 			}
@@ -200,12 +201,24 @@ abstract class Match {
 		}
 
 		// footer line: total score
-		$result .= "\n" . padLeft(formatScore($this->homeAdjustedScore), 38)
-			. ' - ' . formatScore($this->awayAdjustedScore);
+		// TEMPORARY
+		$result .= "\n" . padLeft(self::formatScoreEmailWorkaround($this->homeAdjustedScore), 39)
+			. '-' . self::formatScoreEmailWorkaround($this->awayAdjustedScore);
+		//$result .= "\n" . padLeft(formatScore($this->homeAdjustedScore), 38)
+		//	. ' - ' . formatScore($this->awayAdjustedScore);
 		
 		return $result;
 	}
 
+	// TEMPORARY
+	private static function formatScoreEmailWorkaround($score) {
+		if (($score * 2) % 2 == 0) {
+			return ' ' . $score . ' ';
+		} else {
+			return (string) $score;
+		}
+	}
+	
 	public function saveSubmission() {
 		global $Database, $CurrentUser;
 

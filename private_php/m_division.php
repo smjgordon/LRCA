@@ -8,7 +8,7 @@ require_once 'p_enumerations.php'; // TODO: do away with this?
 
 class Division {
 	private static $instanceCache = [];
-	
+
 	public static function loadById($id) {
 		global $Database;
 
@@ -37,23 +37,23 @@ class Division {
 	public $teams, $rounds;
 
 	public function canPlayPlayer($player) {
-		
+
 		if ($player->status != PlayerStatus::Active) return false;
 		if (!$this->requireGrade) return true;
 		if ($player->id() == PlayerId::BoardDefault) return true;
-		
+
 		switch ($this->matchStyle) {
 			case MatchStyle::Standard:
 				$grade = $player->standardGrade;
 				break;
-				
+
 			case MatchStyle::RapidSame: case MatchStyle::RapidDifferent:
 				$grade = $player->lrcaRapidGrade;
 		}
 		// if the grade object has a non-zero grade value, we are OK
 		return !!($grade->grade);
 	}
-	
+
 	public function playedMatchMonths() {
 		global $Database;
 
@@ -72,20 +72,20 @@ class Division {
 		}
 		return $result;
 	}
-	
+
 	public function playedMatchRounds() {
 		$this->loadRounds();
-		
+
 		$result = [];
 		foreach ($this->rounds as $round) {
 			if ($round->anyPlayed) $result[] = $round;
 		}
 		return $result;
 	}
-	
+
 	public function loadTeams() {
 		global $Database;
-		
+
 		if (!$this->_teamsLoaded) {
 			$this->teams = [];
 			$stmt = $Database->prepare('
@@ -95,22 +95,22 @@ class Division {
 				ORDER BY name');
 			$stmt->execute([$this->_id]);
 			while ($row = $stmt->fetch()) $this->teams[] = Team::loadById($row['team_id']);
-			
+
 			$this->_teamsLoaded = true;
 		}
 	}
-	
+
 	public function rankedTeams() {
 		$this->loadTeams();
 		$result = $this->teams;
 		usort($result, 'Team::rankingOrder');
 		return $result;
 	}
-	
+
 	public function loadRounds() {
 		global $Database;
-		
-		if (!$this->_roundsLoaded) {			
+
+		if (!$this->_roundsLoaded) {
 			$this->rounds = [];
 			$stmt = $Database->prepare('
 				SELECT round_id
@@ -119,7 +119,7 @@ class Division {
 				ORDER BY sequence');
 			$stmt->execute([$this->_id]);
 			while ($row = $stmt->fetch()) $this->rounds[] = Round::loadById($row['round_id']);
-			
+
 			$this->_roundsLoaded = true;
 		}
 	}

@@ -1,5 +1,6 @@
 <?php
 require_once 'p_html_functions.php';
+require_once 'u_text.php';
 
 class HtmlDivisionView {
 	public function __construct($division) {

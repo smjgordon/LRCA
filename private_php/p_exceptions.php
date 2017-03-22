@@ -19,6 +19,7 @@ class ModelAccessException extends Exception {
 	const BadPlayerId      = 60;
 	const BadPlayerEcfCode = 62;
 	const BadGradeId       = 70;
+	const BadUserId        = 80;
 	
 	public function __construct($code, $customData = null, $previous = null) {
 		switch ($code) {
@@ -55,7 +56,25 @@ class ModelAccessException extends Exception {
 				break;
 				
 			case self::BadGradeId:
-				$message = "Grade ID code not found: $customData";
+				$message = "Grade ID not found: $customData";
+				break;
+			
+			case self::BadUserId:
+				$message = "User ID not found: $customData";
+				break;
+		}
+		
+		parent::__construct($message, $code, $previous);
+	}
+}
+
+class UserInputException extends Exception {
+	const MissingOwnEmail = 10;
+	
+	public function __construct($code, $customData = null, $previous = null) {
+		switch ($code) {
+			case self::MissingOwnEmail:
+				$message = 'Please enter your email address';
 				break;
 		}
 		

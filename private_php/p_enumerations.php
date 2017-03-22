@@ -33,9 +33,11 @@ abstract class PlayerID {
 	const BoardDefault = 2;
 }
 
-abstract class BoardDefaultReason {
-	const Standard = 1;
+abstract class PenaltyReason {
+	const BoardDefault = 1;
 	const IllegalBoardOrder = 2;
+	const LateSubmission = 3;
+	const LatePostponementNotification = 4;
 }
 
 abstract class SessionStatus {

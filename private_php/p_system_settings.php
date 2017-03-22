@@ -8,6 +8,8 @@ abstract class SystemSettings {
 	
 	static $summerYear = 2016;
 	static $winterYear = 2016;
-	static $currentSeason = Season::BothDefaultWinter;
+	static $currentSeason = Season::Winter;
+	
+	static $emailReminderDays = 4;
 }
 ?>

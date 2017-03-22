@@ -7,28 +7,40 @@ $error = null;
 if (isset($_POST['email'])) {
 	$email = $_POST['email'];
 	$password = @$_POST['pwd'];
-	
+
 	$email = trim($email);
 	if ($email == '') {
 		$error = 'Please enter your email address';
 	} else if ($password == '') {
 		$error = 'Please enter your password';
 	} else {
+		$Database->beginTransaction();
 		try {
 			$user = User::loadByEmail($email);
 			$user->logIn($password);
+			$Database->commit();
 
 			// redirect to My Fixtures, as this is what the user is most likely to want to use after logging in
 			// TODO: if the user was redirected here from another page, return to that page
 			redirect(303, 'my_fixtures.php');
+
+		} catch (UserAccountException $ex) {
+			$Database->rollBack();
+			$error = $ex->getMessage();
+
 		} catch (ReportableException $ex) {
+			$Database->rollBack();
 			$error = $ex->getMessage();
 
 		} catch (Exception $ex) {
+			$Database->rollBack();
 			errorPage(500);
 		}
 	}
 }
+
+// if already logged in, redirect
+if ($CurrentUser) redirect(303, 'my_fixtures.php');
 
 pageHeader('Log In');
 ?>

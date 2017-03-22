@@ -1,4 +1,5 @@
 <?php
+// TODO: refactor
 require_once 'private_php/p_global.php';
 require_once 'private_php/p_email.php';
 
@@ -24,7 +25,16 @@ if (isset($_POST['email']) && trim($_POST['email']) == '') {
 
 	try {
 		$user = User::loadByEmail($email);
-		$resetKeyStr = $user->generatePasswordResetKey($_POST['type'] == 'mig' ? 2 : 1);
+
+		$Database->beginTransaction();
+		try {
+			$resetKeyStr = $user->generatePasswordResetKey($_POST['type'] == 'mig' ? 2 : 1);
+			$Database->commit();
+		} catch (Exception $ex) {
+			$Database->rollBack();
+			throw $ex;
+		}
+
 		$url = joinUri(getCurrentUri(), "rpwd.php?key=$resetKeyStr");
 
 		// generate an email and send it
@@ -85,6 +95,16 @@ Your existing password will continue to work.';
 		emailConfirmation($emailSubject, $emailMessage, [$user],
 			'rpwd_generated.php?uid=' . $user->id() . '&status=' . $user->status());
 
+	} catch (ModelAccessException $ex) {
+		$error = $ex->getMessage();
+		$user = null;
+		$mode = EmailEntry;
+
+	} catch (UserAccountException $ex) {
+		$error = $ex->getMessage();
+		$user = null;
+		$mode = EmailEntry;
+
 	} catch (ReportableException $ex) {
 		$error = $ex->getMessage();
 		$user = null;
@@ -93,7 +113,7 @@ Your existing password will continue to work.';
 
 } else if (($resetKeyStr = @$_GET['key']) || ($resetKeyStr = @$_POST['key'])) {
 	try {
-		$resetKey = new PasswordResetKey($resetKeyStr);
+		$resetKey = PasswordResetKey::loadByKey($resetKeyStr);
 		$user = $resetKey->user();
 		$mode = PasswordEntry;
 
@@ -123,7 +143,9 @@ Your existing password will continue to work.';
 		} else if (trim($password1) == '') {
 			$error = 'Please enter a password!';
 		} else {
+			$Database->beginTransaction();
 			$resetKey->setNewPassword($password1);
+			$Database->commit();
 			redirect(303, 'password_set.php');
 		}
 	}

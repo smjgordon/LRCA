@@ -12,7 +12,8 @@ if ($sessionKey) {
 	$stmt->execute([$sessionKey]);
 	if ($row = $stmt->fetch()) {
 		if (time() < strtotime($row['expiry_date'])) {
-			$CurrentUser = new User($row['user_id']);
+			//$CurrentUser = new User($row['user_id']);
+			$CurrentUser = User::loadById($row['user_id']);
 		} else {
 			$stmt = $Database->prepare('
 				UPDATE session SET status = 3, logout_date = expiry_date

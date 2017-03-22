@@ -32,7 +32,7 @@ function pageHeader($title) {
 		</ul>
 		<ul id="mainNav2">
 			<?php if ($CurrentUser) { ?>
-				<li class="loggedInUser"><?php echo $CurrentUser->fullName(), ' – ', $CurrentUser->clubName(); ?></li
+				<li class="loggedInUser"><?php echo $CurrentUser->fullName(), ' – ', $CurrentUser->club()->name; ?></li
 				><?php
 					if ($CurrentUser->hasPermission('can_submit')) {
 						echo '<li><a href="my_fixtures.php">My Fixtures</a></li>';

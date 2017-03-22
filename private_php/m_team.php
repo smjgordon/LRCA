@@ -103,8 +103,9 @@ class Team {
 }
 
 abstract class TeamStatus {
-	const Withdrawn = 0;
+	const WithdrawnDeleted = 0;
 	const Active = 1;
 	const Eliminated = 2;
+	const WithdrawnDefaulted = 3;
 }
 ?>
