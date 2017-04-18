@@ -181,7 +181,7 @@ abstract class Match {
 		*/
 		// header line: date and teams
 		$result = formatDate($this->date, false) . '     ' . padRight($this->homeTeamName, 25) . '   v    ' . $this->awayTeamName;
-		
+
 		// body: game results
 		foreach ($this->games as $game) {
 			$result .= "\n$game->board $game->homeColour"
@@ -196,7 +196,7 @@ abstract class Match {
 				case GameResult::AwayWin:       $result .= ' 0 - 1  '; break;
 				case GameResult::DoubleDefault: $result .= ' 0 - 0  ';
 			}
-			
+
 			$result .= padRight($game->awayPlayerName, 25) . padLeft($game->awayPlayerGrade, 4);
 		}
 
@@ -206,7 +206,7 @@ abstract class Match {
 			. '-' . self::formatScoreEmailWorkaround($this->awayAdjustedScore);
 		//$result .= "\n" . padLeft(formatScore($this->homeAdjustedScore), 38)
 		//	. ' - ' . formatScore($this->awayAdjustedScore);
-		
+
 		return $result;
 	}
 
@@ -218,12 +218,15 @@ abstract class Match {
 			return (string) $score;
 		}
 	}
-	
+
 	public function saveSubmission() {
 		global $Database, $CurrentUser;
 
 		// tables to update:
 		// team - increment tallies
+		// game - add game
+		// fixture - update status and score
+		// board_default - add default if applicable
 
 		// populate game table with individual board results
 		// TODO: include grade difference if applicable
@@ -233,12 +236,26 @@ abstract class Match {
 				away_player_id, away_grade_id, away_grade,
 				raw_result, adjusted_result)
 			VALUES(?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)');
+
+		$stmtBoardDefault = $Database->prepare('
+					INSERT INTO board_default(fixture_id, game_id, reason, exempt, home_defaults, away_defaults, incurred_date)
+					VALUES(?, ?, ?, 0, ?, ?, ?)');
+
 		foreach ($this->games as $game) {
 			$stmt->execute([
 				$this->id, $game->board, $game->homeColour,
 				$game->homePlayer->id(), $game->homePlayerGradeObj ? $game->homePlayerGradeObj->id() : null, $game->homePlayerGrade,
 				$game->awayPlayer->id(), $game->awayPlayerGradeObj ? $game->awayPlayerGradeObj->id() : null, $game->awayPlayerGrade,
 				$game->rawResult, $game->adjustedResult]);
+
+			// if this board has been defaulted, then record the default
+			if ($game->homePlayer->id() == PlayerID::BoardDefault || $game->awayPlayer->id() == PlayerID::BoardDefault) {
+				$stmtBoardDefault->execute([
+					$this->id, $Database->lastInsertId(), PenaltyReason::BoardDefault,
+					$game->homePlayer->id() == PlayerID::BoardDefault ? 1 : 0,
+					$game->awayPlayer->id() == PlayerID::BoardDefault ? 1 : 0,
+					date('c', $this->date)]);
+			}
 		}
 
 		// determine which club is submitting, and hence which club needs to approve
@@ -261,7 +278,7 @@ abstract class Match {
 		} else {
 			$rawResult = GameResult::AwayWin;
 		}
-		
+
 		// update match status in fixture table
 		// TODO: support handicaps
 		if ($this->homeAdjustedScore > $this->awayAdjustedScore) {
@@ -271,7 +288,7 @@ abstract class Match {
 		} else {
 			$adjustedResult = GameResult::AwayWin;
 		}
-		
+
 		$stmt = $Database->prepare('
 			UPDATE fixture SET
 				home_raw_score = ?, home_adjusted_score = ?,
@@ -326,10 +343,10 @@ abstract class Match {
 		$stmt->execute([$awayWin, $draw, $awayLoss, $this->awayAdjustedScore - $this->homeAdjustedScore,
 			$awayPoints, $awayPoints, $this->awayTeamID]);
 	}
-	
+
 	public function generateEmailConfirmation() {
 		global $CurrentUser;
-		
+
 		$subject = "Result: " . $this->division->name . " - $this->homeTeamName v $this->awayTeamName";
 
 		$message = 'Dear ' . $CurrentUser->forename() . ',
@@ -343,7 +360,7 @@ This is a confirmation of the result you have submitted.
 
 	public function saveApproval() {
 		global $Database, $CurrentUser;
-		
+
 		$stmt = $Database->prepare('
 			UPDATE fixture SET
 				approved_user_id = ?, approved_date = ?
@@ -351,7 +368,7 @@ This is a confirmation of the result you have submitted.
 		$stmt->execute([
 			$CurrentUser->id(), date('c'), $this->id]);
 	}
-	
+
 	abstract public function renderSubmissionForm();
 	abstract public function buildSubmission();
 

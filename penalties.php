@@ -15,7 +15,7 @@ try {
 	errorPage(404);
 }
 
-pageHeader($divisionView->headerTitle());
+pageHeader("Penalties – " . $divisionView->headerTitle());
 ?>
 
 <div id="subNav"><?php
@@ -26,11 +26,12 @@ pageHeader($divisionView->headerTitle());
 <div id="subBody">
 	<h2><?php echo htmlspecialchars($divisionView->bodyTitle()); ?></h2>
 
-	<p class="devNotice">Board defaults and team withdrawals over the course of the 2016–17 season have led to some penalties being applied.&nbsp; Points have now been deducted to reflect this, but automating the process is still a work in progress.&nbsp; As such, the values may at times be out of sync.</p>
-<?php
-	$divisionView->showStandings();
-	$divisionView->showFixtures();
-?>
+	<p class="devNotice">Board defaults and team withdrawals over the course of the 2016–17 season have led to some penalties being applied, but these are not currently reflected in the displayed numbers.&nbsp; This will be rectified soon.</p>
+	<?php $divisionView->showStandings(); ?>
+	<h3>Board Defaults Incurred</h3>
+	<?php $divisionView->showBoardDefaults(); ?>
+	<h3>Board Default Totals</h3>
+	<?php $divisionView->showDefaultTotals(); ?>
 </div>
 
 <?php

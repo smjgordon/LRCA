@@ -164,6 +164,18 @@ th, td {
 	width: 13em;
 }
 
+.defaults .date {
+	width: 7em;
+}
+.defaults .homeTeam {
+	text-align: right;
+	width: 12em;
+}
+.defaults .awayTeam {
+	text-align: left;
+	width: 12em;
+}
+
 .homeScore {
 	width: 2em;
 	text-align: right;
@@ -176,6 +188,10 @@ td.dash {
 	width: 2em;
 	text-align: left;
 	padding-left: 0;
+}
+
+.defaults .homeScore, .defaults .awayScore {
+	width: 1em;
 }
 
 .rp .board {
@@ -269,4 +285,8 @@ pre {
 
 .barred td:first-child {
 	padding-right: 2em;
+}
+
+.defaultTotals td+td {
+	text-align: center;
 }

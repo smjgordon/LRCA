@@ -11,5 +11,8 @@ abstract class SystemSettings {
 	static $currentSeason = Season::Winter;
 	
 	static $emailReminderDays = 4;
+	// TODO: do away with these and use the database-driven values instead
+	static $defaultFirstPenalty = 5;
+	static $defaultPenaltyEvery = 3;
 }
 ?>
