@@ -33,7 +33,7 @@ class Division {
 	public function id() { return $this->_id; }
 
 	public $section, $name, $urlName, $matchStyle, $breakdown, $sequence, $format, $requireGrade;
-	public $minBoards, $maxBoards;
+	public $minBoards, $maxBoards, $colours;
 	public $teams, $rounds;
 
 	public function canPlayPlayer($player) {
@@ -139,6 +139,7 @@ class Division {
 		$this->requireGrade = !!$row['require_grade'];
 		$this->minBoards = $row['min_boards'];
 		$this->maxBoards = $row['max_boards'];
+		$this->colours = $row['colours'];
 	}
 
 	private $_id, $_teamsLoaded, $_roundsLoaded;

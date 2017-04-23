@@ -210,15 +210,6 @@ abstract class Match {
 		return $result;
 	}
 
-	// TEMPORARY
-	private static function formatScoreEmailWorkaround($score) {
-		if (($score * 2) % 2 == 0) {
-			return ' ' . $score . ' ';
-		} else {
-			return (string) $score;
-		}
-	}
-
 	public function saveSubmission() {
 		global $Database, $CurrentUser;
 
@@ -408,6 +399,67 @@ This is a confirmation of the result you have submitted.
 		</select>
 	<?php
 	}
+
+	protected function validateGameScore($iBoard, $homePlayer, $awayPlayer, $scoreStr) {
+		switch ($scoreStr) {
+			case '':
+				throw new ReportableException("Missing score on board $iBoard");
+
+			case '00':
+				if ($homePlayer->id() == PlayerId::BoardDefault && $awayPlayer->id() == PlayerId::BoardDefault) {
+					$score = GameResult::DoubleDefault;
+				} else {
+					throw new ReportableException("Score of 0 – 0 valid only for a double-defaulted board");
+				}
+				break;
+
+			case '10':
+				if ($homePlayer->id() == PlayerId::BoardDefault) {
+					throw new ReportableException("A defaulted board must be a loss for the defaulting side");
+				} else {
+					$score = GameResult::HomeWin;
+					++$this->homeRawScore;
+				}
+				break;
+
+			case '01':
+				if ($awayPlayer->id() == PlayerId::BoardDefault) {
+					throw new ReportableException("A defaulted board must be a loss for the defaulting side");
+				} else {
+					$score = GameResult::AwayWin;
+					++$this->awayRawScore;
+				}
+				break;
+
+			case '55':
+				if ($homePlayer->id() == PlayerId::BoardDefault || $awayPlayer->id() == PlayerId::BoardDefault) {
+					throw new ReportableException("A defaulted board must be a loss for the defaulting side");
+				} else {
+					$score = GameResult::Draw;
+					$this->homeRawScore += 0.5;
+					$this->awayRawScore += 0.5;
+				}
+		}
+		return $score;
+	}
+
+	protected function getPlayer($homeOrAway, $iBoard) {
+		$playerId = @$_POST[$homeOrAway[0] . $iBoard];
+		if (!$playerId) return null;
+		if (!is_numeric($playerId)) {
+			throw new ReportableException("Invalid player ID on $homeOrAway board $iBoard");
+		}
+		return Player::loadById($playerId); // TODO: handle exception
+	}
+
+	// TEMPORARY
+	protected static function formatScoreEmailWorkaround($score) {
+		if (($score * 2) % 2 == 0) {
+			return ' ' . $score . ' ';
+		} else {
+			return (string) $score;
+		}
+	}
 }
 
 class Game {
@@ -474,7 +526,28 @@ class StandardMatch extends Match {
 					<tr>
 						<td class="board"><?php echo $iBoard; ?></td>
 						<?php // TODO: use colour rule set for the division ?>
-						<td class="colour"><?php echo $iBoard % 2 == 0 ? 'W' : 'B'; ?></td>
+						<td class="colour"><?php
+							switch ($this->division->colours) {
+								case Colours::HomeWhiteOnOdds:
+									echo $iBoard % 2 == 0 ? 'B' : 'W';
+									break;
+
+								case Colours::HomeBlackOnOdds:
+									echo $iBoard % 2 == 0 ? 'W' : 'B';
+									break;
+
+								case Colours::DecidePerMatch:
+									if ($iBoard == 1) {
+									?>	<select name="col"><?php
+											$colours = @$_POST['col'];
+											renderSelectOption('', $colours, '');
+											renderSelectOption('W', $colours, 'W');
+											renderSelectOption('B', $colours, 'B');
+										?></select>
+									<?php
+									}
+							}
+						?></td>
 						<td class="name"><?php $this->renderPlayerSelection('h' . $iBoard, $this->homeTeamID, @$_POST['h' . $iBoard]); ?></td>
 						<td class="score">
 							<select name="s<?php echo $iBoard; ?>"><?php
@@ -505,6 +578,15 @@ class StandardMatch extends Match {
 		}
 		$nBoards = $iBoard;
 		$playersById = [];
+
+		$colours = $this->division->colours;
+		if ($colours == Colours::DecidePerMatch) {
+			switch (@$_POST['col']) {
+				case 'W': $colours = Colours::HomeWhiteOnOdds; break;
+				case 'B': $colours = Colours::HomeBlackOnOdds; break;
+				default: throw new ReportableException('Please select what colours were played');
+			}
+		}
 
 		// now go through them
 		for ($iBoard = 1; $iBoard <= $nBoards; ++$iBoard) {
@@ -546,7 +628,9 @@ class StandardMatch extends Match {
 			$playersById[$awayPlayer->id()] = $awayPlayer;
 
 			// validate score
-			$scoreStr = @$_POST['s' . $iBoard];
+			$score = $this->validateGameScore($iBoard, $homePlayer, $awayPlayer, $_POST['s' . $iBoard]);
+
+			/*$scoreStr = @$_POST['s' . $iBoard];
 			switch ($scoreStr) {
 				case '':
 					throw new ReportableException("Missing score on board $iBoard");
@@ -585,21 +669,25 @@ class StandardMatch extends Match {
 						$this->homeRawScore += 0.5;
 						$this->awayRawScore += 0.5;
 					}
+			}*/
+			switch ($colours) {
+				case Colours::HomeWhiteOnOdds:
+					$gameColour = $iBoard % 2 == 0 ? 'B' : 'W';
+					break;
+
+				case Colours::HomeBlackOnOdds:
+					$gameColour = $iBoard % 2 == 0 ? 'W' : 'B';
+					break;
+
+				default:
+					throw new Exception('Bad value of colours field');
 			}
-			$this->games[] = Game::constructFromSubmission($iBoard, $iBoard % 2 == 0 ? 'W' : 'B',
+
+			$this->games[] = Game::constructFromSubmission($iBoard, $gameColour /*$iBoard % 2 == 0 ? 'W' : 'B'*/,
 				$homePlayer, $homePlayer->standardGrade, $awayPlayer, $awayPlayer->standardGrade, $score);
 		}
 		$this->homeAdjustedScore = $this->homeRawScore;
 		$this->awayAdjustedScore = $this->awayRawScore;
-	}
-
-	private function getPlayer($homeOrAway, $iBoard) {
-		$playerId = @$_POST[$homeOrAway[0] . $iBoard];
-		if (!$playerId) return null;
-		if (!is_numeric($playerId)) {
-			throw new ReportableException("Invalid player ID on $homeOrAway board $iBoard");
-		}
-		return Player::loadById($playerId); // TODO: handle exception
 	}
 }
 
@@ -652,10 +740,201 @@ class RapidSameMatch extends Match {
 	}
 
 	public function renderSubmissionForm() {
-		throw new Exception('rapidplay-same match submission not yet implemented');
+	?>
+		<table class="resultSubmit rp">
+			<col class="board"/><col class="name"/>
+			<col class="score"/><col class="score"/><col class="name"/>
+			<thead>
+				<tr>
+					<th><?php echo formatDate($this->date, false); ?></th>
+					<th><?php echo $this->homeTeamName; ?></th>
+					<th class="score">W-B</th>
+					<th class="score">B-W</th>
+					<th><?php echo $this->awayTeamName; ?></th>
+				</tr>
+			</thead>
+			<tbody>
+				<?php for ($iBoard = 1; $iBoard <= $this->division->maxBoards; ++$iBoard) { ?>
+					<tr>
+						<td class="board"><?php echo $iBoard; ?></td>
+						<td class="name"><?php $this->renderPlayerSelection('h' . $iBoard, $this->homeTeamID, @$_POST['h' . $iBoard]); ?></td>
+						<td class="score">
+							<select name="s<?php echo $iBoard; ?>wb"><?php
+								$score = @$_POST['s' . $iBoard . 'wb'];
+								renderSelectOption('', $score, '');
+								renderSelectOption('10', $score, '1 – 0');
+								renderSelectOption('55', $score, '½ – ½');
+								renderSelectOption('01', $score, '0 – 1');
+								renderSelectOption('00', $score, '0 – 0');
+							?></select>
+						</td>
+						<td class="score">
+							<select name="s<?php echo $iBoard; ?>bw"><?php
+								$score = @$_POST['s' . $iBoard . 'bw'];
+								renderSelectOption('', $score, '');
+								renderSelectOption('10', $score, '1 – 0');
+								renderSelectOption('55', $score, '½ – ½');
+								renderSelectOption('01', $score, '0 – 1');
+								renderSelectOption('00', $score, '0 – 0');
+							?></select>
+						</td>
+						<td class="name"><?php $this->renderPlayerSelection('a' . $iBoard, $this->awayTeamID, @$_POST['a' . $iBoard]); ?></td>
+					</tr>
+				<?php } ?>
+			</tbody>
+		</table>
+	<?php
 	}
 	public function buildSubmission() {
-		throw new Exception('rapidplay-same match submission not yet implemented');
+		$homeTeam = Team::loadById($this->homeTeamID);
+		$awayTeam = Team::loadById($this->awayTeamID);
+		$this->homeRawScore = $this->awayRawScore = 0.0;
+
+		// first, see how many boards we have actually used
+		for ($iBoard = $this->division->maxBoards; $iBoard > $this->division->minBoards; --$iBoard) {
+			if (@$_POST['h' . $iBoard] || @$_POST['a' . $iBoard]
+				|| @$_POST['s' . $iBoard . 'wb'] || @$_POST['s' . $iBoard . 'bw']) break;
+		}
+		$nBoards = $iBoard;
+		$playersById = [];
+
+		// now go through them
+		for ($iBoard = 1; $iBoard <= $nBoards; ++$iBoard) {
+
+			// validate home player
+			$homePlayer = $this->getPlayer('home', $iBoard);
+			if (!$homePlayer) {
+				throw new ReportableException("Missing home player on board $iBoard");
+			}
+			if ($homePlayer->id() != PlayerId::BoardDefault && $homePlayer->club->id() != $homeTeam->club->id()) {
+				throw new ReportableException("Home player on board $iBoard does not play for this club");
+			}
+			if ($homePlayer->id() != PlayerId::BoardDefault && isset($playersById[$homePlayer->id()])) {
+				throw new ReportableException("Duplicate home player on board $iBoard");
+			}
+			$homePlayer->loadGrades($this->date, $this->division->section->season);
+			if (!$this->division->canPlayPlayer($homePlayer)) {
+				throw new ReportableException("Home player on board $iBoard is not eligible to play in this match");
+			}
+
+			$playersById[$homePlayer->id()] = $homePlayer;
+
+			// validate away player
+			$awayPlayer = $this->getPlayer('away', $iBoard);
+			if (!$awayPlayer) {
+				throw new ReportableException("Missing away player on board $iBoard");
+			}
+			if ($awayPlayer->id() != PlayerId::BoardDefault && $awayPlayer->club->id() != $awayTeam->club->id()) {
+				throw new ReportableException("Away player on board $iBoard does not play for this club");
+			}
+			if ($awayPlayer->id() != PlayerId::BoardDefault && isset($playersById[$awayPlayer->id()])) {
+				throw new ReportableException("Duplicate away player on board $iBoard");
+			}
+			$awayPlayer->loadGrades($this->date, $this->division->section->season);
+			if (!$this->division->canPlayPlayer($awayPlayer)) {
+				throw new ReportableException("Away player on board $iBoard is not eligible to play in this match");
+			}
+
+			$playersById[$awayPlayer->id()] = $awayPlayer;
+
+			$score = $this->validateGameScore($iBoard, $homePlayer, $awayPlayer, $_POST['s' . $iBoard . 'wb']);
+			$this->games[] = Game::constructFromSubmission($iBoard, 'W',
+				$homePlayer, $homePlayer->lrcaRapidGrade, $awayPlayer, $awayPlayer->lrcaRapidGrade, $score);
+
+			$score = $this->validateGameScore($iBoard, $homePlayer, $awayPlayer, $_POST['s' . $iBoard . 'bw']);
+			$this->games[] = Game::constructFromSubmission($iBoard, 'B',
+				$homePlayer, $homePlayer->lrcaRapidGrade, $awayPlayer, $awayPlayer->lrcaRapidGrade, $score);
+
+			// validate score
+			/*$scoreStr = @$_POST['s' . $iBoard];
+			switch ($scoreStr) {
+				case '':
+					throw new ReportableException("Missing score on board $iBoard");
+
+				case '00':
+					if ($homePlayer->id() == PlayerId::BoardDefault && $awayPlayer->id() == PlayerId::BoardDefault) {
+						$score = GameResult::DoubleDefault;
+					} else {
+						throw new ReportableException("Score of 0 – 0 valid only for a double-defaulted board");
+					}
+					break;
+
+				case '10':
+					if ($homePlayer->id() == PlayerId::BoardDefault) {
+						throw new ReportableException("A defaulted board must be a loss for the defaulting side");
+					} else {
+						$score = GameResult::HomeWin;
+						++$this->homeRawScore;
+					}
+					break;
+
+				case '01':
+					if ($awayPlayer->id() == PlayerId::BoardDefault) {
+						throw new ReportableException("A defaulted board must be a loss for the defaulting side");
+					} else {
+						$score = GameResult::AwayWin;
+						++$this->awayRawScore;
+					}
+					break;
+
+				case '55':
+					if ($homePlayer->id() == PlayerId::BoardDefault || $awayPlayer->id() == PlayerId::BoardDefault) {
+						throw new ReportableException("A defaulted board must be a loss for the defaulting side");
+					} else {
+						$score = GameResult::Draw;
+						$this->homeRawScore += 0.5;
+						$this->awayRawScore += 0.5;
+					}
+			}
+			$this->games[] = Game::constructFromSubmission($iBoard, $iBoard % 2 == 0 ? 'W' : 'B',
+				$homePlayer, $homePlayer->lrcaRapidGrade, $awayPlayer, $awayPlayer->lrcaRapidGrade, $score);*/
+		}
+		$this->homeAdjustedScore = $this->homeRawScore;
+		$this->awayAdjustedScore = $this->awayRawScore;
+	}
+
+	public function renderPlainTextResult() {
+		/* Sample rendering:
+		01 May    Ashby 1                   W - B   B - W  Loughborough 1
+		1     123 Armstrong, Victor         1 – 0   1 – 0  Glover, John              130
+		2     185 Agnew, Alan               ½ – ½   0 – 1  Miller, James             158
+		3     127 Hayden, Lawrence          1 – 0   0 – 1  Adcock, Terry             127
+		4     125 Reynolds, David           1 – 0   1 – 0  Northage, Robert          152
+		                                       2½ – 1½
+		*/
+		// header line: date and teams
+		$result = formatDate($this->date, false) . '    ' . padRight($this->homeTeamName, 25) . ' W - B   B - W  ' . $this->awayTeamName;
+
+		// body: game results
+		foreach ($this->games as $game) {
+			if ($game->homeColour == 'W') {
+				$result .= "\n$game->board "
+					//. str_pad($game->homePlayerGrade, 7, ' ', STR_PAD_LEFT) . ' ' . str_pad($game->homePlayerName, 26);
+					. '   ' . padLeft($game->homePlayerGrade, 4) . ' ' . padRight($game->homePlayerName, 25);
+			}
+
+			switch ($game->adjustedResult) {
+				case GameResult::HomeWin:       $result .= ' 1 - 0  '; break;
+				// TEMPORARY
+				case GameResult::Draw:          $result .= '0.5-0.5 '; break;
+				//case GameResult::Draw:          $result .= ' ½ - ½  '; break;
+				case GameResult::AwayWin:       $result .= ' 0 - 1  '; break;
+				case GameResult::DoubleDefault: $result .= ' 0 - 0  ';
+			}
+
+			if ($game->homeColour == 'B') {
+				$result .= padRight($game->awayPlayerName, 25) . padLeft($game->awayPlayerGrade, 4);
+			}
+		}
+
+		// footer line: total score
+		// TEMPORARY
+		$result .= "\n" . padLeft(self::formatScoreEmailWorkaround($this->homeAdjustedScore), 42)
+			. '-' . self::formatScoreEmailWorkaround($this->awayAdjustedScore);
+		//$result .= "\n" . padLeft(formatScore($this->homeAdjustedScore), 38)
+		//	. ' - ' . formatScore($this->awayAdjustedScore);
+
+		return $result;
 	}
 }
 

@@ -1,14 +1,16 @@
 <?php
 require_once 'private_php/p_global.php';
 require_once 'private_php/p_division.php';
+require_once 'private_php/v_html_division.php';
 require_once 'private_php/p_match.php';
 
-$divisionID = @$_GET['did'];
-if (!is_numeric($divisionID)) errorPage(404);
-$divisionID = (int) $divisionID;
+$divisionId = @$_GET['did'];
+if (!is_numeric($divisionId)) errorPage(404);
+$divisionId = (int) $divisionId;
 
 try {
-	$division = new OldDivision($divisionID);
+	$division = new OldDivision($divisionId);
+	$divisionView = new HtmlDivisionView(Division::loadById($divisionId));
 } catch (Exception $ex) {
 	errorPage(404);
 }
@@ -20,10 +22,11 @@ $subtitle = monthNameFromIso($datePattern) . ' Results';
 pageHeader($subtitle . ' – ' . $division->headerTitle());
 ?>
 
-<div id="subNav"><?php
-	$division->section->divisionIndex();
-	$division->breakdown();
-?></div>
+<div id="subNav">
+	<?php $division->section->divisionIndex(); // TODO: figure out what to do with this ?>
+	<ul><li><a href='penalties.php?did=<?php echo $divisionId; ?>'>Penalties</a></li></ul>
+	<?php echo $divisionView->breakdown(); ?>
+</div>
 
 <div id="subBody">
 	<h2><?php echo htmlspecialchars($division->bodyTitle()); ?></h2>
@@ -38,7 +41,7 @@ pageHeader($subtitle . ' – ' . $division->headerTitle());
 			AND f.fixture_date LIKE ?
 			AND f.status = 1
 		ORDER BY f.fixture_date DESC');
-	$stmt->execute([$divisionID, $datePattern . '%']);
+	$stmt->execute([$divisionId, $datePattern . '%']);
 
 	$row = $stmt->fetch();
 	if ($row) {

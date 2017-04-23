@@ -6,9 +6,9 @@ abstract class SystemSettings {
 	static $replyEmail = 'Stewart Gordon <smjg@iname.com>';
 	static $ccEmail = 'Stewart Gordon <smjg@iname.com>';
 	
-	static $summerYear = 2016;
+	static $summerYear = 2017;
 	static $winterYear = 2016;
-	static $currentSeason = Season::Winter;
+	static $currentSeason = Season::BothDefaultWinter;
 	
 	static $emailReminderDays = 4;
 	// TODO: do away with these and use the database-driven values instead

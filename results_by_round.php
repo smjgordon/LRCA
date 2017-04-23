@@ -1,6 +1,7 @@
 <?php
 require_once 'private_php/p_global.php';
 require_once 'private_php/p_division.php';
+require_once 'private_php/v_html_division.php';
 require_once 'private_php/p_match.php';
 
 $roundID = @$_GET['rid'];
@@ -13,15 +14,18 @@ $row = $stmt->fetch();
 if (!$row) errorPage(404);
 
 $division = new OldDivision($row['division_id']);
+$divisionId = $division->id();
+$divisionView = new HtmlDivisionView(Division::loadById($divisionId));
 $subtitle = $row['name'] . ' Results';
 
 pageHeader($subtitle . ' – ' . $division->headerTitle());
 ?>
 
-<div id="subNav"><?php
-	$division->section->divisionIndex();
-	$division->breakdown();
-?></div>
+<div id="subNav">
+	<?php $division->section->divisionIndex(); // TODO: figure out what to do with this ?>
+	<ul><li><a href='penalties.php?did=<?php echo $divisionId; ?>'>Penalties</a></li></ul>
+	<?php echo $divisionView->breakdown(); ?>
+</div>
 
 <div id="subBody">
 	<h2><?php echo htmlspecialchars($division->bodyTitle()); ?></h2>

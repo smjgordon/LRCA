@@ -18,15 +18,16 @@ try {
 pageHeader("Penalties – " . $divisionView->headerTitle());
 ?>
 
-<div id="subNav"><?php
-	$division->section->divisionIndex(); // TODO: figure out what to do with this
-	echo $divisionView->breakdown();
-?></div>
+<div id="subNav">
+	<?php $division->section->divisionIndex(); // TODO: figure out what to do with this ?>
+	<ul><li><a href='penalties.php?did=<?php echo $divisionId; ?>'>Penalties</a></li></ul>
+	<?php echo $divisionView->breakdown(); ?>
+</div>
 
 <div id="subBody">
 	<h2><?php echo htmlspecialchars($divisionView->bodyTitle()); ?></h2>
+	<h3 class="sub">Penalties</h3>
 
-	<p class="devNotice">Board defaults and team withdrawals over the course of the 2016–17 season have led to some penalties being applied, but these are not currently reflected in the displayed numbers.&nbsp; This will be rectified soon.</p>
 	<?php $divisionView->showStandings(); ?>
 	<h3>Board Defaults Incurred</h3>
 	<?php $divisionView->showBoardDefaults(); ?>

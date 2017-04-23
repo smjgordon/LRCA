@@ -117,6 +117,9 @@ th, td {
 	background-color: #dddddd;
 }
 
+.fixtures td.division {
+	width: 8em;
+}
 .fixtures .date {
 	width: 8em;
 }

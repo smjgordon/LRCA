@@ -18,15 +18,18 @@ try {
 pageHeader($divisionView->headerTitle());
 ?>
 
-<div id="subNav"><?php
-	$division->section->divisionIndex(); // TODO: figure out what to do with this
-	echo $divisionView->breakdown();
-?></div>
+<div id="subNav">
+	<?php $division->section->divisionIndex(); // TODO: figure out what to do with this ?>
+	<ul><li><a href='penalties.php?did=<?php echo $divisionId; ?>'>Penalties</a></li></ul>
+	<?php echo $divisionView->breakdown(); ?>
+</div>
 
 <div id="subBody">
 	<h2><?php echo htmlspecialchars($divisionView->bodyTitle()); ?></h2>
 
-	<p class="devNotice">Board defaults and team withdrawals over the course of the 2016–17 season have led to some penalties being applied.&nbsp; Points have now been deducted to reflect this, but automating the process is still a work in progress.&nbsp; As such, the values may at times be out of sync.</p>
+	<?php if ($division->breakdown == Breakdown::ByMonth) { ?>
+		<p class="devNotice">Board defaults and team withdrawals over the course of the 2016–17 season have led to some penalties being applied.&nbsp; Points have now been deducted to reflect this, but automating the process is still a work in progress.&nbsp; As such, the values may at times be out of sync.</p>
+	<?php } ?>
 <?php
 	$divisionView->showStandings();
 	$divisionView->showFixtures();

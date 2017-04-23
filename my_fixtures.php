@@ -21,6 +21,7 @@ if ($fixtures) {
 	<table class="fixtures">
 		<?php foreach ($fixtures as $fixture) { ?>
 			<tr>
+				<td class="division"><?php echo $fixture->division->name; ?></td>
 				<td class="date"><?php
 					echo formatDate($fixture->date);
 				?></td>
@@ -42,6 +43,7 @@ if ($fixtures) {
 	<table class="fixtures">
 		<?php foreach ($fixtures as $fixture) { ?>
 			<tr>
+				<td class="division"><?php echo $fixture->division->name; ?></td>
 				<td class="date"><?php
 					echo formatDate($fixture->date);
 				?></td>
@@ -73,6 +75,7 @@ if ($fixtures) {
 	<table class="fixtures">
 		<?php foreach ($fixtures as $fixture) { ?>
 			<tr>
+				<td class="division"><?php echo $fixture->division->name; ?></td>
 				<td class="date"><?php
 					echo formatDate($fixture->date);
 				?></td>

@@ -50,10 +50,10 @@ function importFixtures($xml) {
 
 			$format = (string) $divisionNode['format'];
 			switch ($format) {
-				case 'rr1': $breakdown = DivisionFormat::RoundRobinSingle; break;
-				case 'rr2': $breakdown = DivisionFormat::RoundRobinDouble; break;
-				case 'swiss': $breakdown = DivisionFormat::Swiss; break;
-				case 'ko': $breakdown = DivisionFormat::Knockout; break;
+				case 'rr1': $format = DivisionFormat::RoundRobinSingle; break;
+				case 'rr2': $format = DivisionFormat::RoundRobinDouble; break;
+				case 'swiss': $format = DivisionFormat::Swiss; break;
+				case 'ko': $format = DivisionFormat::Knockout; break;
 				default: throw new ReportableException('Invalid format for division ' . $name);
 			}
 
@@ -122,13 +122,15 @@ function importFixtures($xml) {
 					$awayTeam = @$teamsByName[$teamName];
 					if (!$awayTeam) throw new ReportableException('Team not found: ' . $teamName);
 
-					$fixtureDate = strtotime((string) $fixtureNode['date']);
+					if (isset($fixtureNode['date'])) {
+						$fixtureDate = strtotime((string) $fixtureNode['date']);
+						$fixture->date = $fixtureDate;
+					}
 
 					$fixture = new Fixture();
 					$fixture->round = $round;
 					$fixture->homeTeam = $homeTeam;
 					$fixture->awayTeam = $awayTeam;
-					$fixture->date = $fixtureDate;
 
 					$round->fixtures[] = $fixture;
 				}

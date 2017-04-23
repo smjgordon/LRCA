@@ -86,7 +86,7 @@ pageHeader('Set Fixture Date');
 
 <form class="tabForm" method="post" action="<?php echo htmlspecialchars($_SERVER['SCRIPT_NAME']); ?>">
 	<?php if ($newDate) { ?>
-		<p>Please confirm the date you have entered is correct.&nbsp; If you have made a mistake, please use your browser's Back button to return to the date entry form.&nbsp; If you are happy that the date is correct, please press Submit again to register the date.</p>
+		<p>Please confirm the date you have entered is correct.&nbsp; If you have made a mistake, please use your browser's Back button to return to the date entry form.&nbsp; If you are happy that the date is correct, please press Set Date again to register the date.</p>
 
 		<table class="fixtures">
 			<tr>
