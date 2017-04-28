@@ -10,16 +10,17 @@ class ReportableException extends Exception {
 }
 
 class ModelAccessException extends Exception {
-	const BadClubId        = 10;
-	const BadClubName      = 11;
-	const BadTeamId        = 20;
-	const BadDivisionId    = 30;
-	const BadRoundId       = 40;
-	const BadFixtureId     = 50;
-	const BadPlayerId      = 60;
-	const BadPlayerEcfCode = 62;
-	const BadGradeId       = 70;
-	const BadUserId        = 80;
+	const BadClubId           = 10;
+	const BadClubName         = 11;
+	const BadTeamId           = 20;
+	const BadDivisionId       = 30;
+	const BadRoundId          = 40;
+	const BadFixtureId        = 50;
+	const BadPlayerId         = 60;
+	const BadPlayerEcfCode    = 62;
+	const BadGradeId          = 70;
+	const BadUserId           = 80;
+	const BadHandicapSchemeId = 90;
 	
 	public function __construct($code, $customData = null, $previous = null) {
 		switch ($code) {
@@ -61,6 +62,10 @@ class ModelAccessException extends Exception {
 			
 			case self::BadUserId:
 				$message = "User ID not found: $customData";
+				break;
+			
+			case self::BadHandicapSchemeId:
+				$message = "Handicap scheme ID not found: $customData";
 				break;
 		}
 		

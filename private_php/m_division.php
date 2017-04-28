@@ -32,7 +32,7 @@ class Division {
 
 	public function id() { return $this->_id; }
 
-	public $section, $name, $urlName, $matchStyle, $breakdown, $sequence, $format, $requireGrade;
+	public $section, $name, $urlName, $matchStyle, $breakdown, $sequence, $format, $requireGrade, $maxGrade;
 	public $minBoards, $maxBoards, $colours;
 	public $teams, $rounds;
 
@@ -137,6 +137,7 @@ class Division {
 		$this->sequence = $row['sequence'];
 		$this->format = $row['format'];
 		$this->requireGrade = !!$row['require_grade'];
+		$this->maxGrade = $row['max_grade'];
 		$this->minBoards = $row['min_boards'];
 		$this->maxBoards = $row['max_boards'];
 		$this->colours = $row['colours'];

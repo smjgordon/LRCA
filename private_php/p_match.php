@@ -1,8 +1,10 @@
 <?php
 // TODO: refactor
+// TODO: consider handicapping for rapidplay (currently not needed, but who knows?)
 require_once 'p_enumerations.php';
 require_once 'p_server.php';
 require_once 'm_division.php';
+require_once 'm_handicap.php';
 require_once 'm_player.php';
 require_once 'p_html_functions.php';
 require_once 'p_email.php';
@@ -35,7 +37,8 @@ abstract class Match {
 		}
 	}
 
-	protected $id, $date, $status, $handicapSchemeID, /*$divisionId,*/ $division;
+	//public $handicapSchemeID; // debug
+	protected $id, $date, $status, /*$handicapSchemeID,*/ $handicapScheme, /*$divisionId,*/ $division, $gradeDifference;
 	protected $homeTeamID, $homeTeamName, $homeRawScore, $homeHandicap, $homeAdjustedScore;
 	protected $awayTeamID, $awayTeamName, $awayRawScore, $awayHandicap, $awayAdjustedScore;
 	protected $games;
@@ -59,10 +62,13 @@ abstract class Match {
 		$stmt->execute([$fixtureID]);
 		$row = $stmt->fetch();
 
+		//var_dump($row); // debug
+		//echo 'fixture: ', $fixtureID; // debug
 		if (!$row) throw new Exception('Fixture ID not found');
 		$this->date = strtotime($row['fixture_date']);
 		$this->status = $row['status'];
-		$this->handicapSchemeID = $row['handicap_scheme_id'];
+		$handicapSchemeId = $row['handicap_scheme_id'];
+		if ($handicapSchemeId) $this->handicapScheme = HandicapScheme::loadById($handicapSchemeId);
 		$this->homeTeamID = $row['home_team_id'];
 		$this->homeTeamName = $row['home_team_name'];
 		$this->homeRawScore = $row['home_raw_score'];
@@ -99,6 +105,7 @@ abstract class Match {
 		while ($row = $stmt->fetch()) {
 			$this->games[] = Game::fromDbRow($row);
 		}
+		//echo 'handicap: ', $this->handicapSchemeID; // debug
 	}
 
 	// default implementation, suitable for standard and rapid-different formats
@@ -107,7 +114,7 @@ abstract class Match {
 		<table class="result sp">
 			<col class="board"/><col class="colour"/><col class="grade"/><col class="name"/>
 			<col class="homeScore"/><col class="dash"/><col class="awayScore"/><col class="name"/><col class="grade"/>
-			<?php if ($this->handicapSchemeID) { // extra column for grade difference ?>
+			<?php if ($this->handicapScheme) { // extra column for grade difference ?>
 				<col class="grade"/>
 			<?php } ?>
 			<thead>
@@ -116,13 +123,13 @@ abstract class Match {
 					<th colspan="2"><?php echo $this->homeTeamName; ?></th>
 					<th></th><th class="dash">v</th><th></th>
 					<th colspan="2"><?php echo $this->awayTeamName; ?></th>
-					<?php if ($this->handicapSchemeID) { ?>
+					<?php if ($this->handicapScheme) { ?>
 						<th class="grade">GD</th>
 					<?php } ?>
 				</tr>
 			</thead>
 			<tfoot>
-				<?php if ($this->handicapSchemeID) { ?>
+				<?php if ($this->handicapScheme) { ?>
 					<tr>
 						<td colspan="4"></td>
 						<td class="homeScore"><?php echo formatScore($this->homeRawScore); ?></td>
@@ -145,7 +152,7 @@ abstract class Match {
 					<td class="homeScore"><?php echo formatScore($this->homeAdjustedScore); ?></td>
 					<td class="dash">–</td>
 					<td class="awayScore"><?php echo formatScore($this->awayAdjustedScore); ?></td>
-					<td colspan="<?php echo $this->handicapSchemeID ? 3 : 2; ?>"></td>
+					<td colspan="<?php echo $this->handicapScheme ? 3 : 2; ?>"></td>
 				</tr>
 			</tfoot>
 			<tbody>
@@ -158,7 +165,7 @@ abstract class Match {
 						<?php formatGameResult($game->adjustedResult); ?>
 						<td class="name"><?php echo $game->awayPlayerName; ?></td>
 						<td class="grade"><?php echo $game->awayPlayerGrade; ?></td>
-						<?php if ($this->handicapSchemeID) { ?>
+						<?php if ($this->handicapScheme) { ?>
 							<td class="grade"><?php echo $game->gradeDifference; ?></td>
 						<?php } ?>
 					</tr>
@@ -169,7 +176,7 @@ abstract class Match {
 	}
 
 	// default implementation, suitable for standard and rapid-different formats
-	// TODO: implement for rapid-same; implement grade difference column for handicaps
+	// TODO: implement for rapid-same
 	public function renderPlainTextResult() {
 		/* Sample rendering:
 		01 Sep     Ashby 1                     v    Loughborough 1
@@ -178,9 +185,20 @@ abstract class Match {
 		3 B    127 Hayden, Lawrence          0 – 1  Adcock, Terry             127
 		4 W    125 Reynolds, David           1 – 0  Northage, Robert          152
 		                                    2½ – 1½
+
+		01 Sep     Ashby 1                     v    Loughborough 1
+		1 B    123 Armstrong, Victor         1 – 0  Glover, John              130     7
+		2 W    185 Agnew, Alan               ½ – ½  Miller, James             158   -27
+		3 B    127 Hayden, Lawrence          0 – 1  Adcock, Terry             127     0
+		4 W    125 Reynolds, David           1 – 0  Northage, Robert          152    27
+		                                    2½ – 1½                                   7
+		Handicap                             0 – 0
+		                                    2½ – 1½
 		*/
 		// header line: date and teams
 		$result = formatDate($this->date, false) . '     ' . padRight($this->homeTeamName, 25) . '   v    ' . $this->awayTeamName;
+		// HACK: since we've so far only written 1 line, we can pad the whole string to get the 'GD' in the right place
+		if ($this->handicapScheme) $result = padRight($result, 71) . 'GD';
 
 		// body: game results
 		foreach ($this->games as $game) {
@@ -198,10 +216,18 @@ abstract class Match {
 			}
 
 			$result .= padRight($game->awayPlayerName, 25) . padLeft($game->awayPlayerGrade, 4);
+			if ($this->handicapScheme) $result .= padLeft($game->gradeDifference, 6);
 		}
 
 		// footer line: total score
-		// TEMPORARY
+		// TEMPORARY: formatScoreEmailWorkaround
+		if ($this->handicapScheme) {
+			$result .= "\n" . padLeft(self::formatScoreEmailWorkaround($this->homeRawScore), 39)
+				. '-' . self::formatScoreEmailWorkaround($this->awayRawScore)
+				. padLeft($this->gradeDifference, 36);
+			$result .= "\nHandicap" . padLeft(self::formatScoreEmailWorkaround($this->homeHandicap), 31)
+				. '-' . self::formatScoreEmailWorkaround($this->awayHandicap);
+		}
 		$result .= "\n" . padLeft(self::formatScoreEmailWorkaround($this->homeAdjustedScore), 39)
 			. '-' . self::formatScoreEmailWorkaround($this->awayAdjustedScore);
 		//$result .= "\n" . padLeft(formatScore($this->homeAdjustedScore), 38)
@@ -220,13 +246,12 @@ abstract class Match {
 		// board_default - add default if applicable
 
 		// populate game table with individual board results
-		// TODO: include grade difference if applicable
 		$stmt = $Database->prepare('
 			INSERT INTO game(fixture_id, board, home_colour,
 				home_player_id, home_grade_id, home_grade,
 				away_player_id, away_grade_id, away_grade,
-				raw_result, adjusted_result)
-			VALUES(?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)');
+				raw_result, adjusted_result, grade_difference)
+			VALUES(?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)');
 
 		$stmtBoardDefault = $Database->prepare('
 					INSERT INTO board_default(fixture_id, game_id, reason, exempt, home_defaults, away_defaults, incurred_date)
@@ -237,7 +262,7 @@ abstract class Match {
 				$this->id, $game->board, $game->homeColour,
 				$game->homePlayer->id(), $game->homePlayerGradeObj ? $game->homePlayerGradeObj->id() : null, $game->homePlayerGrade,
 				$game->awayPlayer->id(), $game->awayPlayerGradeObj ? $game->awayPlayerGradeObj->id() : null, $game->awayPlayerGrade,
-				$game->rawResult, $game->adjustedResult]);
+				$game->rawResult, $game->adjustedResult, $game->gradeDifference]);
 
 			// if this board has been defaulted, then record the default
 			if ($game->homePlayer->id() == PlayerID::BoardDefault || $game->awayPlayer->id() == PlayerID::BoardDefault) {
@@ -262,22 +287,22 @@ abstract class Match {
 
 		// update match status in fixture table
 		// TODO: support handicaps
-		if ($this->homeRawScore > $this->awayRawScore) {
+		/*if ($this->homeRawScore > $this->awayRawScore) {
 			$rawResult = GameResult::HomeWin;
 		} else if ($this->homeRawScore == $this->awayRawScore) {
 			$rawResult = GameResult::Draw;
 		} else {
 			$rawResult = GameResult::AwayWin;
-		}
+		}*/
 
 		// update match status in fixture table
 		// TODO: support handicaps
 		if ($this->homeAdjustedScore > $this->awayAdjustedScore) {
-			$adjustedResult = GameResult::HomeWin;
+			$rawResult = $adjustedResult = GameResult::HomeWin;
 		} else if ($this->homeAdjustedScore == $this->awayAdjustedScore) {
-			$adjustedResult = GameResult::Draw;
+			$rawResult = $adjustedResult = GameResult::Draw;
 		} else {
-			$adjustedResult = GameResult::AwayWin;
+			$rawResult = $adjustedResult = GameResult::AwayWin;
 		}
 
 		$stmt = $Database->prepare('
@@ -285,13 +310,15 @@ abstract class Match {
 				home_raw_score = ?, home_adjusted_score = ?,
 				away_raw_score = ?, away_adjusted_score = ?,
 				status = 1, submitted_user_id = ?, submitted_date = ?,
-				raw_result = ?, adjusted_result = ?, approval_club_id = ?
+				raw_result = ?, adjusted_result = ?, approval_club_id = ?,
+				home_handicap = ?, away_handicap = ?, grade_difference = ?
 			WHERE fixture_id = ?');
 		$stmt->execute([
 			$this->homeRawScore, $this->homeAdjustedScore,
 			$this->awayRawScore, $this->awayAdjustedScore,
 			$CurrentUser->id(), date('c'),
 			$rawResult, $adjustedResult, $approvalClub->id(),
+			$this->homeHandicap, $this->awayHandicap, $this->gradeDifference,
 			$this->id]);
 
 		// update team standings
@@ -452,6 +479,51 @@ This is a confirmation of the result you have submitted.
 		return Player::loadById($playerId); // TODO: handle exception
 	}
 
+	protected function fillInAveragesAndHandicaps($games) {
+		if ($this->division->maxGrade || $this->handicapScheme) {
+			// first, see if there are any defaulted boards, and if so then fill the grades in with averages
+			$homeNonDefaults = $awayNonDefaults = 0;
+			$homeTotalGrade = $awayTotalGrade = 0;
+			$homeDefaultedGames = $awayDefaultedGames = [];
+
+			foreach ($games as $game) {
+				if ($game->homePlayer->id() == PlayerID::BoardDefault) {
+					$homeDefaultedGames[] = $game;
+				} else {
+					++$homeNonDefaults;
+					$homeTotalGrade += $game->homePlayerGrade;
+				}
+
+				if ($game->awayPlayer->id() == PlayerID::BoardDefault) {
+					$awayDefaultedGames[] = $game;
+				} else {
+					++$awayNonDefaults;
+					$awayTotalGrade += $game->awayPlayerGrade;
+				}
+			}
+
+			if (count($homeDefaultedGames) > 0) {
+				$averageGrade = (integer) ((1.0 * $homeTotalGrade / $homeNonDefaults) + 0.5);
+				foreach ($homeDefaultedGames as $game) $game->homePlayerGrade = $averageGrade;
+			}
+
+			if (count($awayDefaultedGames) > 0) {
+				$averageGrade = (integer) ((1.0 * $awayTotalGrade / $awayNonDefaults) + 0.5);
+				foreach ($awayDefaultedGames as $game) $game->awayPlayerGrade = $averageGrade;
+			}
+		}
+		
+		if ($this->handicapScheme) {
+			// fill in the grade differences and add up the handicap
+			foreach ($games as $game) {
+				$game->gradeDifference = $game->awayPlayerGrade - $game->homePlayerGrade;
+				$this->handicapScheme->addBoard($game->gradeDifference);
+			}
+
+			$this->handicapScheme->handicapPoints($this->gradeDifference, $this->homeHandicap, $this->awayHandicap);
+		}
+	}
+	
 	// TEMPORARY
 	protected static function formatScoreEmailWorkaround($score) {
 		if (($score * 2) % 2 == 0) {
@@ -489,7 +561,7 @@ class Game {
 	}
 
 	public static function constructFromSubmission($board, $homeColour,
-			$homePlayer, $homePlayerGrade, $awayPlayer, $awayPlayerGrade, $score) {
+			$homePlayer, $homePlayerGrade, $awayPlayer, $awayPlayerGrade, $score/*, $handicapScheme*/) {
 		$game = new Game();
 		$game->board = $board;
 		$game->homeColour = $homeColour;
@@ -502,7 +574,14 @@ class Game {
 		$game->awayPlayerName = $awayPlayer->fullNameFiling();
 		$game->awayPlayerGradeObj = $awayPlayerGrade;
 		if ($game->awayPlayerGradeObj) $game->awayPlayerGrade = $game->awayPlayerGradeObj->grade;
+/*
+		if ($game->homePlayer->id() != PlayerID::BoardDefault && $game->awayPlayer->id() != PlayerID::BoardDefault
 		$game->gradeDifference = $game->awayPlayerGrade - $game->homePlayerGrade;
+
+		if ($handicapScheme) {
+			$handicapScheme->addBoard($game->gradeDifference);
+		}*/
+
 		return $game;
 	}
 }
@@ -525,7 +604,6 @@ class StandardMatch extends Match {
 				<?php for ($iBoard = 1; $iBoard <= $this->division->maxBoards; ++$iBoard) { ?>
 					<tr>
 						<td class="board"><?php echo $iBoard; ?></td>
-						<?php // TODO: use colour rule set for the division ?>
 						<td class="colour"><?php
 							switch ($this->division->colours) {
 								case Colours::HomeWhiteOnOdds:
@@ -684,11 +762,58 @@ class StandardMatch extends Match {
 			}
 
 			$this->games[] = Game::constructFromSubmission($iBoard, $gameColour /*$iBoard % 2 == 0 ? 'W' : 'B'*/,
-				$homePlayer, $homePlayer->standardGrade, $awayPlayer, $awayPlayer->standardGrade, $score);
+				$homePlayer, $homePlayer->standardGrade, $awayPlayer, $awayPlayer->standardGrade, $score/*,
+				$this->handicapScheme*/);
 		}
-		$this->homeAdjustedScore = $this->homeRawScore;
-		$this->awayAdjustedScore = $this->awayRawScore;
+		
+		$this->fillInAveragesAndHandicaps($this->games);
+		//$this->fillInHandicaps();
+
+		$this->homeAdjustedScore = $this->homeRawScore + $this->homeHandicap;
+		$this->awayAdjustedScore = $this->awayRawScore + $this->awayHandicap;
 	}
+
+	// for a handicapped competition, fill in any missing grades, and populate the match-level handicap fields
+	/*private function fillInHandicaps() {
+		if (!$this->handicapScheme) return;
+
+		$homeNonDefaults = $awayNonDefaults = 0;
+		$homeTotalGrade = $awayTotalGrade = 0;
+		$homeDefaultedGames = $awayDefaultedGames = [];
+
+		foreach ($this->games as $game) {
+			if ($game->homePlayer->id() == PlayerID::BoardDefault) {
+				$homeDefaultedGames[] = $game;
+			} else {
+				++$homeNonDefaults;
+				$homeTotalGrade += $game->homePlayerGrade;
+			}
+
+			if ($game->awayPlayer->id() == PlayerID::BoardDefault) {
+				$awayDefaultedGames[] = $game;
+			} else {
+				++$awayNonDefaults;
+				$awayTotalGrade += $game->awayPlayerGrade;
+			}
+		}
+
+		if (count($homeDefaultedGames) > 0) {
+			$averageGrade = (integer) ((1.0 * $homeTotalGrade / $homeNonDefaults) + 0.5);
+			foreach ($homeDefaultedGames as $game) $game->homePlayerGrade = $averageGrade;
+		}
+
+		if (count($awayDefaultedGames) > 0) {
+			$averageGrade = (integer) ((1.0 * $awayTotalGrade / $awayNonDefaults) + 0.5);
+			foreach ($awayDefaultedGames as $game) $game->awayPlayerGrade = $averageGrade;
+		}
+		
+		foreach ($this->games as $game) {
+			$game->gradeDifference = $game->awayPlayerGrade - $game->homePlayerGrade;
+			$this->handicapScheme->addBoard($game->gradeDifference);
+		}
+
+		$this->handicapScheme->handicapPoints($this->gradeDifference, $this->homeHandicap, $this->awayHandicap);
+	}*/
 }
 
 class RapidSameMatch extends Match {
@@ -797,6 +922,7 @@ class RapidSameMatch extends Match {
 		}
 		$nBoards = $iBoard;
 		$playersById = [];
+		$wbGames = []; // here we will build a list of the W-B games, for filling in averages and handicaps
 
 		// now go through them
 		for ($iBoard = 1; $iBoard <= $nBoards; ++$iBoard) {
@@ -838,12 +964,14 @@ class RapidSameMatch extends Match {
 			$playersById[$awayPlayer->id()] = $awayPlayer;
 
 			$score = $this->validateGameScore($iBoard, $homePlayer, $awayPlayer, $_POST['s' . $iBoard . 'wb']);
-			$this->games[] = Game::constructFromSubmission($iBoard, 'W',
-				$homePlayer, $homePlayer->lrcaRapidGrade, $awayPlayer, $awayPlayer->lrcaRapidGrade, $score);
+			$wbGames[] = $this->games[] = Game::constructFromSubmission($iBoard, 'W',
+				$homePlayer, $homePlayer->lrcaRapidGrade, $awayPlayer, $awayPlayer->lrcaRapidGrade, $score/*,
+				$handicapScheme*/);
 
 			$score = $this->validateGameScore($iBoard, $homePlayer, $awayPlayer, $_POST['s' . $iBoard . 'bw']);
 			$this->games[] = Game::constructFromSubmission($iBoard, 'B',
-				$homePlayer, $homePlayer->lrcaRapidGrade, $awayPlayer, $awayPlayer->lrcaRapidGrade, $score);
+				$homePlayer, $homePlayer->lrcaRapidGrade, $awayPlayer, $awayPlayer->lrcaRapidGrade, $score/*,
+				$handicapScheme*/);
 
 			// validate score
 			/*$scoreStr = @$_POST['s' . $iBoard];
@@ -889,8 +1017,11 @@ class RapidSameMatch extends Match {
 			$this->games[] = Game::constructFromSubmission($iBoard, $iBoard % 2 == 0 ? 'W' : 'B',
 				$homePlayer, $homePlayer->lrcaRapidGrade, $awayPlayer, $awayPlayer->lrcaRapidGrade, $score);*/
 		}
-		$this->homeAdjustedScore = $this->homeRawScore;
-		$this->awayAdjustedScore = $this->awayRawScore;
+		//$this->fillInHandicaps();
+		$this->fillInAveragesAndHandicaps($wbGames);
+
+		$this->homeAdjustedScore = $this->homeRawScore + $this->homeHandicap;
+		$this->awayAdjustedScore = $this->awayRawScore + $this->awayHandicap;
 	}
 
 	public function renderPlainTextResult() {
