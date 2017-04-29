@@ -53,15 +53,13 @@ pageHeader($pageTitle);
 <div id="subNav">
 	<form method="get" action="players.php">
 		<p>Club:<br />
-				<select name="cid">
-			<?php
+			<select name="cid"><?php
 				renderSelectOption('', $clubID, 'All');
 				$stmt = $Database->query('SELECT club_id, name FROM club WHERE status = 1 ORDER BY name');
 				while ($row = $stmt->fetch()) {
 					renderSelectOption($row['club_id'], $clubID, $row['name']);
 				}
-			?>
-			</select>
+			?></select>
 		</p>
 
 		<p>Players to show:<br />
