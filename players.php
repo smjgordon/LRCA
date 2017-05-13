@@ -152,11 +152,15 @@ pageHeader($pageTitle);
 							AND g1.season = g2.season
 							AND g1.type = g2.type
 							AND g1.effective_from < g2.effective_from
-				WHERE g1.player_id = ? AND g1.season = ?
+							AND g2.effective_from <= ?
+				WHERE g1.effective_from <= ?
+					AND g1.player_id = ? AND g1.season = ?
 					AND g2.grade_id IS NULL');
 
+			$today = date('c');
+			
 			while ($player = $stmtPlayer->fetch()) {
-				$stmtGrade->execute([$player['player_id'], $season]);
+				$stmtGrade->execute([$today, $today, $player['player_id'], $season]);
 				$grade = $stmtGrade->fetch();
 			?>
 				<tr>

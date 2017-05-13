@@ -8,7 +8,7 @@ abstract class SystemSettings {
 	
 	static $summerYear = 2017;
 	static $winterYear = 2016;
-	static $currentSeason = Season::BothDefaultWinter;
+	static $currentSeason = Season::BothDefaultSummer;
 	
 	static $submitResultReminderDays = 4;
 	static $registerDateReminderDays = 14;

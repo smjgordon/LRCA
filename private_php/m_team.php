@@ -41,6 +41,8 @@ class Team {
 	public static function rankingOrder($team1, $team2) {
 		if ($team1->adjustedPoints > $team2->adjustedPoints) return -1;
 		if ($team1->adjustedPoints < $team2->adjustedPoints) return 1;
+		if ($team1->tieBreak < $team2->tieBreak) return -1;
+		if ($team1->tieBreak > $team2->tieBreak) return 1;
 		if ($team1->gpd > $team2->gpd) return -1;
 		if ($team1->gpd < $team2->gpd) return 1;
 		return 0;
@@ -52,7 +54,8 @@ class Team {
 
 	public function id() { return $this->_id; }
 
-	public $division, $club, $sequence, $name, $status, $played, $won, $drawn, $lost, $gpd, $rawPoints, $adjustedPoints;
+	public $division, $club, $sequence, $name, $status, $played, $won, $drawn, $lost, $gpd;
+	public $rawPoints, $adjustedPoints, $tieBreak;
 
 	private function populateFromDbRow($row) {
 		$this->_id = $row['team_id'];
@@ -68,6 +71,7 @@ class Team {
 		$this->gpd = $row['gpd'];
 		$this->rawPoints = $row['raw_points'];
 		$this->adjustedPoints = $row['adjusted_points'];
+		$this->tieBreak = $row['tie_break'];
 	}
 
 	private $_id;

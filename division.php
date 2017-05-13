@@ -27,9 +27,11 @@ pageHeader($divisionView->headerTitle());
 <div id="subBody">
 	<h2><?php echo htmlspecialchars($divisionView->bodyTitle()); ?></h2>
 
-	<?php if ($division->breakdown == Breakdown::ByMonth) { ?>
+	<?php /*if ($division->breakdown == Breakdown::ByMonth) { ?>
 		<p class="devNotice">Board defaults and team withdrawals over the course of the 2016–17 season have led to some penalties being applied.&nbsp; Points have now been deducted to reflect this, but automating the process is still a work in progress.&nbsp; As such, the values may at times be out of sync.</p>
-	<?php } ?>
+	<?php ?>
+		<p class="devNotice">All League matches have now been played, but the final rankings still need to be updated to take into account tie-breaking rules.&nbsp; This will be done over the next few days.</p>
+	<?php }*/ ?>
 <?php
 	$divisionView->showStandings();
 	$divisionView->showFixtures();
