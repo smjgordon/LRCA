@@ -53,7 +53,7 @@ class HandicapScheme {
 			
 		} else {
 			// away is higher graded, so home gets the handicap points
-			$outHomeHandicap = 0;
+			$outAwayHandicap = 0;
 			$outPoints = &$outHomeHandicap;
 			$absGradeDifference = $outGradeDifference;
 		}
