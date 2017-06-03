@@ -99,6 +99,7 @@ class HtmlDivisionView {
 
 	public function showFixtures() {
 		$this->_division->loadRounds();
+		$anyUnapproved = false;
 		foreach ($this->_division->rounds as $round) {
 			if ($round->name) echo '<h3>', htmlspecialchars($round->name), '</h3>';
 
@@ -109,6 +110,10 @@ class HtmlDivisionView {
 					<tr>
 						<td class="date"><?php
 							if ($fixture->date) echo formatDate($fixture->date);
+							if ($fixture->status == MatchStatus::Played && !$fixture->isApproved) {
+								echo ' *';
+								$anyUnapproved = true;
+							}
 						?></td>
 						<td class="homeTeam"><?php echo $fixture->homeTeam ? htmlspecialchars($fixture->homeTeam->name) : 'bye'; ?></td>
 					<?php
@@ -144,6 +149,10 @@ class HtmlDivisionView {
 					</tr>
 				<?php } ?>
 			</table>
+		<?php
+		}
+		if ($anyUnapproved) {
+		?>	<p>* Pending approval</p>
 		<?php
 		}
 	}
@@ -186,7 +195,11 @@ class HtmlDivisionView {
 				<td class="awayScore"><?php echo $row['away_defaults']; ?></td>
 				<td class="awayTeam"><?php echo htmlspecialchars($row['away_team']); ?></td>
 				<td><?php echo htmlspecialchars($row['reason']); ?></td>
-				<td><?php echo htmlspecialchars($row['exempt_reason']); ?></td>
+				<td><?php
+					if ($row['exempt_reason']) {
+						echo 'Waived: ', htmlspecialchars($row['exempt_reason']);
+					}
+				?></td>
 			</tr>
 		<?php
 		}
@@ -225,9 +238,9 @@ class HtmlDivisionView {
 		<?php
 			while ($row = $stmt->fetch()) {
 				$nDefaults = $row['n'];
-				if ($nDefaults >= SystemSettings::$defaultFirstPenalty) {
+				if ($nDefaults >= $this->_division->boardDefaultPenaltyFirst) {
 					$nPointsDeducted = (integer)
-						(($nDefaults - SystemSettings::$defaultFirstPenalty) / SystemSettings::$defaultPenaltyEvery) + 1;
+						(($nDefaults - $this->_division->boardDefaultPenaltyFirst) / $this->_division->boardDefaultPenaltyEvery) + 1;
 				} else {
 					$nPointsDeducted = 0;
 				}

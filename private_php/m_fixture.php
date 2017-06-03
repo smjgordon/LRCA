@@ -24,7 +24,7 @@ class Fixture {
 
 	public function id() { return $this->_id; }
 
-	public $round, $division, $date, $status;
+	public $round, $division, $date, $status, $isApproved;
 	public $homeTeam, $homeRawScore, $homeAdjustedScore;
 	public $awayTeam, $awayRawScore, $awayAdjustedScore;
 
@@ -38,6 +38,8 @@ class Fixture {
 		$this->awayTeam = $row['away_team_id'] ? Team::loadById($row['away_team_id']) : null;
 		$this->date = strtotime($row['fixture_date']);
 		$this->status = $row['status'];
+		
+		$this->isApproved = !!$row['approved_user_id'];
 
 		if ($this->status == MatchStatus::Played || $this->status == MatchStatus::Defaulted
 				|| $this->status == MatchStatus::ScoredBye) {

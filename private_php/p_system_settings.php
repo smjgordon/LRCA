@@ -8,12 +8,9 @@ abstract class SystemSettings {
 	
 	static $summerYear = 2017;
 	static $winterYear = 2016;
-	static $currentSeason = Season::BothDefaultSummer;
+	static $currentSeason = Season::Summer;
 	
 	static $submitResultReminderDays = 4;
 	static $registerDateReminderDays = 14;
-	// TODO: do away with these and use the database-driven values instead
-	static $defaultFirstPenalty = 5;
-	static $defaultPenaltyEvery = 3;
 }
 ?>
