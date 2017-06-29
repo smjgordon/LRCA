@@ -24,10 +24,13 @@ class User {
 		}
 	}
 
-	static public function loadById($userId) {
+	static public function loadById($userId, $includeInactive = false) {
 		global $Database;
 
-		$stmt = $Database->prepare('SELECT * FROM user WHERE user_id = ?');
+		$sql = 'SELECT * FROM user WHERE user_id = ?';
+		if (!$includeInactive) $sql .= ' AND status <> 0';
+		
+		$stmt = $Database->prepare($sql);
 		$stmt->execute([$userId]);
 		if ($row = $stmt->fetch()) {
 			//return new User($row['user_id']);
@@ -151,7 +154,7 @@ class User {
 		return $resetKey;
 	}
 
-	public function logIn($password) {
+	public function checkPassword($password) {
 		global $Database;
 
 		$stmt = $Database->prepare('SELECT hashed_password FROM user WHERE user_id = ?');
@@ -159,10 +162,24 @@ class User {
 
 		$row = $stmt->fetch();
 		if (!$row) {
-			throw new ModelAccessException(ModelAccessException::BadUserId, $userId);
+			throw new ModelAccessException(ModelAccessException::BadUserId, $this->_id);
+		}
+		return password_verify($password, $row['hashed_password']);
+	}
+		
+	public function logIn($password) {
+		global $Database;
+/*
+		$stmt = $Database->prepare('SELECT hashed_password FROM user WHERE user_id = ?');
+		$stmt->execute([$this->_id]);
+
+		$row = $stmt->fetch();
+		if (!$row) {
+			throw new ModelAccessException(ModelAccessException::BadUserId, $this->_id);
 			//throw new Exception('User ID not found');
 		}
-		if (password_verify($password, $row['hashed_password'])) {
+		if (password_verify($password, $row['hashed_password'])) {*/
+		if ($this->checkPassword($password)) {
 			$loginTime = time();
 			$loginTimeStr = date('c', $loginTime);
 			$expiryTime = $loginTime + 86400; // session expires 24 hours from now
@@ -203,6 +220,15 @@ class User {
 			//throw new ReportableException('The password you entered was not correct.  Please try again.');
 			throw new UserAccountException(UserAccountException::IncorrectPassword, $this);
 		}
+	}
+
+	public function setNewPassword($password) {
+		global $Database;
+
+		$hashedPassword = password_hash($password, PASSWORD_DEFAULT);
+
+		$stmt = $Database->prepare('UPDATE user SET hashed_password = ?, status = 1 WHERE user_id = ?');
+		$stmt->execute([$hashedPassword, $this->_id]);
 	}
 
 	private $_id, $_forename, $_surname, $_email, $_club, /*$_clubID, $_clubName,*/ $_status, $_permissions;
@@ -272,11 +298,13 @@ class PasswordResetKey {
 	public function setNewPassword($password) {
 		global $Database;
 
-		$hashedPassword = password_hash($password, PASSWORD_DEFAULT);
+		/*$hashedPassword = password_hash($password, PASSWORD_DEFAULT);
 
 		//$Database->beginTransaction();
 		$stmt = $Database->prepare('UPDATE user SET hashed_password = ?, status = 1 WHERE user_id = ?');
-		$stmt->execute([$hashedPassword, $this->_user->id()]);
+		$stmt->execute([$hashedPassword, $this->_user->id()]);*/
+		
+		$this->_user->setNewPassword($password);
 
 		$stmt = $Database->prepare('UPDATE password_reset_key SET status = 1 WHERE reset_key_id = ?');
 		$stmt->execute([$this->_id]);

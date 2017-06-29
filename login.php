@@ -46,11 +46,11 @@ pageHeader('Log In');
 ?>
 
 <h2>Log In</h2>
-
+<?php /*
 <div class="devNotice">
 	<p>Everybody who had a user account under the old results website, and every team captain listed in the 2016-17 LRCA Handbook, should have a user account here.&nbsp; In the near future, a facility will be implemented to enable registered users to create user accounts for members of their clubs to enable them to submit results.&nbsp; Meanwhile, if you do not have an account and need to submit results for your club, please contact the <a href="mailto:smjg@iname.com">Results Webmaster</a>.</p>
 </div>
-
+*/ ?>
 <p>Team captains can log in here in order to submit and approve results.</p>
 
 <?php if ($error) { ?>

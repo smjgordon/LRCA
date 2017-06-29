@@ -3,7 +3,7 @@ require_once 'private_php/p_global.php';
 pageHeader('New Password Set');
 ?>
 
-<h1>New Password Set</h1>
+<h2>New Password Set</h2>
 
 <p>You have successfully set a new password for your user account.</p>
 
