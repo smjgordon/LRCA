@@ -160,6 +160,7 @@ class HtmlDivisionView {
 	// TODO: separate model from view
 	public function showBoardDefaults() {
 		global $Database;
+		$anyDefaults = false;
 
 		$stmt = $Database->prepare('
 			SELECT bd.incurred_date, ht.name AS home_team, at.name AS away_team, re.text AS reason, bd.exempt,
@@ -182,34 +183,41 @@ class HtmlDivisionView {
 
 			ORDER BY bd.incurred_date, f.fixture_id');
 		$stmt->execute([$this->_division->id()]);
-	?>
-		<table class="defaults">
-	<?php
-		while ($row = $stmt->fetch()) {
-		?>
-			<tr>
-				<td class="date"><?php echo formatDate(strtotime($row['incurred_date'])); ?></td>
-				<td class="homeTeam"><?php echo htmlspecialchars($row['home_team']); ?></td>
-				<td class="homeScore"><?php echo $row['home_defaults']; ?></td>
-				<td class="dash">–</td>
-				<td class="awayScore"><?php echo $row['away_defaults']; ?></td>
-				<td class="awayTeam"><?php echo htmlspecialchars($row['away_team']); ?></td>
-				<td><?php echo htmlspecialchars($row['reason']); ?></td>
-				<td><?php
-					if ($row['exempt_reason']) {
-						echo 'Waived: ', htmlspecialchars($row['exempt_reason']);
-					}
-				?></td>
-			</tr>
+
+		while (!!($row = $stmt->fetch())) {
+			if (!$anyDefaults) {
+			?>	<h3>Board Defaults Incurred</h3>
+				<table class="defaults">
+				<?php
+					$anyDefaults = true;
+				}
+			?>
+				<tr>
+					<td class="date"><?php echo formatDate(strtotime($row['incurred_date'])); ?></td>
+					<td class="homeTeam"><?php echo htmlspecialchars($row['home_team']); ?></td>
+					<td class="homeScore"><?php echo $row['home_defaults']; ?></td>
+					<td class="dash">–</td>
+					<td class="awayScore"><?php echo $row['away_defaults']; ?></td>
+					<td class="awayTeam"><?php echo htmlspecialchars($row['away_team']); ?></td>
+					<td><?php echo htmlspecialchars($row['reason']); ?></td>
+					<td><?php
+						if ($row['exempt_reason']) {
+							echo 'Waived: ', htmlspecialchars($row['exempt_reason']);
+						}
+					?></td>
+				</tr>
+			<?php
+			}
+			
+			if ($anyDefaults) {
+			?>
+			</table>
 		<?php
 		}
-	?>
-		</table>
-	<?php
+		return $anyDefaults;
 	}
 
 	public function showDefaultTotals() {
-		// TODO: do away with parameters in SystemSettings and use the database-driven values instead
 		global $Database;
 
 		$stmt = $Database->prepare('
@@ -226,7 +234,11 @@ class HtmlDivisionView {
 			HAVING n > 0
 			ORDER BY t.name');
 		$stmt->execute([$this->_division->id()]);
+		
+		// no penalties in this division
+		if (!($this->_division->boardDefaultPenaltyEvery)) return;
 	?>
+		<h3>Board Default Totals</h3>
 		<table class="defaultTotals">
 			<thead>
 				<tr>

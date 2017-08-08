@@ -44,9 +44,7 @@ if ($fixtures) {
 		<?php foreach ($fixtures as $fixture) { ?>
 			<tr>
 				<td class="division"><?php echo $fixture->division->name; ?></td>
-				<td class="date"><?php
-					echo formatDate($fixture->date);
-				?></td>
+				<td class="date"><?php echo formatDate($fixture->date); ?></td>
 				<td class="homeTeam"><?php echo $fixture->homeTeam ? htmlspecialchars($fixture->homeTeam->name) : 'bye'; ?></td>
 				<td class="homeScore"><?php echo formatScore($fixture->homeAdjustedScore); ?></td>
 				<td class="dash">–</td>

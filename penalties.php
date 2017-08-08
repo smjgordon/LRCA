@@ -27,12 +27,23 @@ pageHeader("Penalties – " . $divisionView->headerTitle());
 <div id="subBody">
 	<h2><?php echo htmlspecialchars($divisionView->bodyTitle()); ?></h2>
 	<h3 class="sub">Penalties</h3>
+	
+<?php
+	if ($division->section->year < ($division->section->season == Season::Winter ? 2016 : 2017)) {
+	?>
+		<p class="devNotice">Penalties prior to the 2016–17 League season are not fully entered into the database.&nbsp; As such, this information may be inaccurate.</p>
+	<?php
+	}
 
-	<?php $divisionView->showStandings(); ?>
-	<h3>Board Defaults Incurred</h3>
-	<?php $divisionView->showBoardDefaults(); ?>
-	<h3>Board Default Totals</h3>
-	<?php $divisionView->showDefaultTotals(); ?>
+	$divisionView->showStandings();
+	if ($divisionView->showBoardDefaults()) {
+		$divisionView->showDefaultTotals();
+	} else {
+	?>
+		<p>No penalties have been incurred in this division.</p>
+	<?php
+	}
+?>
 </div>
 
 <?php

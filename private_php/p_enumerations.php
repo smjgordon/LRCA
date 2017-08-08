@@ -80,11 +80,4 @@ abstract class GameResult {
 	const Draw = 0;
 	const HomeWin = 1;
 }
-
-abstract class HttpStatus {
-	const RedirectSeeOther = 303;
-	const Forbidden        = 403;
-	const NotFound         = 404;
-	const InternalError    = 500;
-}
 ?>
