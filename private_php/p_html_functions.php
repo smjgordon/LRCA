@@ -35,4 +35,17 @@ function carryForwardPostData() {
 	<?php
 	}
 }
+
+function encodeMultiLine($string) {
+	return str_replace("\n", '<br/>', htmlspecialchars($string));
+}
+
+function encodeMultiLineArray($strings) {
+	$result = '';
+	foreach ($strings as $string) {
+		if ($result != '') $result .= '<br/>';
+		$result .= htmlspecialchars($string);
+	}
+	return $result;
+}
 ?>

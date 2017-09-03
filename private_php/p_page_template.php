@@ -33,7 +33,7 @@ function pageHeader($title) {
 		<ul id="mainNav2">
 			<?php if ($CurrentUser) { ?>
 				<li class="loggedInUser"><?php
-					echo htmlspecialchars($CurrentUser->fullName() . ' – ' . $CurrentUser->club()->name); ?></li
+					echo htmlspecialchars($CurrentUser->fullName() . ' – ' . $CurrentUser->club()->name()); ?></li
 				><li><a href="my_account.php">My Account</a></li
 				><?php
 					if ($CurrentUser->hasPermission('can_submit')) {

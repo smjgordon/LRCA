@@ -42,7 +42,7 @@ function createUser($forename, $surname, $email, $clubId) {
 
 	// generate a welcome email and send it
 	$url = joinUri(getCurrentUri(), "rpwd.php?key=$resetKeyStr");
-	$clubName = $club->name;
+	$clubName = $club->name();
 
 	$emailSubject = 'Welcome to the LRCA Results Website';
 	$emailMessage = 'Dear ' . $newUser->forename() . ",

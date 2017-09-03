@@ -54,7 +54,7 @@ pageHeader('Create User');
 	<p>
 		<label for="cid">Club:</label>
 		<input type="hidden" name="cid" value="<?php echo $CurrentUser->club()->id(); ?>" />
-		<?php echo htmlspecialchars($CurrentUser->club()->name); ?>
+		<?php echo htmlspecialchars($CurrentUser->club()->name()); ?>
 	</p>
 
 	<p><input type="submit" name="action" value="Create" /></p>

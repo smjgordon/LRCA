@@ -12,7 +12,7 @@ foreach ($allPlayers as $player) {
 		
 		if (($player->standardGrade && $player->standardGrade->category)
 				|| ($player->rapidGrade && $player->rapidGrade->category)) {
-			echo $player->club->name, ',', $player->ecfGradingCode, ',', $player->forename, ',', $player->surname, ',';
+			echo $player->club->name(), ',', $player->ecfGradingCode, ',', $player->forename, ',', $player->surname, ',';
 			
 			$grade = $player->standardGrade;
 			

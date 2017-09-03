@@ -41,12 +41,13 @@ foreach ($allClubs as $club) {
 		} while (!!($row = $stmt->fetch()));
 
 		$toSendTo = User::loadByClub($club, 'can_submit');
+		$clubName = $club->name();
 
 		sendEmail('Reminder: Fixtures in your club pending result submission or approval',
 			$nMatches == 1 ?
 "Hello,
 
-The following $club->name fixture is still awaiting result submission or
+The following $clubName fixture is still awaiting result submission or
 approval:
 
 $matchList
@@ -59,7 +60,7 @@ within 7 days of the fixture date are liable to incur penalties."
 			:
 "Hello,
 
-The following $club->name fixtures are still awaiting result submission
+The following $clubName fixtures are still awaiting result submission
 or approval:
 
 $matchList
@@ -107,12 +108,13 @@ foreach ($allClubs as $club) {
 		} while (!!($row = $stmt->fetch()));
 
 		$toSendTo = User::loadByClub($club, 'can_submit');
+		$clubName = $club->name();
 
 		sendEmail('Reminder: Fixtures in your club pending dates',
 			$nMatches == 1 ?
 "Hello,
 
-The following $club->name fixture is still waiting for a date to be
+The following $clubName fixture is still waiting for a date to be
 registered:
 
 $matchList
@@ -125,7 +127,7 @@ taken care of it since this email was sent."
 			:
 "Hello,
 
-The following $club->name fixtures are still waiting for dates to be
+The following $clubName fixtures are still waiting for dates to be
 registered:
 
 $matchList

@@ -6,12 +6,16 @@ require_once 'm_fixture.php';
 require_once 'm_team.php';
 
 class Club {
-	public static function loadAll() {
+	public static function loadAll($activeOnly = true) {
 		global $Database;
 
 		$result = [];
 
-		$stmt = $Database->query('SELECT * FROM club');
+		$sql = 'SELECT * FROM club';
+		if ($activeOnly) $sql .= ' WHERE status = 1';
+		$sql .= ' ORDER BY name';
+
+		$stmt = $Database->query($sql);
 		while ($row = $stmt->fetch()) {
 			$result[] = new Club($row);
 		}
@@ -107,7 +111,7 @@ class Club {
 
 	public function fixturesPendingDates(&$anyPostponed, &$anyUnscheduled) {
 		global $Database;
-		
+
 		$fixtures = [];
 		$anyPostponed = $anyUnscheduled = false;
 		$stmt = $Database->prepare('
@@ -135,18 +139,141 @@ class Club {
 
 	private function __construct($row) {
 		$this->_id = $row['club_id'];
-		$this->name = $row['name'];
-		$this->ecfCode = $row['ecf_code'];
-		$this->status = $row['status'];
+		$this->_name = $row['name'];
+		$this->_longName = $row['long_name'];
+		$this->_ecfCode = $row['ecf_code'];
+		$this->_status = $row['status'];
+
+		$this->_venueName = $row['venue_name'];
+		$this->_venueAddress = $row['venue_address_1'];
+		for ($iLine = 2; $iLine <= 3; ++$iLine) {
+			$addressLine = $row["venue_address_$iLine"];
+			if ($addressLine) $this->_venueAddress .= "\n" . $addressLine;
+		}
+		$this->_venuePostcode = $row['venue_postcode'];
+		$this->_venueLatitude = $row['venue_latitude'];
+		$this->_venueLongitude = $row['venue_longitude'];
+		$this->_venuePlaceId = $row['venue_google_place_id'];
+		
+		$this->_venueInfo = $row['venue_info_1'];
+		for ($iLine = 2; $iLine <= 3; ++$iLine) {
+			$infoLine = $row["venue_info_$iLine"];
+			if ($infoLine) $this->_venueInfo .= "\n" . $infoLine;
+		}
+
+		$this->_meetingDay = $row['meeting_day'];
+		$this->_meetingTime = $row['meeting_time'];
+		$this->_meetingEndTime = $row['meeting_end_time'];
+		$this->_websiteUrl = $row['website_url'];
 	}
 
 	public function id() { return $this->_id; }
-	public $name, $ecfCode, $status;
-	private $_id;//, $_fixturesLoaded;
+	public function name() { return $this->_name; }
+	public function longName() { return $this->_longName; }
+	public function ecfCode() { return $this->_ecfCode; }
+	public function status() { return $this->_status; }
+	public function venueName() { return $this->_venueName; }
+	public function venueAddress() { return $this->_venueAddress; }
+	public function venuePostcode() { return $this->_venuePostcode; }
+	public function venueInfo() { return $this->_venueInfo; }
+	
+	public function hasMapCoordinates() {
+		return $this->_venueLatitude !== null && $this->_venueLongitude !== null;
+	}
+	public function venueLatitude() { return $this->_venueLatitude; }
+	public function venueLongitude() { return $this->_venueLongitude; }
+	public function venueGooglePlaceId() { return $this->_venuePlaceId; }
+	
+	/*public function mapUrl() {
+		if ($this->hasMapCoordinates()) {
+			return "https://www.google.com/maps/search/?api=1&query=$this->_venueLatitude,$this->_venueLongitude";
+		} else {
+			return null;
+		}
+	}*/
+	
+	public function meetingDay() {
+		return array('Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday')[$this->_meetingDay];
+	}
+	public function meetingTime() { return $this->_meetingTime; }
+	public function meetingEndTime() { return $this->_meetingEndTime; }
+	public function websiteUrl() { return $this->_websiteUrl; }
+
+	private $_id, $_name, $_longName, $_ecfCode, $_status;//, $_fixturesLoaded;
+	private $_venueName, $_venueAddress, $_venuePostcode, $venueInfo;
+	private $_venueLatitude, $_venueLongitude, $_venuePlaceId;
+	private $_meetingDay, $_meetingTime, $_meetingEndTime;
+	private $_websiteUrl;
 }
 
 abstract class ClubStatus {
 	const Inactive = 0;
 	const Active = 1;
+}
+
+abstract class ContactType {
+	const Secretary = 1;
+	const TeamCaptain = 10;
+}
+
+class Contact {
+	public static function loadByClub($club) {
+		global $Database;
+
+		$result = [];
+
+		$stmt = $Database->prepare('
+			SELECT con.contact_id, cc.type, con.name AS contact, t.name AS team, t.sequence, d.name AS division
+			FROM club_contact cc
+				JOIN contact con ON cc.contact_id = con.contact_id
+				LEFT JOIN team t ON cc.team_id = t.team_id AND cc.club_id = t.club_id
+				LEFT JOIN division d ON t.division_id = d.division_id
+			WHERE cc.club_id = ?
+			ORDER BY cc.type, d.sequence, t.sequence');
+		$stmt->execute([$club->id()]);
+		while (!!($row = $stmt->fetch())) {
+			$contact = new Contact();
+			$contact->populateFromDbRow($row);
+			$result[] = $contact;
+		}
+		return $result;
+	}
+
+	private function populateFromDbRow($row) {
+		global $Database;
+		
+		$this->_id = $row['contact_id'];
+		$this->_type = $row['type'];
+		$this->_name = $row['contact'];
+		$this->_teamName = $row['team'];
+		$this->_divisionName = $row['division'];
+		$this->_emails = [];
+		$this->_phoneNumbers = [];
+		
+		// TODO: logicalise
+		$stmt = $Database->prepare('SELECT email, email_type FROM contact_email WHERE contact_id = ?');
+		$stmt->execute([$this->_id]);
+		while (!!($row = $stmt->fetch())) {
+			$this->_emails[] = [$row['email'], $row['email_type']];
+		}
+		
+		$stmt = $Database->prepare('SELECT phone, phone_type FROM contact_phone WHERE contact_id = ?');
+		$stmt->execute([$this->_id]);
+		while (!!($row = $stmt->fetch())) {
+			$this->_phoneNumbers[] = [$row['phone'], $row['phone_type']];
+		}
+	}
+	
+	public function id() { return $this->_id; }
+	public function type() { return $this->_type; }
+	public function name() { return $this->_name; }
+	public function teamName() { return $this->_teamName; }
+	public function divisionName() { return $this->_divisionName; }
+	public function emails() { return $this->_emails; }
+	public function phoneNumbers() { return $this->_phoneNumbers; }	
+
+	private $_id, $_type, $_name, $_teamName, $_divisionName;
+	// TODO: logicalise
+	private $_emails, $_phoneNumbers;
 }
 ?>

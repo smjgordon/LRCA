@@ -204,14 +204,14 @@ td.dash {
 	width: 1em;
 }
 
-.players, .barred {
+.players, .barred, .contacts {
 	border-top: 1px solid #999999;
 	border-bottom: 1px solid #999999;
 }
 .players thead {
 	border-bottom: 1px solid #999999;
 }
-.players th, .players tr:nth-child(even), .barred tr:nth-child(even) {
+.players th, .players tr:nth-child(even), .barred tr:nth-child(even), .contacts tr:nth-child(even) {
 	background-color: #dddddd;
 }
 .players .grade, .players .cat {
@@ -292,4 +292,16 @@ pre {
 
 .defaultTotals td+td {
 	text-align: center;
+}
+
+table.contacts {
+	margin-top: 1em;
+}
+table.contacts td {
+	padding-right: 1em;
+	vertical-align: top;
+}
+
+#map+p, #mapScript+p {
+	margin-top: 1em;
 }

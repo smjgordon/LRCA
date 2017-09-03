@@ -22,4 +22,5 @@ try {
 }
 
 $CanSendEmail = true;
+$GoogleMapKey = 'AIzaSyAO14roLN-8rzZzmab1xl9EYP-Zeu5PvoI';
 ?>
