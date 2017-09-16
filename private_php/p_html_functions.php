@@ -48,4 +48,13 @@ function encodeMultiLineArray($strings) {
 	}
 	return $result;
 }
+
+function carryForwardReferrer() {
+	$referrer = @$_POST['referrer'] or $referrer = @$_SERVER['HTTP_REFERER'];
+	$urlPrefix = 'http://' . $_SERVER['HTTP_HOST'] . '/';
+	if ($referrer && substr($referrer, 0, strlen($urlPrefix)) == $urlPrefix) {
+	?>	<input type="hidden" name="referrer" value="<?php echo htmlspecialchars($referrer); ?>" />
+	<?php
+	}
+}
 ?>

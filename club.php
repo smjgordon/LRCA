@@ -2,6 +2,7 @@
 require_once 'private_php/p_global.php';
 require_once 'private_php/v_html_club.php';
 require_once 'private_php/p_html_functions.php';
+require_once 'private_php/c_captcha.php';
 
 $clubId = @$_GET['cid'];
 if (!is_numeric($clubId)) errorPage(404);
@@ -31,10 +32,6 @@ pageHeader($club->name() . ' – Club Profile');
 		}
 
 		echo $clubView->mapLink();
-		/*$mapUrl = $club->mapUrl();
-		if ($mapUrl) {
-			echo ' <a href="', htmlspecialchars($mapUrl), '">(Map)</a>';
-		}*/
 	?></h2>
 	<p><b><?php echo htmlspecialchars($club->venueName()); ?></b><br />
 	<?php echo encodeMultiLine($club->venueAddress()); ?><br />
@@ -52,7 +49,7 @@ pageHeader($club->name() . ' – Club Profile');
 <?php
 	$contacts = Contact::loadByClub($club);
 	$lastContactType = 0;
-	$showContactInfo = ($CurrentUser != null);
+	$showContactInfo = ($CurrentUser != null || haveValidCaptcha());
 
 	foreach ($contacts as $contact) {
 		switch ($contact->type()) {
@@ -61,6 +58,16 @@ pageHeader($club->name() . ' – Club Profile');
 			?>
 				<tr>
 					<td>Secretary</td>
+					<?php echo showContact($contact, $showContactInfo); ?>
+				</tr>
+			<?php
+				break;
+
+			case ContactType::EmailContact:
+				if ($lastContactType == 0) echo '<table class="contacts">';
+			?>
+				<tr>
+					<td>Email Contact</td>
 					<?php echo showContact($contact, $showContactInfo); ?>
 				</tr>
 			<?php
@@ -86,8 +93,11 @@ pageHeader($club->name() . ' – Club Profile');
 ?>
 
 <?php if (!$showContactInfo) { ?>
-	<p>Note: As an anti-spam measure, contact information is shown only to logged-in users.</p>
+	<p><a href="captcha.php">Show Contact Information</a></p>
+	<?php /* <div class="g-recaptcha" data-sitekey="<?php echo $GoogleRecaptchaKey; ?>"></div>*/ ?>
+	<?php /* <!--<p>Note: As an anti-spam measure, contact information is shown only to logged-in users.</p>*/ ?>
 <?php } ?>
+
 </div>
 
 <?php

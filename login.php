@@ -20,9 +20,10 @@ if (isset($_POST['email'])) {
 			$user->logIn($password);
 			$Database->commit();
 
-			// redirect to My Fixtures, as this is what the user is most likely to want to use after logging in
-			// TODO: if the user was redirected here from another page, return to that page
-			redirect(303, 'my_fixtures.php');
+			// if the user was redirected here from another page, redirect back to that page on successful login
+			// otherwise go to My Fixtures, as this is what the user is most likely to want to use after logging in
+			$redirectTo = @$_REQUEST['url'] or $redirectTo = 'my_fixtures.php';
+			redirect(HttpStatus::RedirectSeeOther, $redirectTo);
 
 		} catch (UserAccountException $ex) {
 			$Database->rollBack();
@@ -61,7 +62,12 @@ pageHeader('Log In');
 	<p><label for="email">Email address:</label> <input type="text" name="email" id="email" /></p>
 	<p><label for="pwd">Password:</label> <input type="password" name="pwd" id="pwd" /></p>
 
-	<p><input type="submit" value="Log In" /></p>
+	<p>
+		<?php if (isset($_REQUEST['url'])) { ?>
+			<input type="hidden" name="url" value="<?php echo htmlspecialchars($_REQUEST['url']); ?>" />
+		<?php } ?>
+		<input type="submit" value="Log In" />
+	</p>
 </form>
 
 <p><a href="rpwd.php">Forgotten your password?</a></p>

@@ -122,15 +122,15 @@ function importFixtures($xml) {
 					$awayTeam = @$teamsByName[$teamName];
 					if (!$awayTeam) throw new ReportableException('Team not found: ' . $teamName);
 
-					if (isset($fixtureNode['date'])) {
-						$fixtureDate = strtotime((string) $fixtureNode['date']);
-						$fixture->date = $fixtureDate;
-					}
-
 					$fixture = new Fixture();
 					$fixture->round = $round;
 					$fixture->homeTeam = $homeTeam;
 					$fixture->awayTeam = $awayTeam;
+
+					if (isset($fixtureNode['date'])) {
+						$fixtureDate = strtotime((string) $fixtureNode['date']);
+						$fixture->date = $fixtureDate;
+					}
 
 					$round->fixtures[] = $fixture;
 				}

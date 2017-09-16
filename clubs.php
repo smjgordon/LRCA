@@ -3,7 +3,7 @@ require_once 'private_php/p_global.php';
 require_once 'private_php/v_html_club.php';
 require_once 'private_php/p_html_functions.php';
 
-pageHeader('Clubs');
+pageHeader('Clubs', ['map.js']);
 
 $clubs = Club::loadAll();
 $jsMapMarkers = '';
@@ -24,11 +24,8 @@ foreach ($clubs as $club) {
 		if ($long > $maxLong) $maxLong = $long;
 		
 		$jsMapMarkers .= "
-			marker = new google.maps.Marker({
-				position: new google.maps.LatLng($lat, $long),
-				title: " . json_encode($club->name()) . '
-			});
-			marker.setMap(map);';
+			createMarker(map, $lat, $long, " . json_encode($club->id()) . ', '
+				. json_encode($club->name()) . ');';
 	}
 }
 ?>
@@ -49,7 +46,7 @@ foreach ($clubs as $club) {
 			zoom: 10
 		};
 		var map = new google.maps.Map(document.getElementById('map'), mapOptions);
-		var marker;
+		var marker, bubble;
 		<?php echo $jsMapMarkers; ?>
 	}
 	</script>

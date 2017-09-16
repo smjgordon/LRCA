@@ -41,6 +41,7 @@ abstract class Match {
 	protected $id, $date, $status, /*$handicapSchemeID,*/ $handicapScheme, /*$divisionId,*/ $division, $gradeDifference;
 	protected $homeTeamID, $homeTeamName, $homeRawScore, $homeHandicap, $homeAdjustedScore;
 	protected $awayTeamID, $awayTeamName, $awayRawScore, $awayHandicap, $awayAdjustedScore;
+	protected $comments;
 	protected $games;
 
 	private function __construct($fixtureID) {
@@ -311,7 +312,8 @@ abstract class Match {
 				away_raw_score = ?, away_adjusted_score = ?,
 				status = 1, submitted_user_id = ?, submitted_date = ?,
 				raw_result = ?, adjusted_result = ?, approval_club_id = ?,
-				home_handicap = ?, away_handicap = ?, grade_difference = ?
+				home_handicap = ?, away_handicap = ?, grade_difference = ?,
+				comment = ?
 			WHERE fixture_id = ?');
 		$stmt->execute([
 			$this->homeRawScore, $this->homeAdjustedScore,
@@ -319,6 +321,7 @@ abstract class Match {
 			$CurrentUser->id(), date('c'),
 			$rawResult, $adjustedResult, $approvalClub->id(),
 			$this->homeHandicap, $this->awayHandicap, $this->gradeDifference,
+			$this->comments,
 			$this->id]);
 
 		// update team standings
@@ -372,6 +375,13 @@ abstract class Match {
 This is a confirmation of the result you have submitted.
 
 ' . $this->renderPlainTextResult();
+
+		if ($this->comments) {
+			$message .= "
+
+Comments:
+$this->comments";
+		}
 
 		emailConfirmation($subject, $message, [$CurrentUser], 'result_submitted.php');
 	}
@@ -771,6 +781,7 @@ class StandardMatch extends Match {
 
 		$this->homeAdjustedScore = $this->homeRawScore + $this->homeHandicap;
 		$this->awayAdjustedScore = $this->awayRawScore + $this->awayHandicap;
+		$this->comments = @$_POST['comments'];
 	}
 
 	// for a handicapped competition, fill in any missing grades, and populate the match-level handicap fields
@@ -910,6 +921,7 @@ class RapidSameMatch extends Match {
 		</table>
 	<?php
 	}
+	
 	public function buildSubmission() {
 		$homeTeam = Team::loadById($this->homeTeamID);
 		$awayTeam = Team::loadById($this->awayTeamID);
@@ -1022,6 +1034,7 @@ class RapidSameMatch extends Match {
 
 		$this->homeAdjustedScore = $this->homeRawScore + $this->homeHandicap;
 		$this->awayAdjustedScore = $this->awayRawScore + $this->awayHandicap;
+		$this->comments = @$_POST['comments'];
 	}
 
 	public function renderPlainTextResult() {

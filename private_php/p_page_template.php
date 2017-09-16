@@ -1,7 +1,7 @@
 <?php
 require_once 'm_session.php';
 
-function pageHeader($title) {
+function pageHeader($title, $javascripts = null) {
 	global $Database, $CurrentUser;
 ?>
 <!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN"
@@ -10,6 +10,14 @@ function pageHeader($title) {
 	<meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
 	<title><?php echo htmlspecialchars($title); ?></title>
 	<link rel="stylesheet" href="main.css" />
+<?php
+	if ($javascripts) {
+		foreach ($javascripts as $script) {
+	?>		<script type="text/javascript" src="<?php echo htmlspecialchars($script); ?>"></script>
+	<?php
+		}
+	}
+?>
 	</head>
 
 	<body>
@@ -20,7 +28,7 @@ function pageHeader($title) {
 			<li><a href="./">Home</a></li
 			><?php
 				// TODO: maybe separate this BL out
-				$stmt = $Database->query('SELECT section_id, name, season FROM section');
+				$stmt = $Database->query('SELECT section_id, name, season FROM section WHERE status = 1');
 				while ($row = $stmt->fetch()) {
 					$year = ($row['season'] == Season::Winter) ? SystemSettings::$winterYear : SystemSettings::$summerYear;
 					echo "<li><a href='section.php?year=$year&amp;sid=$row[section_id]'>$row[name]</a></li>";

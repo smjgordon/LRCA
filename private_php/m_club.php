@@ -213,7 +213,8 @@ abstract class ClubStatus {
 
 abstract class ContactType {
 	const Secretary = 1;
-	const TeamCaptain = 10;
+	const EmailContact = 10;
+	const TeamCaptain = 20;
 }
 
 class Contact {

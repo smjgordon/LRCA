@@ -83,6 +83,11 @@ pageHeader('Submit Result');
 			<input type="hidden" name="confirm" value="yes" />
 			<input type="submit" value="Submit" />
 		</p>
+		
+		<?php if ($_POST['comments']) { ?>
+			<p>Comments:<br />
+			<?php echo encodeMultiLine($_POST['comments']); ?></p>
+		<?php } ?>
 	<?php } else { ?>
 		<p>Please enter the details of the match.</p>
 	<?php
@@ -94,6 +99,11 @@ pageHeader('Submit Result');
 
 		$match->renderSubmissionForm();
 	?>
+		<p>Comments:<br />
+		<textarea style="width: 40em; max-width: 100%;" maxlength="1024" name="comments"><?php
+			echo htmlspecialchars(@$_POST['comments']);
+		?></textarea></p>
+	
 		<p>
 			<input type="hidden" name="fid" value="<?php echo $fixtureId; ?>" />
 			<input type="submit" value="Submit" />
