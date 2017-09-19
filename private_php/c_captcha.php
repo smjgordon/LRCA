@@ -43,7 +43,7 @@ function haveValidCaptcha() {
 		$stmt = $Database->prepare('SELECT * FROM captcha WHERE captcha_key = ?');
 		$stmt->execute([$captchaKey]);
 		if ($row = $stmt->fetch()) {
-			if (time() < strtotime($row['expiry_date'])) {
+			if (time() < strtotime($row['expiry_date']) && $_SERVER['REMOTE_ADDR'] == $row['ip_address']) {
 				return true;
 			} else {
 				setcookie('captcha', '', 1);

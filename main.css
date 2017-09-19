@@ -83,6 +83,29 @@
 	margin-top: 0.8em;
 }*/
 
+#clubVenue {
+	float: left;
+	margin-bottom: 1em;
+	width: 50%;
+	/*position: absolute;
+	left: 1em;
+	width: 13em;*/
+}
+#clubInfo {
+	float: left;
+	margin-top: 0.8em;
+	margin-bottom: 1em;
+}
+#clubInfo td {
+	vertical-align: top;
+}
+#clubInfo td:first-child {
+	text-align: right;
+}
+#clubInfo+* {
+	clear: both;
+}
+
 table {
 	border-collapse: collapse;
 }

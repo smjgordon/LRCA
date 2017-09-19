@@ -33,18 +33,59 @@ pageHeader($club->name() . ' – Club Profile');
 
 		echo $clubView->mapLink();
 	?></h2>
-	<p><b><?php echo htmlspecialchars($club->venueName()); ?></b><br />
-	<?php echo encodeMultiLine($club->venueAddress()); ?><br />
-	<?php echo htmlspecialchars($club->venuePostcode()); ?></p>
+	<div id="clubVenue">
+		<p><b><?php echo htmlspecialchars($club->venueName()); ?></b><br />
+		<?php echo encodeMultiLine($club->venueAddress()); ?><br />
+		<?php echo htmlspecialchars($club->venuePostcode()); ?></p>
+	</div>
 
+	<table id="clubInfo">
+		<tr>
+			<td>Club night:</td>
+			<td><?php echo $club->meetingDay(); ?></td>
+		</tr>
+		<tr>
+			<td>Start time:</td>
+			<td><?php
+				echo $club->meetingTime();
+				if ($club->meetingEndTime()) {
+					echo ' sharp<br />(must finish by ', $club->meetingEndTime(), ')';
+				}
+			?></td>
+		</tr>
+		<tr>
+			<td>Session length:</td>
+			<td><?php
+				switch ($club->sessionLength()) {
+					case SessionLength::TwoHours40:
+						echo '2 hours 40 minutes';
+						break;
+					case SessionLength::ThreeHours:
+						echo '3 hours';
+						break;
+					case SessionLength::Negotiable:
+						echo 'To suit visiting team';
+				}
+			?></td>
+		</tr>
+		<tr>
+			<td>Digital clocks:</td>
+			<td><?php
+				switch ($club->digitalClocks()) {
+					case DigitalClocks::No:
+						echo 'No';
+						break;
+					case DigitalClocks::Limited:
+						echo 'Limited';
+						break;
+					case DigitalClocks::Yes:
+						echo 'Yes';
+				}
+			?></td>
+		</tr>
+	</table>
+	
 	<p><?php echo encodeMultiLine($club->venueInfo()); ?></p>
-
-	<p>
-		Club Night: <?php echo $club->meetingDay(); ?>, <?php echo $club->meetingTime(); ?> start
-		<?php if ($club->meetingEndTime()) { ?>
-			essential to ensure finish by <?php echo $club->meetingEndTime(); ?>
-		<?php } ?>
-	</p>
 
 <?php
 	$contacts = Contact::loadByClub($club);
@@ -94,8 +135,6 @@ pageHeader($club->name() . ' – Club Profile');
 
 <?php if (!$showContactInfo) { ?>
 	<p><a href="captcha.php">Show Contact Information</a></p>
-	<?php /* <div class="g-recaptcha" data-sitekey="<?php echo $GoogleRecaptchaKey; ?>"></div>*/ ?>
-	<?php /* <!--<p>Note: As an anti-spam measure, contact information is shown only to logged-in users.</p>*/ ?>
 <?php } ?>
 
 </div>

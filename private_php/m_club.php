@@ -164,6 +164,8 @@ class Club {
 		$this->_meetingDay = $row['meeting_day'];
 		$this->_meetingTime = $row['meeting_time'];
 		$this->_meetingEndTime = $row['meeting_end_time'];
+		$this->_sessionLength = $row['session_length'];
+		$this->_digitalClocks = $row['digital_clocks'];
 		$this->_websiteUrl = $row['website_url'];
 	}
 
@@ -198,17 +200,31 @@ class Club {
 	public function meetingTime() { return $this->_meetingTime; }
 	public function meetingEndTime() { return $this->_meetingEndTime; }
 	public function websiteUrl() { return $this->_websiteUrl; }
+	public function sessionLength() { return $this->_sessionLength; }
+	public function digitalClocks() { return $this->_digitalClocks; }
 
 	private $_id, $_name, $_longName, $_ecfCode, $_status;//, $_fixturesLoaded;
 	private $_venueName, $_venueAddress, $_venuePostcode, $venueInfo;
 	private $_venueLatitude, $_venueLongitude, $_venuePlaceId;
-	private $_meetingDay, $_meetingTime, $_meetingEndTime;
+	private $_meetingDay, $_meetingTime, $_meetingEndTime, $_sessionLength, $_digitalClocks;
 	private $_websiteUrl;
 }
 
 abstract class ClubStatus {
 	const Inactive = 0;
 	const Active = 1;
+}
+
+abstract class SessionLength {
+	const TwoHours40 = 1;
+	const ThreeHours = 2;
+	const Negotiable = 3;
+}
+
+abstract class DigitalClocks {
+	const No = 0;
+	const Limited = 1;
+	const Yes = 2;
 }
 
 abstract class ContactType {
