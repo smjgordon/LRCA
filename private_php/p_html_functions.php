@@ -1,18 +1,20 @@
 <?php
 // TODO: implement new naming convention
-function formatGameResult($result) {
+function formatGameResult($result, $homeDefault, $awayDefault) {
 	switch ($result) {
 		case GameResult::HomeWin: // 1-0
-			echo '<td class="homeScore">1</td><td class="dash">–</td><td class="awayScore">0</td>';
+			echo '<td class="homeScore">1</td><td class="dash">–</td>';
+			echo $awayDefault ? '<td class="awayScore">0d</td>' : '<td class="awayScore">0</td>';
 			break;
 		case GameResult::Draw: // ½-½
 			echo '<td class="homeScore">½</td><td class="dash">–</td><td class="awayScore">½</td>';
 			break;
 		case GameResult::AwayWin: // 0-1
-			echo '<td class="homeScore">0</td><td class="dash">–</td><td class="awayScore">1</td>';
+			echo $homeDefault ? '<td class="homeScore">d0</td>' : '<td class="homeScore">0</td>';
+			echo '<td class="dash">–</td><td class="awayScore">1</td>';
 			break;
 		case GameResult::DoubleDefault: // 0-0
-			echo '<td class="homeScore">0</td><td class="dash">–</td><td class="awayScore">0</td>';
+			echo '<td class="homeScore">d0</td><td class="dash">–</td><td class="awayScore">0d</td>';
 	}
 }
 

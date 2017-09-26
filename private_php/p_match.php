@@ -87,9 +87,11 @@ abstract class Match {
 		$stmt = $Database->prepare("
 			SELECT g.board, g.home_colour, g.raw_result, g.adjusted_result,
 				hp.player_id AS home_player_id,
+				g.home_planned_player_id,
 				Concat(hp.surname, Coalesce(Concat(', ', NullIf(hp.forename, '')), '')) AS home_player,
 				NullIf(g.home_grade, 0) AS home_grade,
 				ap.player_id AS away_player_id,
+				g.away_planned_player_id,
 				Concat(ap.surname, Coalesce(Concat(', ', NullIf(ap.forename, '')), '')) AS away_player,
 				NullIf(g.away_grade, 0) AS away_grade,
 				g.grade_difference
@@ -162,9 +164,11 @@ abstract class Match {
 						<td class="board"><?php echo $game->board; ?></td>
 						<td class="colour"><?php echo $game->homeColour; ?></td>
 						<td class="grade"><?php echo $game->homePlayerGrade; ?></td>
-						<td class="name"><?php echo $game->homePlayerName; ?></td>
-						<?php formatGameResult($game->adjustedResult); ?>
-						<td class="name"><?php echo $game->awayPlayerName; ?></td>
+						<td class="name"><?php echo Match::renderPlayerName($game->homePlannedPlayer, $game->homePlayer); /*htmlspecialchars($game->homePlayer->fullNameFiling());*/ ?></td>
+						<?php formatGameResult($game->adjustedResult,
+							$game->homePlayer->id() == PlayerId::BoardDefault,
+							$game->awayPlayer->id() == PlayerId::BoardDefault); ?>
+						<td class="name"><?php echo Match::renderPlayerName($game->awayPlannedPlayer, $game->awayPlayer); /*htmlspecialchars($game->awayPlayer->fullNameFiling());*/ ?></td>
 						<td class="grade"><?php echo $game->awayPlayerGrade; ?></td>
 						<?php if ($this->handicapScheme) { ?>
 							<td class="grade"><?php echo $game->gradeDifference; ?></td>
@@ -176,6 +180,14 @@ abstract class Match {
 	<?php
 	}
 
+	protected static function renderPlayerName($plannedPlayer, $actualPlayer) {
+		if ($plannedPlayer->id() == $actualPlayer->id() | $actualPlayer->id() == PlayerId::BoardDefault) {
+			return htmlspecialchars($plannedPlayer->fullNameFiling());
+		} else {
+			return htmlspecialchars($actualPlayer->fullNameFiling()) . ' (sub)';
+		}
+	}
+	
 	// default implementation, suitable for standard and rapid-different formats
 	// TODO: implement for rapid-same
 	public function renderPlainTextResult() {
@@ -203,20 +215,29 @@ abstract class Match {
 
 		// body: game results
 		foreach ($this->games as $game) {
+			// TEMPORARY: just show the planned player - can't submit substitutions currently
 			$result .= "\n$game->board $game->homeColour"
 				//. str_pad($game->homePlayerGrade, 7, ' ', STR_PAD_LEFT) . ' ' . str_pad($game->homePlayerName, 26);
-				. '   ' . padLeft($game->homePlayerGrade, 4) . ' ' . padRight($game->homePlayerName, 25);
-
+				. '   ' . padLeft($game->homePlayerGrade, 4) . ' ' . padRight($game->homePlannedPlayer->fullNameFiling(), 25);
+				
 			switch ($game->adjustedResult) {
-				case GameResult::HomeWin:       $result .= ' 1 - 0  '; break;
+				case GameResult::HomeWin:
+					$result .= ($game->awayPlayer->id() == PlayerId::BoardDefault) ? ' 1 - 0d ' : ' 1 - 0  ';
+					break;
 				// TEMPORARY
-				case GameResult::Draw:          $result .= '0.5-0.5 '; break;
+				case GameResult::Draw:
+					$result .= '0.5-0.5 ';
+					break;
+
 				//case GameResult::Draw:          $result .= ' ½ - ½  '; break;
-				case GameResult::AwayWin:       $result .= ' 0 - 1  '; break;
-				case GameResult::DoubleDefault: $result .= ' 0 - 0  ';
+				case GameResult::AwayWin:
+					$result .= ($game->homePlayer->id() == PlayerId::BoardDefault) ? 'd0 - 1  ' : ' 0 - 1  ';
+					break;
+				case GameResult::DoubleDefault:
+					$result .= 'd0 - 0d ';
 			}
 
-			$result .= padRight($game->awayPlayerName, 25) . padLeft($game->awayPlayerGrade, 4);
+			$result .= padRight($game->awayPlannedPlayer->fullNameFiling(), 25) . padLeft($game->awayPlayerGrade, 4);
 			if ($this->handicapScheme) $result .= padLeft($game->gradeDifference, 6);
 		}
 
@@ -249,10 +270,10 @@ abstract class Match {
 		// populate game table with individual board results
 		$stmt = $Database->prepare('
 			INSERT INTO game(fixture_id, board, home_colour,
-				home_player_id, home_grade_id, home_grade,
-				away_player_id, away_grade_id, away_grade,
+				home_planned_player_id, home_player_id, home_grade_id, home_grade,
+				away_planned_player_id, away_player_id, away_grade_id, away_grade,
 				raw_result, adjusted_result, grade_difference)
-			VALUES(?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)');
+			VALUES(?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)');
 
 		$stmtBoardDefault = $Database->prepare('
 					INSERT INTO board_default(fixture_id, game_id, reason, exempt, home_defaults, away_defaults, incurred_date)
@@ -261,8 +282,10 @@ abstract class Match {
 		foreach ($this->games as $game) {
 			$stmt->execute([
 				$this->id, $game->board, $game->homeColour,
-				$game->homePlayer->id(), $game->homePlayerGradeObj ? $game->homePlayerGradeObj->id() : null, $game->homePlayerGrade,
-				$game->awayPlayer->id(), $game->awayPlayerGradeObj ? $game->awayPlayerGradeObj->id() : null, $game->awayPlayerGrade,
+				$game->homePlannedPlayer->id(), $game->homePlayer->id(),
+				$game->homePlayerGradeObj ? $game->homePlayerGradeObj->id() : null, $game->homePlayerGrade,
+				$game->awayPlannedPlayer->id(), $game->awayPlayer->id(),
+				$game->awayPlayerGradeObj ? $game->awayPlayerGradeObj->id() : null, $game->awayPlayerGrade,
 				$game->rawResult, $game->adjustedResult, $game->gradeDifference]);
 
 			// if this board has been defaulted, then record the default
@@ -437,11 +460,58 @@ $this->comments";
 	<?php
 	}
 
-	protected function validateGameScore($iBoard, $homePlayer, $awayPlayer, $scoreStr) {
-		switch ($scoreStr) {
-			case '':
-				throw new ReportableException("Missing score on board $iBoard");
+	protected function validateGameScore($iBoard, $homePlayer, $awayPlayer, $scoreStr, &$homeDefault, &$awayDefault) {
+		if ($scoreStr == '') {
+			throw new ReportableException("Missing score on board $iBoard");
+		} else if (strlen($scoreStr) != 2) {
+			throw new ReportableException("Invalid score on board $iBoard");
+		}
 
+		if ($scoreStr[0] == 'd') {
+			$homeDefault = true;
+			$scoreStr[0] = '0';
+		} else if ($homePlayer->id() == PlayerId::BoardDefault) {
+			throw new ReportableException("For a defaulted board, the 'd0' score must be used");
+		} else {
+			$homeDefault = false;
+		}
+
+		if ($scoreStr[1] == 'd') {
+			$awayDefault = true;
+			$scoreStr[1] = '0';
+		} else if ($awayPlayer->id() == PlayerId::BoardDefault) {
+			throw new ReportableException("For a defaulted board, the '0d' score must be used");
+		} else {
+			$awayDefault = false;
+		}
+
+		switch ($scoreStr) {
+			case '10':
+				++$this->homeRawScore;
+				return GameResult::HomeWin;
+
+			case '01':
+				++$this->awayRawScore;
+				return GameResult::AwayWin;
+
+			case '55':
+				$this->homeRawScore += 0.5;
+				$this->awayRawScore += 0.5;
+				return GameResult::Draw;
+
+			case '00':
+				if (!($homeDefault && $awayDefault)) {
+					throw new ReportableException("Invalid score on board $iBoard");
+				}
+				return GameResult::DoubleDefault;
+/*
+								renderSelectOption('10', $score, '1 – 0');
+								renderSelectOption('55', $score, '½ – ½');
+								renderSelectOption('01', $score, '0 – 1');
+								renderSelectOption('1d', $score, '1 – 0d');
+								renderSelectOption('d1', $score, 'd0 – 1');
+								renderSelectOption('dd', $score, 'd0 – 0d');*/
+/*
 			case '00':
 				if ($homePlayer->id() == PlayerId::BoardDefault && $awayPlayer->id() == PlayerId::BoardDefault) {
 					$score = GameResult::DoubleDefault;
@@ -476,8 +546,11 @@ $this->comments";
 					$this->homeRawScore += 0.5;
 					$this->awayRawScore += 0.5;
 				}
+*/
+			default:
+				throw new ReportableException("Invalid score on board $iBoard");
 		}
-		return $score;
+		//return $score;
 	}
 
 	protected function getPlayer($homeOrAway, $iBoard) {
@@ -522,7 +595,7 @@ $this->comments";
 				foreach ($awayDefaultedGames as $game) $game->awayPlayerGrade = $averageGrade;
 			}
 		}
-		
+
 		if ($this->handicapScheme) {
 			// fill in the grade differences and add up the handicap
 			foreach ($games as $game) {
@@ -533,7 +606,7 @@ $this->comments";
 			$this->handicapScheme->handicapPoints($this->gradeDifference, $this->homeHandicap, $this->awayHandicap);
 		}
 	}
-	
+
 	// TEMPORARY
 	protected static function formatScoreEmailWorkaround($score) {
 		if (($score * 2) % 2 == 0) {
@@ -546,8 +619,8 @@ $this->comments";
 
 class Game {
 	public $board, $homeColour, $rawResult, $adjustedResult;
-	public $homePlayer, $homePlayerID, $homePlayerName, $homePlayerGradeObj, $homePlayerGrade;
-	public $awayPlayer, $awayPlayerID, $awayPlayerName, $awayPlayerGradeObj, $awayPlayerGrade;
+	public $homePlayer, $homePlayerID, $homePlannedPlayer, /*$homePlayerName,*/ $homePlayerGradeObj, $homePlayerGrade;
+	public $awayPlayer, $awayPlayerID, $awayPlannedPlayer, /*$awayPlayerName,*/ $awayPlayerGradeObj, $awayPlayerGrade;
 	public $gradeDifference;
 
 	private function __construct() {}
@@ -560,28 +633,34 @@ class Game {
 		$game->adjustedResult = $row['adjusted_result'];
 		$game->homePlayerID = $row['home_player_id'];
 		$game->homePlayer = Player::loadById($game->homePlayerID);
-		$game->homePlayerName = $row['home_player'];
+		$game->homePlannedPlayer = Player::loadById($row['home_planned_player_id']);
+		//$game->homePlayerName = $row['home_player'];
 		$game->homePlayerGrade = $row['home_grade'];
 		$game->awayPlayerID = $row['away_player_id'];
 		$game->awayPlayer = Player::loadById($game->awayPlayerID);
-		$game->awayPlayerName = $row['away_player'];
+		$game->awayPlannedPlayer = Player::loadById($row['away_planned_player_id']);
+		//$game->awayPlayerName = $row['away_player'];
 		$game->awayPlayerGrade = $row['away_grade'];
 		$game->gradeDifference = $row['grade_difference'];
 		return $game;
 	}
 
 	public static function constructFromSubmission($board, $homeColour,
-			$homePlayer, $homePlayerGrade, $awayPlayer, $awayPlayerGrade, $score/*, $handicapScheme*/) {
+			$homePlayer, $homePlayerGrade, $awayPlayer, $awayPlayerGrade, $score/*, $handicapScheme*/,
+			$homeDefault, $awayDefault) {
 		$game = new Game();
 		$game->board = $board;
 		$game->homeColour = $homeColour;
 		$game->rawResult = $game->adjustedResult = $score;
-		$game->homePlayer = $homePlayer;
-		$game->homePlayerName = $homePlayer->fullNameFiling();
+		$game->homePlannedPlayer = $homePlayer;
+		$game->homePlayer = $homeDefault ? Player::loadById(PlayerId::BoardDefault) : $game->homePlannedPlayer;
+		//$game->homePlanned
+		//$game->homePlayerName = $homePlayer->fullNameFiling();
 		$game->homePlayerGradeObj = $homePlayerGrade;
 		if ($game->homePlayerGradeObj) $game->homePlayerGrade = $game->homePlayerGradeObj->grade;
-		$game->awayPlayer = $awayPlayer;
-		$game->awayPlayerName = $awayPlayer->fullNameFiling();
+		$game->awayPlannedPlayer = $awayPlayer;
+		$game->awayPlayer = $awayDefault ? Player::loadById(PlayerId::BoardDefault) : $game->awayPlannedPlayer;
+		//$game->awayPlayerName = $awayPlayer->fullNameFiling();
 		$game->awayPlayerGradeObj = $awayPlayerGrade;
 		if ($game->awayPlayerGradeObj) $game->awayPlayerGrade = $game->awayPlayerGradeObj->grade;
 /*
@@ -644,7 +723,9 @@ class StandardMatch extends Match {
 								renderSelectOption('10', $score, '1 – 0');
 								renderSelectOption('55', $score, '½ – ½');
 								renderSelectOption('01', $score, '0 – 1');
-								renderSelectOption('00', $score, '0 – 0');
+								renderSelectOption('1d', $score, '1 – 0d');
+								renderSelectOption('d1', $score, 'd0 – 1');
+								renderSelectOption('dd', $score, 'd0 – 0d');
 							?></select>
 						</td>
 						<td class="name"><?php $this->renderPlayerSelection('a' . $iBoard, $this->awayTeamID, @$_POST['a' . $iBoard]); ?></td>
@@ -676,6 +757,8 @@ class StandardMatch extends Match {
 			}
 		}
 
+		$homeDefaultPlayerSelected = $awayDefaultPlayerSelected = false;
+		
 		// now go through them
 		for ($iBoard = 1; $iBoard <= $nBoards; ++$iBoard) {
 
@@ -716,8 +799,23 @@ class StandardMatch extends Match {
 			$playersById[$awayPlayer->id()] = $awayPlayer;
 
 			// validate score
-			$score = $this->validateGameScore($iBoard, $homePlayer, $awayPlayer, $_POST['s' . $iBoard]);
+			$homeDefault = $awayDefault = false;
+			$score = $this->validateGameScore($iBoard, $homePlayer, $awayPlayer, $_POST['s' . $iBoard], $homeDefault, $awayDefault);
 
+			if ($homePlayer->id() == PlayerId::BoardDefault) {
+				$homeDefaultPlayerSelected = true;
+			} else if ($homeDefaultPlayerSelected) {
+				throw new ReportableException('(Default) option valid only on bottom board(s).  If the player was a '
+					. "no-show, please select that player's name and enter a 'd0' score.");
+			}
+
+			if ($awayPlayer->id() == PlayerId::BoardDefault) {
+				$awayDefaultPlayerSelected = true;
+			} else if ($awayDefaultPlayerSelected) {
+				throw new ReportableException('(Default) option valid only on bottom board(s).  If the player was a '
+					. "no-show, please select that player's name and enter a '0d' score.");
+			}
+			
 			/*$scoreStr = @$_POST['s' . $iBoard];
 			switch ($scoreStr) {
 				case '':
@@ -773,9 +871,9 @@ class StandardMatch extends Match {
 
 			$this->games[] = Game::constructFromSubmission($iBoard, $gameColour /*$iBoard % 2 == 0 ? 'W' : 'B'*/,
 				$homePlayer, $homePlayer->standardGrade, $awayPlayer, $awayPlayer->standardGrade, $score/*,
-				$this->handicapScheme*/);
+				$this->handicapScheme*/, $homeDefault, $awayDefault);
 		}
-		
+
 		$this->fillInAveragesAndHandicaps($this->games);
 		//$this->fillInHandicaps();
 
@@ -817,7 +915,7 @@ class StandardMatch extends Match {
 			$averageGrade = (integer) ((1.0 * $awayTotalGrade / $awayNonDefaults) + 0.5);
 			foreach ($awayDefaultedGames as $game) $game->awayPlayerGrade = $averageGrade;
 		}
-		
+
 		foreach ($this->games as $game) {
 			$game->gradeDifference = $game->awayPlayerGrade - $game->homePlayerGrade;
 			$this->handicapScheme->addBoard($game->gradeDifference);
@@ -861,11 +959,15 @@ class RapidSameMatch extends Match {
 					<tr>
 						<td class="board"><?php echo $wbGame->board; ?></td>
 						<td class="grade"><?php echo $wbGame->homePlayerGrade; ?></td>
-						<td class="name"><?php echo $wbGame->homePlayerName; ?></td>
-						<?php formatGameResult($wbGame->adjustedResult); ?>
+						<td class="name"><?php echo $wbGame->homePlayer->fullNameFiling(); ?></td>
+						<?php formatGameResult($wbGame->adjustedResult,
+							$game->homePlayer->id() == PlayerId::BoardDefault,
+							$game->awayPlayer->id() == PlayerId::BoardDefault); ?>
 						<td></td>
-						<?php formatGameResult($bwGame->adjustedResult); ?>
-						<td class="name"><?php echo $wbGame->awayPlayerName; ?></td>
+						<?php formatGameResult($bwGame->adjustedResult,
+							$game->homePlayer->id() == PlayerId::BoardDefault,
+							$game->awayPlayer->id() == PlayerId::BoardDefault); ?>
+						<td class="name"><?php echo $wbGame->awayPlayer->fullNameFiling(); ?></td>
 						<td class="grade"><?php echo $wbGame->awayPlayerGrade; ?></td>
 					</tr>
 				<?php
@@ -901,7 +1003,9 @@ class RapidSameMatch extends Match {
 								renderSelectOption('10', $score, '1 – 0');
 								renderSelectOption('55', $score, '½ – ½');
 								renderSelectOption('01', $score, '0 – 1');
-								renderSelectOption('00', $score, '0 – 0');
+								renderSelectOption('1d', $score, '1 – 0d');
+								renderSelectOption('d1', $score, 'd0 – 1');
+								renderSelectOption('dd', $score, 'd0 – 0d');
 							?></select>
 						</td>
 						<td class="score">
@@ -911,7 +1015,9 @@ class RapidSameMatch extends Match {
 								renderSelectOption('10', $score, '1 – 0');
 								renderSelectOption('55', $score, '½ – ½');
 								renderSelectOption('01', $score, '0 – 1');
-								renderSelectOption('00', $score, '0 – 0');
+								renderSelectOption('1d', $score, '1 – 0d');
+								renderSelectOption('d1', $score, 'd0 – 1');
+								renderSelectOption('dd', $score, 'd0 – 0d');
 							?></select>
 						</td>
 						<td class="name"><?php $this->renderPlayerSelection('a' . $iBoard, $this->awayTeamID, @$_POST['a' . $iBoard]); ?></td>
@@ -921,7 +1027,7 @@ class RapidSameMatch extends Match {
 		</table>
 	<?php
 	}
-	
+
 	public function buildSubmission() {
 		$homeTeam = Team::loadById($this->homeTeamID);
 		$awayTeam = Team::loadById($this->awayTeamID);
@@ -975,15 +1081,17 @@ class RapidSameMatch extends Match {
 
 			$playersById[$awayPlayer->id()] = $awayPlayer;
 
-			$score = $this->validateGameScore($iBoard, $homePlayer, $awayPlayer, $_POST['s' . $iBoard . 'wb']);
+			$homeDefault = $awayDefault = false;
+			$score = $this->validateGameScore($iBoard, $homePlayer, $awayPlayer, $_POST['s' . $iBoard . 'wb'], $homeDefault, $awayDefault);
 			$wbGames[] = $this->games[] = Game::constructFromSubmission($iBoard, 'W',
 				$homePlayer, $homePlayer->lrcaRapidGrade, $awayPlayer, $awayPlayer->lrcaRapidGrade, $score/*,
-				$handicapScheme*/);
+				$handicapScheme*/, $homeDefault, $awayDefault);
 
-			$score = $this->validateGameScore($iBoard, $homePlayer, $awayPlayer, $_POST['s' . $iBoard . 'bw']);
+			$homeDefault = $awayDefault = false;
+			$score = $this->validateGameScore($iBoard, $homePlayer, $awayPlayer, $_POST['s' . $iBoard . 'bw'], $homeDefault, $awayDefault);
 			$this->games[] = Game::constructFromSubmission($iBoard, 'B',
 				$homePlayer, $homePlayer->lrcaRapidGrade, $awayPlayer, $awayPlayer->lrcaRapidGrade, $score/*,
-				$handicapScheme*/);
+				$handicapScheme*/, $homeDefault, $awayDefault);
 
 			// validate score
 			/*$scoreStr = @$_POST['s' . $iBoard];
@@ -1054,7 +1162,7 @@ class RapidSameMatch extends Match {
 			if ($game->homeColour == 'W') {
 				$result .= "\n$game->board "
 					//. str_pad($game->homePlayerGrade, 7, ' ', STR_PAD_LEFT) . ' ' . str_pad($game->homePlayerName, 26);
-					. '   ' . padLeft($game->homePlayerGrade, 4) . ' ' . padRight($game->homePlayerName, 25);
+					. '   ' . padLeft($game->homePlayerGrade, 4) . ' ' . padRight($game->homePlayer->fullNameFiling(), 25);
 			}
 
 			switch ($game->adjustedResult) {
@@ -1067,7 +1175,7 @@ class RapidSameMatch extends Match {
 			}
 
 			if ($game->homeColour == 'B') {
-				$result .= padRight($game->awayPlayerName, 25) . padLeft($game->awayPlayerGrade, 4);
+				$result .= padRight($game->awayPlayer->fullNameFiling(), 25) . padLeft($game->awayPlayerGrade, 4);
 			}
 		}
 
