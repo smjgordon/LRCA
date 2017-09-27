@@ -121,7 +121,7 @@ if ($game) {
 				<td class="colour"><?php echo $game['home_colour']; ?></td>
 				<td class="grade"><?php echo $game['home_grade']; ?></td>
 				<td class="name"><?php echo $game['home_player']; ?></td>
-				<?php formatGameResult($game['raw_result']); ?>
+				<?php formatGameResult($game['raw_result'], false, false); ?>
 				<td class="name"><?php echo $game['away_player']; ?></td>
 				<td class="grade"><?php echo $game['away_grade']; ?></td>
 			</tr>
