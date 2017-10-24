@@ -20,9 +20,10 @@ $title = $section->displayName();
 pageHeader($title);
 ?>
 
-<div id="subNav">
-	<?php $anyDivisions = $section->divisionIndex(); ?>
-</div>
+<div id="subNav"><?php
+	$anyDivisions = $section->divisionIndex();
+	$section->documentList();
+?></div>
 
 <div id="subBody">
 	<h2><?php echo htmlspecialchars($title); ?></h2>

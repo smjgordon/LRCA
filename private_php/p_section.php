@@ -51,5 +51,27 @@ class Section {
 			return false;
 		}
 	}
+
+	function documentList() {
+		global $Database;
+		
+		$stmt = $Database->prepare('
+			SELECT file_name, display_name
+			FROM section_document sd
+				JOIN document d ON sd.document_id = d.document_id
+			WHERE section_id = ? AND year = ?
+			ORDER BY sd.sequence');
+		$stmt->execute([$this->id, $this->year]);
+		
+		$row = $stmt->fetch();
+		if ($row) {
+			echo '<ul>';
+			do {
+				$anyDivisions = true;
+				echo "<li><a href='docs/$row[file_name]'>", htmlspecialchars($row['display_name']), '</a></li>';
+			} while ($row = $stmt->fetch());
+			echo '</ul>';
+		}
+	}
 }
 ?>
