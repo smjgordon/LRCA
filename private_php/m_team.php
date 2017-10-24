@@ -59,7 +59,8 @@ class Team {
 
 	private function populateFromDbRow($row) {
 		$this->_id = $row['team_id'];
-		$this->division = new IdWrapper($row['division_id']);
+		//$this->division = new IdWrapper($row['division_id']);
+		$this->division = Division::loadById($row['division_id']);
 		$this->club = new IdWrapper($row['club_id']);
 		$this->sequence = $row['sequence'];
 		$this->name = $row['name'];

@@ -54,4 +54,11 @@ function showContact($contact, $showContactInfo) {
 	}
 	return $result;
 }
+
+function showNoContact($showContactInfo) {
+	$result = '<td';
+	if ($showContactInfo) $result .= ' colspan="3"';
+	$result .= '>To be confirmed</td>';
+	return $result;
+}
 ?>

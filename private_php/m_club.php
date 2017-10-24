@@ -51,6 +51,7 @@ class Club {
 			throw new ModelAccessException(ModelAccessException::BadClubId, $id);
 		}
 	}
+	
 	/*
 	public $fixtures;
 
@@ -73,6 +74,21 @@ class Club {
 		}
 	}*/
 
+	public function teamsInSection($section) {
+		global $Database;
+		
+		$teams = [];
+		$stmt = $Database->prepare('
+			SELECT t.team_id
+			FROM team t JOIN division d ON t.division_id = d.division_id
+			WHERE t.club_id = ? AND d.year = ? AND d.section_id = ?
+			ORDER BY t.sequence');
+		$stmt->execute([$this->_id, $section->year, $section->id]);
+		
+		while ($row = $stmt->fetch()) $teams[] = Team::loadById($row['team_id']);
+		return $teams;
+	}
+	
 	public function fixturesPendingSubmission() {
 		global $Database;
 
@@ -234,7 +250,27 @@ abstract class ContactType {
 }
 
 class Contact {
-	public static function loadByClub($club) {
+	public static function loadNonTeamByClub($club) {
+		global $Database;
+
+		$result = [];
+
+		$stmt = $Database->prepare('
+			SELECT con.contact_id, cc.type, con.name AS contact
+			FROM club_contact cc
+				JOIN contact con ON cc.contact_id = con.contact_id
+			WHERE cc.club_id = ? AND cc.team_id IS NULL
+			ORDER BY cc.type');
+		$stmt->execute([$club->id()]);
+		while (!!($row = $stmt->fetch())) {
+			$contact = new Contact();
+			$contact->populateFromDbRow($row);
+			$result[] = $contact;
+		}
+		return $result;
+	}
+	
+	public static function loadByTeam($team) {
 		global $Database;
 
 		$result = [];
@@ -243,11 +279,11 @@ class Contact {
 			SELECT con.contact_id, cc.type, con.name AS contact, t.name AS team, t.sequence, d.name AS division
 			FROM club_contact cc
 				JOIN contact con ON cc.contact_id = con.contact_id
-				LEFT JOIN team t ON cc.team_id = t.team_id AND cc.club_id = t.club_id
-				LEFT JOIN division d ON t.division_id = d.division_id
-			WHERE cc.club_id = ?
+				JOIN team t ON cc.team_id = t.team_id AND cc.club_id = t.club_id
+				JOIN division d ON t.division_id = d.division_id
+			WHERE t.team_id = ?
 			ORDER BY cc.type, d.sequence, t.sequence');
-		$stmt->execute([$club->id()]);
+		$stmt->execute([$team->id()]);
 		while (!!($row = $stmt->fetch())) {
 			$contact = new Contact();
 			$contact->populateFromDbRow($row);
@@ -262,8 +298,10 @@ class Contact {
 		$this->_id = $row['contact_id'];
 		$this->_type = $row['type'];
 		$this->_name = $row['contact'];
-		$this->_teamName = $row['team'];
-		$this->_divisionName = $row['division'];
+		if (@$row['team']) {
+			$this->_teamName = $row['team'];
+			$this->_divisionName = $row['division'];
+		}
 		$this->_emails = [];
 		$this->_phoneNumbers = [];
 		

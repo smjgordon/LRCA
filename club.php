@@ -88,54 +88,67 @@ pageHeader($club->name() . ' – Club Profile');
 	<p><?php echo encodeMultiLine($club->venueInfo()); ?></p>
 
 <?php
-	$contacts = Contact::loadByClub($club);
-	$lastContactType = 0;
+	$contacts = Contact::loadNonTeamByClub($club);
 	$showContactInfo = ($CurrentUser != null || haveValidCaptcha());
-
-	foreach ($contacts as $contact) {
-		switch ($contact->type()) {
-			case ContactType::Secretary:
-				if ($lastContactType == 0) echo '<table class="contacts">';
-			?>
+	
+	if (!empty($contacts)) {
+	?>	<table class="contacts">
+			<?php foreach ($contacts as $contact) { ?>
 				<tr>
-					<td>Secretary</td>
+					<td><?php
+						switch ($contact->type()) {
+							case ContactType::Secretary:
+								echo 'Secretary';
+								break;
+							case ContactType::EmailContact:
+								echo 'Email Contact';
+						}
+					?></td>
 					<?php echo showContact($contact, $showContactInfo); ?>
 				</tr>
-			<?php
-				break;
-
-			case ContactType::EmailContact:
-				if ($lastContactType == 0) echo '<table class="contacts">';
-			?>
-				<tr>
-					<td>Email Contact</td>
-					<?php echo showContact($contact, $showContactInfo); ?>
-				</tr>
-			<?php
-				break;
-
-			case ContactType::TeamCaptain:
-				if ($lastContactType != ContactType::TeamCaptain) {
-					if ($lastContactType == ContactType::Secretary) echo '</table>';
-					echo '<h3>Teams and Captains</h3>';
-					echo '<table class="contacts">';
-				}
-			?>
-				<tr>
-					<td><?php echo $contact->divisionName(); ?></td>
-					<td><?php echo $contact->teamName(); ?></td>
-					<?php echo showContact($contact, $showContactInfo); ?>
-				</tr>
-			<?php
-		}
-		$lastContactType = $contact->type();
+			<?php } ?>
+		</table>
+	<?php
 	}
-	if ($lastContactType != 0) echo '</table>';
+	
+	// TODO: support other sections
+	$teams = $club->teamsInSection(new Section(1, SystemSettings::$winterYear));
+	
+	if (!empty($teams)) {
+	?>
+		<h3>Teams and Captains</h3>
+		<table class="contacts"><?php
+			foreach ($teams as $team) {
+				$contacts = Contact::loadByTeam($team);
+				if (empty($contacts)) {
+				?>
+					<tr>
+						<td><?php echo $team->division->name; ?></td>
+						<td><?php echo $team->name; ?></td>
+						<?php echo showNoContact($showContactInfo); ?>
+					</tr>
+				<?php					
+				} else {
+					foreach ($contacts as $contact) {
+					?>
+						<tr>
+							<td><?php echo $team->division->name; ?></td>
+							<td><?php echo $team->name; ?></td>
+							<?php echo showContact($contact, $showContactInfo); ?>
+						</tr>
+					<?php
+					}
+				}
+			}
+		?>
+		</table>
+	<?php
+	}
 ?>
 
-<?php if (!$showContactInfo) { ?>
-	<p><a href="captcha.php">Show Contact Information</a></p>
-<?php } ?>
+	<?php if (!$showContactInfo) { ?>
+		<p><a href="captcha.php">Show Contact Information</a></p>
+	<?php } ?>
 
 </div>
 
