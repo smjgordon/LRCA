@@ -16,3 +16,4 @@ Redirect permanent /players/melton.html /players.php?cid=6
 Redirect permanent /players/syston.html /players.php?cid=12
 Redirect permanent /players/wigston.html /players.php?cid=13
 Redirect permanent /new http://lrca.stewartsplace.org.uk
+ErrorDocument 404 /error_page.php
