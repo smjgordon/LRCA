@@ -21,6 +21,7 @@ class ModelAccessException extends Exception {
 	const BadGradeId          = 70;
 	const BadUserId           = 80;
 	const BadHandicapSchemeId = 90;
+	const BadSectionId        = 100;
 	
 	public function __construct($code, $customData = null, $previous = null) {
 		switch ($code) {
@@ -66,6 +67,10 @@ class ModelAccessException extends Exception {
 			
 			case self::BadHandicapSchemeId:
 				$message = "Handicap scheme ID not found: $customData";
+				break;
+			
+			case self::BadSectionId:
+				$message = "SectionID not found: $customData";
 				break;
 		}
 		

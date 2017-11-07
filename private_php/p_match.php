@@ -961,12 +961,12 @@ class RapidSameMatch extends Match {
 						<td class="grade"><?php echo $wbGame->homePlayerGrade; ?></td>
 						<td class="name"><?php echo $wbGame->homePlayer->fullNameFiling(); ?></td>
 						<?php formatGameResult($wbGame->adjustedResult,
-							$game->homePlayer->id() == PlayerId::BoardDefault,
-							$game->awayPlayer->id() == PlayerId::BoardDefault); ?>
+							$wbGame->homePlayer->id() == PlayerId::BoardDefault,
+							$wbGame->awayPlayer->id() == PlayerId::BoardDefault); ?>
 						<td></td>
 						<?php formatGameResult($bwGame->adjustedResult,
-							$game->homePlayer->id() == PlayerId::BoardDefault,
-							$game->awayPlayer->id() == PlayerId::BoardDefault); ?>
+							$bwGame->homePlayer->id() == PlayerId::BoardDefault,
+							$bwGame->awayPlayer->id() == PlayerId::BoardDefault); ?>
 						<td class="name"><?php echo $wbGame->awayPlayer->fullNameFiling(); ?></td>
 						<td class="grade"><?php echo $wbGame->awayPlayerGrade; ?></td>
 					</tr>

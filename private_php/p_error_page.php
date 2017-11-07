@@ -14,19 +14,19 @@ function errorPage($errorCode) {
 	pageHeaderNoDb("$errorCode Error - Leicestershire and Rutland Chess Association");
 	
 	switch ($errorCode) {
-		case 403:
+		case HttpStatus::Forbidden:
 		?>
 			<p>You do not have permission to access this facility.</p>
 		<?php
 			break;
 
-		case 404:
+		case HttpStatus::NotFound:
 		?>
 			<p>The requested page was not found.</p>
 		<?php
 			break;
 
-		case 500:
+		case HttpStatus::InternalError:
 		?>
 			<p>Something went wrong.</p>
 			
@@ -36,7 +36,7 @@ function errorPage($errorCode) {
 		<?php
 			break;
 
-		case 503:
+		case HttpStatus::TemporarilyDown:
 		?>
 			<p>This website is undergoing a programming update and is temporarily unavailable.&nbsp; Please wait a few minutes and try reloading.</p>
 			

@@ -26,7 +26,7 @@ class OldDivision {
 		$this->name = $row['name'];
 		$this->format = $row['format'];
 		$this->breakdown = $row['breakdown'];
-		$this->section = new Section($row['section_id'], $row['year']);
+		$this->section = new OldSection($row['section_id'], $row['year']);
 	}
 
 	function bodyTitle() {

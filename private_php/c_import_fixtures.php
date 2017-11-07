@@ -22,7 +22,7 @@ function importFixtures($xml) {
 		if ($year < 2015) throw new ReportableException('Invalid year');
 
 		// TODO: update this when/if Section is refactored
-		$section = new Section($sectionId, $year);
+		$section = new OldSection($sectionId, $year);
 
 		// create divisions
 		$divisionSequence = 0; // TODO: continue the sequence if divisions already exist in the section

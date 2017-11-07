@@ -1,9 +1,9 @@
 <?php
-// todo: refactor
+// TODO: get everything using the new section class and do away with this
 require_once 'p_enumerations.php';
 require_once 'p_server.php';
 
-class Section {
+class OldSection {
 	public $id, $year, $season;
 	private $name;
 
@@ -42,7 +42,7 @@ class Section {
 		if ($row) {
 			echo '<ul>';
 			do {
-				$anyDivisions = true;
+				//$anyDivisions = true;
 				echo "<li><a href='division.php?did=$row[division_id]'>", htmlspecialchars($row['name']), '</a></li>';
 			} while ($row = $stmt->fetch());
 			echo '</ul>';
@@ -67,7 +67,7 @@ class Section {
 		if ($row) {
 			echo '<ul>';
 			do {
-				$anyDivisions = true;
+				//$anyDivisions = true;
 				echo "<li><a href='docs/$row[file_name]'>", htmlspecialchars($row['display_name']), '</a></li>';
 			} while ($row = $stmt->fetch());
 			echo '</ul>';

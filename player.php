@@ -79,7 +79,7 @@ if ($row && is_numeric($row['won'])) {
 			while ($row = $stmt->fetch()) {
 			?>
 				<tr>
-					<td><?php echo (new Section($row['section_id'], $row['year']))->displayName(); ?></td>
+					<td><?php echo (new OldSection($row['section_id'], $row['year']))->displayName(); ?></td>
 					<td><?php echo $row['won'] + $row['drawn'] + $row['lost']; ?></td>
 					<td><?php echo $row['won']; ?></td>
 					<td><?php echo $row['drawn']; ?></td>

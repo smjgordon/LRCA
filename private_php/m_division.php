@@ -30,6 +30,29 @@ class Division {
 		}
 	}
 
+	public static function loadBySection($section) {
+		global $Database;
+
+		$result = [];
+		
+		$stmt = $Database->prepare('
+			SELECT * FROM division
+			WHERE section_id = ? AND year = ?');
+		$stmt->execute([$section->id(), $section->year()]);
+		
+		while (!!($row = $stmt->fetch())) {
+			$divisionId = (int) $row['division_id'];
+			if (isset(Division::$instanceCache[$divisionId])) {
+				$result[] = Division::$instanceCache[$divisionId];
+			} else {
+				$div = new Division();
+				$div->populateFromDbRow($row);
+				$result[] = $div;
+			}
+		}
+		return $result;
+	}
+
 	public function id() { return $this->_id; }
 
 	public $section, $name, $urlName, $matchStyle, $breakdown, $sequence, $format, $requireGrade, $maxGrade;
@@ -37,7 +60,6 @@ class Division {
 	public $teams, $rounds;
 
 	public function canPlayPlayer($player) {
-
 		if ($player->status != PlayerStatus::Active) return false;
 		if (!$this->requireGrade) return true;
 		if ($player->id() == PlayerId::BoardDefault) return true;
@@ -128,7 +150,7 @@ class Division {
 		$this->_id = $row['division_id'];
 
 		// TODO: decide what to do with this
-		$this->section = new Section($row['section_id'], $row['year']);
+		$this->section = new OldSection($row['section_id'], $row['year']);
 
 		$this->name = $row['name'];
 		$this->urlName = $row['url_name'];

@@ -78,7 +78,15 @@ class HtmlDivisionView {
 					?>
 						<tr>
 							<td><?php echo ++$position; ?></td>
-							<td><?php echo htmlspecialchars($team->name); ?></td>
+							<td><?php
+								if ($team->played != 0) {
+									echo '<a href="results_by_team.php?tid=', $team->id(), '">';
+								}
+								echo htmlspecialchars($team->name);
+								if ($team->played != 0) {
+									echo '</a>';
+								}
+							?></td>
 							<td><?php echo $team->played; ?></td>
 							<td><?php echo $team->won; ?></td>
 							<td><?php echo $team->drawn; ?></td>

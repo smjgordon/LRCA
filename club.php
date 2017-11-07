@@ -112,7 +112,7 @@ pageHeader($club->name() . ' – Club Profile');
 	}
 	
 	// TODO: support other sections
-	$teams = $club->teamsInSection(new Section(1, SystemSettings::$winterYear));
+	$teams = $club->teamsInSection(new OldSection(1, SystemSettings::$winterYear));
 	
 	if (!empty($teams)) {
 	?>
