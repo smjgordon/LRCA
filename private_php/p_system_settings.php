@@ -12,5 +12,6 @@ abstract class SystemSettings {
 	
 	static $submitResultReminderDays = 4;
 	static $registerDateReminderDays = 14;
+	static $upcomingFixturesToShow = 5;
 }
 ?>

@@ -102,6 +102,33 @@ if ($fixtures) {
 <?php
 }
 
+$fixtures = $CurrentUser->club()->futureFixtures();
+if ($fixtures) {
+	$fixturesSoFar = 0;
+	$anyFixtures = true;
+	$lastFixtureDate = null;
+?>
+	<h3>Upcoming Fixtures</h3>
+	<table class="fixtures"><?php
+		foreach ($fixtures as $fixture) {
+			++$fixturesSoFar;
+			if ($fixture->date != $lastFixtureDate && $fixturesSoFar > SystemSettings::$upcomingFixturesToShow) break;
+		?>	<tr>
+				<td class="division"><?php echo $fixture->division->name; ?></td>
+				<td class="date"><?php
+					echo formatDate($fixture->date);
+				?></td>
+				<td class="homeTeam"><?php echo $fixture->homeTeam ? htmlspecialchars($fixture->homeTeam->name) : 'bye'; ?></td>
+				<td class="homeScore"></td><td class="dash">v</td><td class="awayScore"></td>
+				<td class="awayTeam"><?php echo $fixture->awayTeam ? htmlspecialchars($fixture->awayTeam->name) : 'bye'; ?></td>
+			</tr>
+		<?php
+			$lastFixtureDate = $fixture->date;
+		}
+	?></table>
+<?php
+}
+
 if (!$anyFixtures) {
 ?>
 	<p>You do not currently have any fixtures available for submission or approval.</p>

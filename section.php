@@ -4,8 +4,6 @@ require_once 'private_php/m_section.php';
 require_once 'private_php/v_html_section.php';
 require_once 'private_php/v_html_document.php';
 
-require_once 'private_php/p_section.php';
-
 $year = @$_GET['year'];
 if (!is_numeric($year)) errorPage(404);
 $year = (int) $year;
@@ -40,6 +38,6 @@ pageHeader($sectionView->displayName());
 	<?php } ?>
 </div>
 
-<?php*/
+<?php
 pageFooter();
 ?>

@@ -108,6 +108,25 @@ class Club {
 		return $fixtures;
 	}
 
+	public function futureFixtures() {
+		global $Database;
+
+		$fixtures = [];
+		$stmt = $Database->prepare("
+			SELECT f.fixture_id
+			FROM fixture f
+				JOIN team ht ON f.home_team_id = ht.team_id
+				JOIN team at ON f.away_team_id = at.team_id
+			WHERE ? IN (ht.club_id, at.club_id)
+				AND f.status = 0
+				AND addtime(fixture_date, '20:00') > ?
+			ORDER BY f.fixture_date, f.fixture_id");
+		$stmt->execute([$this->_id, date('c')]);
+
+		while ($row = $stmt->fetch()) $fixtures[] = Fixture::loadById($row['fixture_id']);
+		return $fixtures;
+	}
+
 	public function fixturesPendingApproval() {
 		global $Database;
 
