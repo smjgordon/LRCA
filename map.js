@@ -1,12 +1,12 @@
 var currentBubble = null;
 	
-function createMarker(map, latitude, longitude, clubId, clubName) {
+function createMarker(map, latitude, longitude, clubUrlName, clubName) {
 	var marker = new google.maps.Marker({
 		position: new google.maps.LatLng(latitude, longitude),
 		title: clubName
 	});
 	var bubble = new google.maps.InfoWindow({
-		content: '<a href="club.php?cid=' + clubId + '">' + htmlEncode(clubName) + '</a>'
+		content: '<a href="' + clubUrlName + '">' + htmlEncode(clubName) + '</a>'
 	});
 	marker.addListener('click', function() {
 		if (currentBubble != bubble) {

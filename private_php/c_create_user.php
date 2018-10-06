@@ -5,6 +5,7 @@ require_once 'p_email.php';
 function createUser($forename, $surname, $email, $clubId) {
 	global $Database;
 	global $CurrentUser;
+	global $UriBase;
 
 	$club = Club::loadById($clubId);
 
@@ -41,32 +42,33 @@ function createUser($forename, $surname, $email, $clubId) {
 	}
 
 	// generate a welcome email and send it
-	$url = joinUri(getCurrentUri(), "rpwd.php?key=$resetKeyStr");
+	//$uri = joinUri(getCurrentUri(), "../rpwd/$resetKeyStr");
+	$uri = "http://$_SERVER[HTTP_HOST]$UriBase" . "rpwd/$resetKeyStr";
 	$clubName = $club->name();
 
-	$emailSubject = 'Welcome to the LRCA Results Website';
+	$emailSubject = 'Welcome to the LRCA Website';
 	$emailMessage = 'Dear ' . $newUser->forename() . ",
 
-A user account has been created for you on the LRCA Results Website, so
-that you can submit results for $clubName Chess Club.
+A user account has been created for you on the LRCA Website, so that you
+can submit results for $clubName Chess Club.
 This website can be found here:
 
-http://lrca.stewartsplace.org.uk/
+http://leicestershirechess.org/
 
 If you have difficulty using this website or you find any bugs, large or
-small, please do not hesitate to contact the Results Webmaster, Stewart
-Gordon, at smjg@iname.com.
+small, please do not hesitate to contact the Webmaster, Stewart Gordon, at
+smjg@iname.com.
 
 You will need to set a password for your user account.  To set a password,
 please visit the following page:
 
-$url
+$uri
 
 This link will expire 48 hours after this email was sent.  If you are not
 able to use it within this period, you can still visit the page, but you
 will be prompted to generate a new password reset key which will be
 emailed to you.";
 
-	emailConfirmation($emailSubject, $emailMessage, [$newUser], 'user_created.php');
+	emailConfirmation($emailSubject, $emailMessage, [$newUser], $UriBase . 'my_account/user_created');
 }
 ?>

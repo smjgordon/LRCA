@@ -21,14 +21,14 @@ if ($fixtures) {
 	<table class="fixtures">
 		<?php foreach ($fixtures as $fixture) { ?>
 			<tr>
-				<td class="division"><?php echo $fixture->division->name; ?></td>
+				<td class="division"><?php echo $fixture->division->name(); ?></td>
 				<td class="date"><?php
 					echo formatDate($fixture->date);
 				?></td>
-				<td class="homeTeam"><?php echo $fixture->homeTeam ? htmlspecialchars($fixture->homeTeam->name) : 'bye'; ?></td>
+				<td class="homeTeam"><?php echo $fixture->homeTeam ? htmlspecialchars($fixture->homeTeam->name()) : 'bye'; ?></td>
 				<td class="homeScore"></td><td class="dash">v</td><td class="awayScore"></td>
-				<td class="awayTeam"><?php echo $fixture->awayTeam ? htmlspecialchars($fixture->awayTeam->name) : 'bye'; ?></td>
-				<td><a href="submit.php?fid=<?php echo $fixture->id(); ?>">Submit Result</a></td>
+				<td class="awayTeam"><?php echo $fixture->awayTeam ? htmlspecialchars($fixture->awayTeam->name()) : 'bye'; ?></td>
+				<td><a href="submit?fid=<?php echo $fixture->id(); ?>">Submit Result</a></td>
 			</tr>
 		<?php } ?>
 	</table>
@@ -43,14 +43,14 @@ if ($fixtures) {
 	<table class="fixtures">
 		<?php foreach ($fixtures as $fixture) { ?>
 			<tr>
-				<td class="division"><?php echo $fixture->division->name; ?></td>
+				<td class="division"><?php echo $fixture->division->name(); ?></td>
 				<td class="date"><?php echo formatDate($fixture->date); ?></td>
-				<td class="homeTeam"><?php echo $fixture->homeTeam ? htmlspecialchars($fixture->homeTeam->name) : 'bye'; ?></td>
+				<td class="homeTeam"><?php echo $fixture->homeTeam ? htmlspecialchars($fixture->homeTeam->name()) : 'bye'; ?></td>
 				<td class="homeScore"><?php echo formatScore($fixture->homeAdjustedScore); ?></td>
 				<td class="dash">–</td>
 				<td class="awayScore"><?php echo formatScore($fixture->awayAdjustedScore); ?></td>
-				<td class="awayTeam"><?php echo $fixture->awayTeam ? htmlspecialchars($fixture->awayTeam->name) : 'bye'; ?></td>
-				<td><a href="approve.php?fid=<?php echo $fixture->id(); ?>">Approve</a></td>
+				<td class="awayTeam"><?php echo $fixture->awayTeam ? htmlspecialchars($fixture->awayTeam->name()) : 'bye'; ?></td>
+				<td><a href="approve?fid=<?php echo $fixture->id(); ?>">Approve</a></td>
 			</tr>
 		<?php } ?>
 	</table>
@@ -73,11 +73,11 @@ if ($fixtures) {
 	<table class="fixtures">
 		<?php foreach ($fixtures as $fixture) { ?>
 			<tr>
-				<td class="division"><?php echo $fixture->division->name; ?></td>
+				<td class="division"><?php echo $fixture->division->name(); ?></td>
 				<td class="date"><?php
 					echo formatDate($fixture->date);
 				?></td>
-				<td class="homeTeam"><?php echo $fixture->homeTeam ? htmlspecialchars($fixture->homeTeam->name) : 'bye'; ?></td>
+				<td class="homeTeam"><?php echo $fixture->homeTeam ? htmlspecialchars($fixture->homeTeam->name()) : 'bye'; ?></td>
 			<?php
 				switch ($fixture->status) {
 					case MatchStatus::Unplayed: ?>
@@ -94,8 +94,8 @@ if ($fixtures) {
 						errorPage(HttpStatus::InternalError);
 				}
 			?>
-				<td class="awayTeam"><?php echo $fixture->awayTeam ? htmlspecialchars($fixture->awayTeam->name) : 'bye'; ?></td>
-				<td><a href="set_fixture_date.php?fid=<?php echo $fixture->id(); ?>">Set Date</a></td>
+				<td class="awayTeam"><?php echo $fixture->awayTeam ? htmlspecialchars($fixture->awayTeam->name()) : 'bye'; ?></td>
+				<td><a href="set_date?fid=<?php echo $fixture->id(); ?>">Set Date</a></td>
 			</tr>
 		<?php } ?>
 	</table>
@@ -114,13 +114,13 @@ if ($fixtures) {
 			++$fixturesSoFar;
 			if ($fixture->date != $lastFixtureDate && $fixturesSoFar > SystemSettings::$upcomingFixturesToShow) break;
 		?>	<tr>
-				<td class="division"><?php echo $fixture->division->name; ?></td>
+				<td class="division"><?php echo $fixture->division->name(); ?></td>
 				<td class="date"><?php
 					echo formatDate($fixture->date);
 				?></td>
-				<td class="homeTeam"><?php echo $fixture->homeTeam ? htmlspecialchars($fixture->homeTeam->name) : 'bye'; ?></td>
+				<td class="homeTeam"><?php echo $fixture->homeTeam ? htmlspecialchars($fixture->homeTeam->name()) : 'bye'; ?></td>
 				<td class="homeScore"></td><td class="dash">v</td><td class="awayScore"></td>
-				<td class="awayTeam"><?php echo $fixture->awayTeam ? htmlspecialchars($fixture->awayTeam->name) : 'bye'; ?></td>
+				<td class="awayTeam"><?php echo $fixture->awayTeam ? htmlspecialchars($fixture->awayTeam->name()) : 'bye'; ?></td>
 			</tr>
 		<?php
 			$lastFixtureDate = $fixture->date;

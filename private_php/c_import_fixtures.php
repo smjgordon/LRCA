@@ -7,6 +7,8 @@ require_once 'm_round.php';
 require_once 'm_fixture.php';
 require_once 'u_xml.php';
 
+// TODO: update this to work with private fields
+
 function importFixtures($xml) {
 	global $Database;
 
@@ -22,7 +24,8 @@ function importFixtures($xml) {
 		if ($year < 2015) throw new ReportableException('Invalid year');
 
 		// TODO: update this when/if Section is refactored
-		$section = new OldSection($sectionId, $year);
+		//$section = new OldSection($sectionId, $year);
+		$section = Section::loadByYearAndId($year, $sectionId);
 
 		// create divisions
 		$divisionSequence = 0; // TODO: continue the sequence if divisions already exist in the section
@@ -65,9 +68,12 @@ function importFixtures($xml) {
 			}
 
 			$division = new Division();
-			$division->section = $section;
-			$division->name = $name;
-			$division->urlName = $urlName;
+			//$division->section = $section;
+			//$division->name = $name;
+			//$division->urlName = $urlName;
+			$division->setSection($section);
+			$division->setName($name);
+			$division->setUrlName($urlName);
 			$division->matchStyle = $matchStyle;
 			$division->sequence = ++$divisionSequence;
 			$division->breakdown = $breakdown;
@@ -88,10 +94,14 @@ function importFixtures($xml) {
 				$name = XmlUtils::readString($teamNode['name'], 'Missing team name');
 
 				$team = new Team();
-				$team->division = $division;
+				/*$team->division = $division;
 				$team->club = $club;
 				$team->sequence = $sequence;
-				$team->name = $name;
+				$team->name = $name;*/
+				$team->setDivision($division);
+				$team->setClub($club);
+				$team->setSequence($sequence);
+				$team->setName($name);
 
 				$teamsByName[$name] = $team;
 				$division->teams[] = $team;
@@ -106,10 +116,14 @@ function importFixtures($xml) {
 				$urlName = $roundNode['url-name'];
 
 				$round = new Round();
-				$round->division = $division;
+				/*$round->division = $division;
 				$round->sequence = ++$roundSequence;
 				$round->urlName = $urlName;
-				$round->name = $name;
+				$round->name = $name;*/
+				$round->setDivision($division);
+				$round->setSequence(++$roundSequence);
+				$round->setUrlName($urlName);
+				$round->setName($name);
 
 				$division->rounds[] = $round;
 
@@ -136,7 +150,7 @@ function importFixtures($xml) {
 				}
 			}
 
-			$divisionsByName[$division->name] = $division;
+			$divisionsByName[$division->name()] = $division;
 			$divisions[] = $division;
 		}
 

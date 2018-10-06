@@ -1,6 +1,6 @@
 <?php
 require_once 'p_server.php';
-require_once 'p_section.php';
+//require_once 'p_section.php';
 require_once 'm_team.php';
 require_once 'm_round.php';
 require_once 'p_exceptions.php';
@@ -23,10 +23,38 @@ class Division {
 			if ($row = $stmt->fetch()) {
 				$result = new Division();
 				$result->populateFromDbRow($row);
+				Division::$instanceCache[$id] = $result;
 				return $result;
 			} else {
 				throw new ModelAccessException(ModelAccessException::BadDivisionId, $id);
 			}
+		}
+	}
+	
+	static public function loadByUri($uri) {
+		global $Database;
+		
+		$uriParts = array_slice(explode('/', trim($uri, '/')), -3);
+		if (count($uriParts) != 3) throw new ModelAccessException(ModelAccessException::BadUrl, $uri);
+		$stmt = $Database->prepare('
+			SELECT d.*
+			FROM division d
+				JOIN section s ON d.section_id = s.section_id
+			WHERE d.year = ? AND s.url_name = ? AND d.url_name = ?');
+		$stmt->execute($uriParts);
+		if ($row = $stmt->fetch()) {
+			$id = (int) $row['division_id'];
+			if (isset(Division::$instanceCache[$id])) {
+				return Division::$instanceCache[$id];
+			} else {			
+				$result = new Division();
+				$result->populateFromDbRow($row);
+				//$result->_year = (int) $uriParts[0];
+				Division::$instanceCache[$id] = $result;
+				return $result;
+			}
+		} else {
+			throw new ModelAccessException(ModelAccessException::BadSectionUrlName, $uriParts[1]);
 		}
 	}
 
@@ -47,6 +75,7 @@ class Division {
 			} else {
 				$div = new Division();
 				$div->populateFromDbRow($row);
+				Division::$instanceCache[$div->_id] = $div;
 				$result[] = $div;
 			}
 		}
@@ -54,8 +83,16 @@ class Division {
 	}
 
 	public function id() { return $this->_id; }
+	public function section() { return $this->_section; }
+	public function name() { return $this->_name; }
+	public function urlName() { return $this->_urlName; }
+	public function setSection($section) { $this->_section = $section; }
+	public function setName($name) { $this->_name = $name; }
+	public function setUrlName($name) { $this->_urlName = $name; }
 
-	public $section, $name, $urlName, $matchStyle, $breakdown, $sequence, $format, $requireGrade, $maxGrade;
+	private $_id, $_section, $_name, $_urlName, $_teamsLoaded, $_roundsLoaded;
+
+	public $matchStyle, $breakdown, $sequence, $format, $requireGrade, $maxGrade;
 	public $minBoards, $maxBoards, $colours, $boardDefaultPenaltyFirst, $boardDefaultPenaltyEvery;
 	public $teams, $rounds;
 
@@ -100,7 +137,7 @@ class Division {
 
 		$result = [];
 		foreach ($this->rounds as $round) {
-			if ($round->anyPlayed) $result[] = $round;
+			if ($round->anyPlayed()) $result[] = $round;
 		}
 		return $result;
 	}
@@ -148,12 +185,9 @@ class Division {
 
 	private function populateFromDbRow($row) {
 		$this->_id = $row['division_id'];
-
-		// TODO: decide what to do with this
-		$this->section = new OldSection($row['section_id'], $row['year']);
-
-		$this->name = $row['name'];
-		$this->urlName = $row['url_name'];
+		$this->_section = Section::loadByYearAndId($row['year'], $row['section_id']);
+		$this->_name = $row['name'];
+		$this->_urlName = $row['url_name'];
 		$this->matchStyle = $row['match_style'];
 		$this->breakdown = $row['breakdown'];
 		$this->sequence = $row['sequence'];
@@ -167,8 +201,6 @@ class Division {
 		$this->boardDefaultPenaltyEvery = $row['board_default_penalty_every'];
 	}
 
-	private $_id, $_teamsLoaded, $_roundsLoaded;
-
 	public function save($silentFail = false) {
 		global $Database;
 
@@ -177,8 +209,8 @@ class Division {
 				INSERT INTO division(year, section_id, url_name, name,
 					match_style, breakdown, sequence, format, require_grade)
 				VALUES(?, ?, ?, ?, ?, ?, ?, ?, ?)');
-			$stmt->execute([$this->section->year, $this->section->id, $this->urlName,
-				$this->name, $this->matchStyle, $this->breakdown, $this->sequence, $this->format, $this->requireGrade]);
+			$stmt->execute([$this->_section->year(), $this->_section->id(), $this->_urlName,
+				$this->_name, $this->matchStyle, $this->breakdown, $this->sequence, $this->format, $this->requireGrade]);
 			$this->_id = $Database->lastInsertId();
 
 		} else if (!$silentFail) {
@@ -194,8 +226,8 @@ class Division {
 
 	// DEBUG
 	public function dump() {
-		echo "<p>Division ID: $this->_id; Section: ", $this->section->displayName(), "; Name: $this->name; ",
-			"URL name: $this->urlName; Match style: $this->matchStyle; ",
+		echo "<p>Division ID: $this->_id; Section: ", $this->_section->displayName(), "; Name: $this->_name; ",
+			"URL name: $this->_urlName; Match style: $this->matchStyle; ",
 			"Breakdown: $this->breakdown; Format: $this->format; Require grade: ", (integer) $this->requireGrade, '</p>';
 	}
 

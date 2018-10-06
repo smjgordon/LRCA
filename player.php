@@ -1,39 +1,49 @@
 <?php
 require_once 'private_php/p_global.php';
-require_once 'private_php/p_section.php';
+//require_once 'private_php/p_section.php';
+require_once 'private_php/m_player.php';
+require_once 'private_php/m_section.php';
 require_once 'private_php/p_html_functions.php';
 require_once 'private_php/u_text.php';
 
-$playerID = @$_GET['pid'];
-if (!is_numeric($playerID)) errorPage(404);
-$playerID = (int) $playerID;
+try {
+	$player = Player::loadByUri($_SERVER['REQUEST_URI']);
+	//$clubView = new HtmlClubView($club);
+} catch (ModelAccessException $ex) {
+	errorPage(HttpStatus::NotFound);
+}
+/*
+$playerId = @$_GET['pid'];
+if (!is_numeric($playerId)) errorPage(404);
+$playerId = (int) $playerId;
 
 $stmt = $Database->prepare('
 	SELECT p.forename, p.surname, c.club_id, c.name AS club
 	FROM player p JOIN club c ON p.club_id = c.club_id
 	WHERE p.player_id = ?
 	');
-$stmt->execute([$playerID]);
+$stmt->execute([$playerId]);
 $player = $stmt->fetch();
 if (!$player) errorPage(404);
-
-$fullName = $player['forename'] . ' ' . $player['surname'];
-pageHeader($fullName . ' – Player Profile');
+*/
+pageHeader($player->fullName() . ' – Player Profile');
 ?>
-	<h2><?php echo htmlspecialchars($fullName); ?></h2>
-	<h3 class="sub"><?php echo htmlspecialchars($player['club']); ?></h3>
+	<h2><?php echo htmlspecialchars($player->fullName()); ?></h2>
+	<h3 class="sub"><?php echo htmlspecialchars($player->club->name()); ?></h3>
 
 <?php
 // get all-time totals for the player
 // stupidity: you can't use a named parameter multiple times in a query
-// we've already made sure $playerID is an int
+
+$playerId = $player->id();
+
 $stmt = $Database->query("
 	SELECT
-		Sum(CASE WHEN (home_player_id = $playerID AND raw_result = 1) OR (away_player_id = $playerID AND raw_result = -1) THEN 1 ELSE 0 END) AS won,
+		Sum(CASE WHEN (home_player_id = $playerId AND raw_result = 1) OR (away_player_id = $playerId AND raw_result = -1) THEN 1 ELSE 0 END) AS won,
 		Sum(CASE WHEN raw_result = 0 THEN 1 ELSE 0 END) AS drawn,
-		Sum(CASE WHEN (home_player_id = $playerID AND raw_result = -1) OR (away_player_id = $playerID AND raw_result = 1) THEN 1 ELSE 0 END) AS lost
+		Sum(CASE WHEN (home_player_id = $playerId AND raw_result = -1) OR (away_player_id = $playerId AND raw_result = 1) THEN 1 ELSE 0 END) AS lost
 	FROM game
-	WHERE $playerID IN (home_player_id, away_player_id)
+	WHERE $playerId IN (home_player_id, away_player_id)
 		AND 2 NOT IN (home_player_id, away_player_id)");
 $row = $stmt->fetch();
 
@@ -62,16 +72,16 @@ if ($row && is_numeric($row['won'])) {
 		</tfoot>
 		<tbody><?php
 			$stmt = $Database->query("
-				SELECT d.year, s.section_id,
-					Sum(CASE WHEN (home_player_id = $playerID AND g.raw_result = 1) OR (away_player_id = $playerID AND g.raw_result = -1) THEN 1 ELSE 0 END) AS won,
+				SELECT d.year, s.season, s.section_id,
+					Sum(CASE WHEN (home_player_id = $playerId AND g.raw_result = 1) OR (away_player_id = $playerId AND g.raw_result = -1) THEN 1 ELSE 0 END) AS won,
 					Sum(CASE WHEN g.raw_result = 0 THEN 1 ELSE 0 END) AS drawn,
-					Sum(CASE WHEN (home_player_id = $playerID AND g.raw_result = -1) OR (away_player_id = $playerID AND g.raw_result = 1) THEN 1 ELSE 0 END) AS lost
+					Sum(CASE WHEN (home_player_id = $playerId AND g.raw_result = -1) OR (away_player_id = $playerId AND g.raw_result = 1) THEN 1 ELSE 0 END) AS lost
 				FROM game g
 					JOIN fixture f ON g.fixture_id = f.fixture_id
 					JOIN round r ON f.round_id = r.round_id
 					JOIN division d ON r.division_id = d.division_id
 					JOIN section s ON d.section_id = s.section_id
-				WHERE $playerID IN (g.home_player_id, away_player_id)
+				WHERE $playerId IN (g.home_player_id, away_player_id)
 					AND 2 NOT IN (g.home_player_id, away_player_id)
 				GROUP BY d.year, s.section_id
 				ORDER BY d.year DESC, s.season, s.sequence");
@@ -79,7 +89,11 @@ if ($row && is_numeric($row['won'])) {
 			while ($row = $stmt->fetch()) {
 			?>
 				<tr>
-					<td><?php echo (new OldSection($row['section_id'], $row['year']))->displayName(); ?></td>
+					<td><?php
+						$year = $row['year'];
+						echo htmlspecialchars(Section::loadByYearAndId($row['year'], $row['section_id'])->name()), ' ',
+							$row['season'] == Season::Winter ? ($year . '–' . ($year + 1)) : $year;
+					?></td>
 					<td><?php echo $row['won'] + $row['drawn'] + $row['lost']; ?></td>
 					<td><?php echo $row['won']; ?></td>
 					<td><?php echo $row['drawn']; ?></td>
@@ -105,7 +119,7 @@ $stmt = $Database->prepare("
 	WHERE ? IN (g.home_player_id, away_player_id)
 		AND 2 NOT IN (g.home_player_id, away_player_id)
 	ORDER BY f.fixture_date DESC, g.fixture_id DESC, g.home_colour DESC");
-$stmt->execute([$playerID]);
+$stmt->execute([$playerId]);
 
 $game = $stmt->fetch();
 if ($game) {

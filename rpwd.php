@@ -10,6 +10,10 @@ $pageTitle = 'Password Recovery'; // will be changed to 'Password Creation' if t
 const EmailEntry = 1;
 const PasswordEntry = 2;
 
+// get reset key from URI
+$uriParts = array_slice(explode('/', $_SERVER['REQUEST_URI']), -1);
+$resetKeyStr = $uriParts[0];
+
 // possible scenarios:
 // no query parameters - initial entry to page
 // POST method, parameter email - requesting key
@@ -35,11 +39,11 @@ if (isset($_POST['email']) && trim($_POST['email']) == '') {
 			throw $ex;
 		}
 
-		$url = joinUri(getCurrentUri(), "rpwd.php?key=$resetKeyStr");
+		$uri = joinUri(getCurrentUri(), "$resetKeyStr");
 
 		// generate an email and send it
 		switch ($_POST['type']) {
-			case 'mig':
+			/*case 'mig':
 				$emailSubject = 'Welcome to the new LRCA Results Website';
 				$emailMessage = 'Dear ' . $user->forename() . ",
 
@@ -65,22 +69,22 @@ You will need to set a password for your user account.  This may be either
 the same password you used on the old results website or a new one.  To
 set a password, please visit the following page:
 
-$url
+$uri
 
 This link will expire 48 hours after this email was sent.  If you are not
 able to use it within this period, you can still visit the page, but you
 will be prompted to generate a new password reset key which will be
 emailed to you.";
-				break;
+				break;*/
 
 			default:
-				$emailSubject = 'Password reset for the LRCA Results Website';
+				$emailSubject = 'Password reset for the LRCA Website';
 				$emailMessage = 'Dear ' . $user->forename() . ",
 
 A password reset has been requested for your user account.  To set a new
 password, please visit the following page:
 
-$url
+$uri
 
 This link will expire 24 hours after this email was sent.";
 
@@ -92,8 +96,8 @@ Your existing password will continue to work.';
 				}
 		}
 
-		emailConfirmation($emailSubject, $emailMessage, [$user],
-			'rpwd_generated.php?uid=' . $user->id() . '&status=' . $user->status());
+		emailConfirmation($emailSubject, $emailMessage, [$user], '../rpwd_generated?status=' . $user->status());
+			//'rpwd_generated.php?uid=' . $user->id() . '&status=' . $user->status());
 
 	} catch (ModelAccessException $ex) {
 		$error = $ex->getMessage();
@@ -111,7 +115,7 @@ Your existing password will continue to work.';
 		$mode = EmailEntry;
 	}
 
-} else if (($resetKeyStr = @$_GET['key']) || ($resetKeyStr = @$_POST['key'])) {
+} else if ($resetKeyStr /*($resetKeyStr = @$_GET['key'])*/ || ($resetKeyStr = @$_POST['key'])) {
 	try {
 		$resetKey = PasswordResetKey::loadByKey($resetKeyStr);
 		$user = $resetKey->user();
@@ -124,7 +128,7 @@ Your existing password will continue to work.';
 		$mode = EmailEntry;
 
 	} catch (Exception $ex) {
-		errorPage(404);
+		errorPage(HttpStatus::NotFound);
 	}
 
 	if ($user->status() == UserStatus::PendingPassword) {
@@ -133,7 +137,7 @@ Your existing password will continue to work.';
 
 	if ($mode == PasswordEntry && ($userID = @$_POST['uid'])) {
 		$userID = (integer) $userID;
-		if ($userID != $user->id()) errorPage(404);
+		if ($userID != $user->id()) errorPage(HttpStatus::NotFound);
 
 		$password1 = @$_POST['pwd1'];
 		$password2 = @$_POST['pwd2'];
@@ -146,7 +150,7 @@ Your existing password will continue to work.';
 			$Database->beginTransaction();
 			$resetKey->setNewPassword($password1);
 			$Database->commit();
-			redirect(303, 'password_set.php');
+			redirect(HttpStatus::RedirectSeeOther, '../password_set');
 		}
 	}
 
@@ -164,7 +168,7 @@ pageHeader($pageTitle);
 	<p class="error"><?php echo htmlspecialchars($error); ?></p>
 <?php } ?>
 
-<form class="tabForm" method="post" action="<?php echo htmlspecialchars($_SERVER['SCRIPT_NAME']); ?>"><?php
+<form class="tabForm" method="post" action="./"><?php
 	switch ($mode) {
 		case EmailEntry:
 		?>
@@ -180,13 +184,15 @@ pageHeader($pageTitle);
 		case PasswordEntry:
 		?>
 			<p>
+				<label for="email">Email address:</label>
+				<span id="email"><?php echo htmlspecialchars($user->email()); ?></span>
 				<input type="hidden" name="uid" value="<?php echo $user->id(); ?>" />
 				<input type="hidden" name="kid" value="<?php echo $resetKey->id(); ?>" />
 				<input type="hidden" name="key" value="<?php echo $resetKeyStr; ?>" />
-				<label for="pwd1">Password:</label> <input type="password" name="pwd1" id="pwd1" />
 			</p>
+			<p><label for="pwd1">New password:</label> <input type="password" name="pwd1" id="pwd1" /></p>
 
-			<p><label for="pwd2">Re-enter password:</label> <input type="password" name="pwd2" id="pwd2" /></p>
+			<p><label for="pwd2">Re-enter new password:</label> <input type="password" name="pwd2" id="pwd2" /></p>
 
 			<p><input type="submit" value="Set Password" /></p>
 		<?php

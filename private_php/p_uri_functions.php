@@ -1,7 +1,17 @@
 <?php
 // TODO: implement new naming convention
 function getCurrentUri() {
-	return "http://$_SERVER[HTTP_HOST]$_SERVER[SCRIPT_NAME]";
+	$scheme = $_SERVER['REQUEST_SCHEME'];
+	if (!$scheme) $scheme = 'http'; // not sure why $_SERVER['REQUEST_SCHEME'] doesn't always work
+	
+	return "$scheme://$_SERVER[HTTP_HOST]$_SERVER[REQUEST_URI]";
+}
+
+function backToLevel($level) {
+	global $UriBase;
+	
+	$backLevels = substr_count($_SERVER['REQUEST_URI'], '/') - substr_count($UriBase, '/') - $level;
+	return str_repeat('../', $backLevels);
 }
 
 function joinUri($from, $to) {

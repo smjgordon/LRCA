@@ -3,6 +3,7 @@ require_once('p_page_template_no_db.php');
 
 abstract class HttpStatus {
 	const RedirectSeeOther = 303;
+	const BadRequest       = 400;
 	const Forbidden        = 403;
 	const NotFound         = 404;
 	const InternalError    = 500;
@@ -14,6 +15,12 @@ function errorPage($errorCode) {
 	pageHeaderNoDb("$errorCode Error - Leicestershire and Rutland Chess Association");
 	
 	switch ($errorCode) {
+		case HttpStatus::BadRequest:
+		?>
+			<p>Something went wrong with the data submitted for processing.</p>
+		<?php
+			break;
+
 		case HttpStatus::Forbidden:
 		?>
 			<p>You do not have permission to access this facility.</p>

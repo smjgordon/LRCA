@@ -38,7 +38,7 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
 			$match->saveApproval();
 			$Database->commit();
 
-			redirect(HttpStatus::RedirectSeeOther, 'result_approved.php');
+			redirect(HttpStatus::RedirectSeeOther, 'approved');
 
 		} catch (ReportableException $ex) {
 			$Database->rollBack();
@@ -63,8 +63,8 @@ pageHeader('Approve Result');
 	<p class="error"><?php echo htmlspecialchars($error); ?></p>
 <?php } ?>
 
-<form method="post" action="<?php echo htmlspecialchars($_SERVER['SCRIPT_NAME']); ?>">
-	<p>Please confirm that these details are correct.&nbsp; If there are any errors or omissions, please do not proceed, but contact the <a href="mailto:smjg@iname.com">Results Webmaster</a> with the corrections.</p>
+<form method="post" action="approve">
+	<p>Please confirm that these details are correct.&nbsp; If there are any errors or omissions, please do not proceed, but contact the <a href="mailto:smjg@iname.com">Webmaster</a> with the corrections.</p>
 	<?php $match->renderResult(); ?>
 
 	<p><label><input type="checkbox" name="confirm" /> I confirm that the result details are complete and correct.</p>

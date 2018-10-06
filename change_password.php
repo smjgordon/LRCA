@@ -23,7 +23,7 @@ if ($userId) {
 		$Database->beginTransaction();
 		$CurrentUser->setNewPassword($password1);
 		$Database->commit();
-		redirect(303, 'password_set.php');
+		redirect(303, 'password_set');
 	}
 }
 
@@ -36,7 +36,7 @@ pageHeader('Change Password');
 	<p class="error"><?php echo htmlspecialchars($error); ?></p>
 <?php } ?>
 
-<form class="tabForm" method="post" action="<?php echo htmlspecialchars($_SERVER['SCRIPT_NAME']); ?>">
+<form class="tabForm" method="post" action="change_password">
 	<p>
 		<input type="hidden" name="uid" value="<?php echo $CurrentUser->id(); ?>" />
 		<label for="pwd0">Current password:</label> <input type="password" name="pwd0" id="pwd0" />

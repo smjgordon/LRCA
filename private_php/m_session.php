@@ -29,10 +29,10 @@ if ($sessionKey) {
 unset($sessionKey);
 
 function requireLogin($permissionsNeeded = null) {
-	global $CurrentUser;
+	global $CurrentUser, $UriBase;
 	
 	if (!$CurrentUser) {
-		redirect(303, 'login.php?url=' . urlencode($_SERVER['REQUEST_URI']));
+		redirect(303, $UriBase . 'login?uri=' . urlencode($_SERVER['REQUEST_URI']));
 	}
 	
 	if ($permissionsNeeded) {

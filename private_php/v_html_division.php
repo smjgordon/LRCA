@@ -1,5 +1,6 @@
 <?php
 require_once 'p_html_functions.php';
+require_once 'v_html_section.php';
 require_once 'u_text.php';
 
 class HtmlDivisionView {
@@ -9,25 +10,25 @@ class HtmlDivisionView {
 
 	// TODO: update when/if section is refactored
 	public function bodyTitle() {
-		return $this->_division->section->displayName() . ' – ' . $this->_division->name;
+		return $this->sectionView()->displayName() . ' – ' . $this->_division->name();
 	}
 
 	public function headerTitle() {
-		return $this->_division->name . ' – ' . $this->_division->section->displayName();
+		return $this->_division->name() . ' – ' . $this->sectionView()->displayName();
 	}
 
 	public function breakdown() {
+		$backToDivision = backToLevel(3);
+		
 		switch ($this->_division->breakdown) {
 			case Breakdown::ByMonth:
 				$months = $this->_division->playedMatchMonths();
 
 				if ($months) {
-					$result = '<ul>';
+					$result = '<ul>';
 					foreach ($months as $yearAndMonth) {
 						$monthName = monthNameFromIso($yearAndMonth);
-						$result .= "<li><a href='results_by_month.php?did="
-							. $this->_division->id()
-							. "&amp;month=$yearAndMonth'>$monthName</a></li>";
+						$result .= "<li><a href='$backToDivision" . "month/$yearAndMonth'>$monthName</a></li>";
 					}
 					return $result . '</ul>';
 				} else {
@@ -43,9 +44,12 @@ class HtmlDivisionView {
 				if ($rounds) {
 					$result = '<ul>';
 					foreach ($rounds as $round) {
-						$result .= "<li><a href='results_by_round.php?rid=" . $round->id() . "'>"
-							. htmlspecialchars($round->name)
+						$result .= '<li><a href="' . $backToDivision . 'round/' . $round->urlName() . '">'
+							. htmlspecialchars($round->name())
 							. '</a></li>';
+						/*$result .= "<li><a href='results_by_round.php?rid=" . $round->id() . "'>"
+							. htmlspecialchars($round->name)
+							. '</a></li>';*/
 					}
 					return $result . '</ul>';
 				} else {
@@ -80,9 +84,9 @@ class HtmlDivisionView {
 							<td><?php echo ++$position; ?></td>
 							<td><?php
 								if ($team->played != 0) {
-									echo '<a href="results_by_team.php?tid=', $team->id(), '">';
+									echo '<a href="team/', $team->club()->urlName(), '/', $team->sequence(), '">';
 								}
-								echo htmlspecialchars($team->name);
+								echo htmlspecialchars($team->name());
 								if ($team->played != 0) {
 									echo '</a>';
 								}
@@ -109,7 +113,7 @@ class HtmlDivisionView {
 		$this->_division->loadRounds();
 		$anyUnapproved = false;
 		foreach ($this->_division->rounds as $round) {
-			if ($round->name) echo '<h3>', htmlspecialchars($round->name), '</h3>';
+			if ($round->name()) echo '<h3>', htmlspecialchars($round->name()), '</h3>';
 
 			$round->loadFixtures();
 		?>
@@ -123,7 +127,7 @@ class HtmlDivisionView {
 								$anyUnapproved = true;
 							}
 						?></td>
-						<td class="homeTeam"><?php echo $fixture->homeTeam ? htmlspecialchars($fixture->homeTeam->name) : 'bye'; ?></td>
+						<td class="homeTeam"><?php echo $fixture->homeTeam ? htmlspecialchars($fixture->homeTeam->name()) : 'bye'; ?></td>
 					<?php
 						switch ($fixture->status) {
 							case MatchStatus::Unplayed:
@@ -153,7 +157,7 @@ class HtmlDivisionView {
 								echo '<td class="homeScore">0</td><td class="dash">–</td><td class="awayScore">0</td>';
 						}
 					?>
-						<td class="awayTeam"><?php echo $fixture->awayTeam ? htmlspecialchars($fixture->awayTeam->name) : 'bye'; ?></td>
+						<td class="awayTeam"><?php echo $fixture->awayTeam ? htmlspecialchars($fixture->awayTeam->name()) : 'bye'; ?></td>
 					</tr>
 				<?php } ?>
 			</table>
@@ -278,7 +282,14 @@ class HtmlDivisionView {
 		</table>
 	<?php
 	}
+	
+	private function sectionView() {
+		if (!$this->_sectionView) {
+			$this->_sectionView = new HtmlSectionView($this->_division->section());
+		}
+		return $this->_sectionView;
+	}
 
-	private $_division;
+	private $_division, $_sectionView;
 }
 ?>

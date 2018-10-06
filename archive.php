@@ -6,7 +6,7 @@ pageHeader('Archive');
 <h2>Archive</h2>
 <?php
 $stmt = $Database->query('
-	SELECT DISTINCT d.year, s.section_id, s.name, s.season
+	SELECT DISTINCT d.year, s.section_id, s.name, s.season, s.url_name
 	FROM division d
 		JOIN section s ON d.section_id = s.section_id
 	ORDER BY s.sequence, d.year');
@@ -44,12 +44,19 @@ while ($row = $stmt->fetch()) {
 	}
 ?>
 	<li>
-		<a href="section.php?year=<?php echo $year; ?>&amp;sid=<?php echo $sectionID; ?>"><?php echo $displayYear; ?></a>
+		<a href="../<?php echo $year; ?>/<?php echo $row['url_name']; ?>"><?php echo $displayYear; ?></a>
 	</li>
 <?php
 }
 
 if ($inList) echo '</ul>';
+?>
+	<h3>Previous LRCA Websites</h3>
+	<ul>
+		<li><a href="http://legacy.leicestershirechess.org/2011-18/">2011-18 site</a></li>
+		<li><a href="http://legacy.leicestershirechess.org/2001-11/">2001-11 site</a></li>
+	</ul>
 
+<?php
 pageFooter();
 ?>

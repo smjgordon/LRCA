@@ -301,10 +301,10 @@ abstract class Match {
 		// determine which club is submitting, and hence which club needs to approve
 		$homeTeam = Team::loadById($this->homeTeamID);
 		$awayTeam = Team::loadById($this->awayTeamID);
-		if ($CurrentUser->club()->id() == $homeTeam->club->id()) {
-			$approvalClub = $awayTeam->club;
-		} else if ($CurrentUser->club()->id() == $awayTeam->club->id()) {
-			$approvalClub = $homeTeam->club;
+		if ($CurrentUser->club()->id() == $homeTeam->club()->id()) {
+			$approvalClub = $awayTeam->club();
+		} else if ($CurrentUser->club()->id() == $awayTeam->club()->id()) {
+			$approvalClub = $homeTeam->club();
 		} else {
 			throw new Exception("User shouldn't have been able to submit this result");
 		}
@@ -391,7 +391,7 @@ abstract class Match {
 	public function generateEmailConfirmation() {
 		global $CurrentUser;
 
-		$subject = "Result: " . $this->division->name . " - $this->homeTeamName v $this->awayTeamName";
+		$subject = "Result: " . $this->division->name() . " - $this->homeTeamName v $this->awayTeamName";
 
 		$message = 'Dear ' . $CurrentUser->forename() . ',
 
@@ -406,7 +406,7 @@ Comments:
 $this->comments";
 		}
 
-		emailConfirmation($subject, $message, [$CurrentUser], 'result_submitted.php');
+		emailConfirmation($subject, $message, [$CurrentUser], 'submitted');
 	}
 
 	public function saveApproval() {
@@ -446,7 +446,7 @@ $this->comments";
 			renderSelectOption(2, $selectedPlayerId, '(Default)');
 			while ($row = $stmt->fetch()) {
 				$player = Player::loadById($row['player_id']);
-				$player->loadGrades($this->date, $this->division->section->season);
+				$player->loadGrades($this->date, $this->division->section()->season());
 
 				if ($this->division->canPlayPlayer($player)) {
 					renderSelectOption($player->id(), $selectedPlayerId, $player->fullNameFiling());
@@ -767,13 +767,13 @@ class StandardMatch extends Match {
 			if (!$homePlayer) {
 				throw new ReportableException("Missing home player on board $iBoard");
 			}
-			if ($homePlayer->id() != PlayerId::BoardDefault && $homePlayer->club->id() != $homeTeam->club->id()) {
+			if ($homePlayer->id() != PlayerId::BoardDefault && $homePlayer->club->id() != $homeTeam->club()->id()) {
 				throw new ReportableException("Home player on board $iBoard does not play for this club");
 			}
 			if ($homePlayer->id() != PlayerId::BoardDefault && isset($playersById[$homePlayer->id()])) {
 				throw new ReportableException("Duplicate home player on board $iBoard");
 			}
-			$homePlayer->loadGrades($this->date, $this->division->section->season);
+			$homePlayer->loadGrades($this->date, $this->division->section()->season());
 			if (!$this->division->canPlayPlayer($homePlayer)) {
 				throw new ReportableException("Home player on board $iBoard is not eligible to play in this match");
 			}
@@ -785,13 +785,13 @@ class StandardMatch extends Match {
 			if (!$awayPlayer) {
 				throw new ReportableException("Missing away player on board $iBoard");
 			}
-			if ($awayPlayer->id() != PlayerId::BoardDefault && $awayPlayer->club->id() != $awayTeam->club->id()) {
+			if ($awayPlayer->id() != PlayerId::BoardDefault && $awayPlayer->club->id() != $awayTeam->club()->id()) {
 				throw new ReportableException("Away player on board $iBoard does not play for this club");
 			}
 			if ($awayPlayer->id() != PlayerId::BoardDefault && isset($playersById[$awayPlayer->id()])) {
 				throw new ReportableException("Duplicate away player on board $iBoard");
 			}
-			$awayPlayer->loadGrades($this->date, $this->division->section->season);
+			$awayPlayer->loadGrades($this->date, $this->division->section()->season());
 			if (!$this->division->canPlayPlayer($awayPlayer)) {
 				throw new ReportableException("Away player on board $iBoard is not eligible to play in this match");
 			}
@@ -1050,13 +1050,13 @@ class RapidSameMatch extends Match {
 			if (!$homePlayer) {
 				throw new ReportableException("Missing home player on board $iBoard");
 			}
-			if ($homePlayer->id() != PlayerId::BoardDefault && $homePlayer->club->id() != $homeTeam->club->id()) {
+			if ($homePlayer->id() != PlayerId::BoardDefault && $homePlayer->club->id() != $homeTeam->club()->id()) {
 				throw new ReportableException("Home player on board $iBoard does not play for this club");
 			}
 			if ($homePlayer->id() != PlayerId::BoardDefault && isset($playersById[$homePlayer->id()])) {
 				throw new ReportableException("Duplicate home player on board $iBoard");
 			}
-			$homePlayer->loadGrades($this->date, $this->division->section->season);
+			$homePlayer->loadGrades($this->date, $this->division->section()->season());
 			if (!$this->division->canPlayPlayer($homePlayer)) {
 				throw new ReportableException("Home player on board $iBoard is not eligible to play in this match");
 			}
@@ -1068,13 +1068,13 @@ class RapidSameMatch extends Match {
 			if (!$awayPlayer) {
 				throw new ReportableException("Missing away player on board $iBoard");
 			}
-			if ($awayPlayer->id() != PlayerId::BoardDefault && $awayPlayer->club->id() != $awayTeam->club->id()) {
+			if ($awayPlayer->id() != PlayerId::BoardDefault && $awayPlayer->club->id() != $awayTeam->club()->id()) {
 				throw new ReportableException("Away player on board $iBoard does not play for this club");
 			}
 			if ($awayPlayer->id() != PlayerId::BoardDefault && isset($playersById[$awayPlayer->id()])) {
 				throw new ReportableException("Duplicate away player on board $iBoard");
 			}
-			$awayPlayer->loadGrades($this->date, $this->division->section->season);
+			$awayPlayer->loadGrades($this->date, $this->division->section()->season());
 			if (!$this->division->canPlayPlayer($awayPlayer)) {
 				throw new ReportableException("Away player on board $iBoard is not eligible to play in this match");
 			}

@@ -20,6 +20,36 @@ class Team {
 		}
 	}*/
 
+	static public function loadByUri($uri) {
+		global $Database;
+		
+		$uriParts = array_slice(explode('/', trim($uri, '/')), -6);
+		if (count($uriParts) != 6) throw new ModelAccessException(ModelAccessException::BadUrl, $uri);
+		$stmt = $Database->prepare('
+			SELECT t.* -- , f.status AS any_played [DISTINCT]
+			FROM team t
+				JOIN club c ON t.club_id = c.club_id
+				-- LEFT JOIN fixture f ON r.round_id = f.round_id AND f.status = 1
+				JOIN division d ON t.division_id = d.division_id
+				JOIN section s ON d.section_id = s.section_id
+			WHERE d.year = ? AND s.url_name = ? AND d.url_name = ? AND c.url_name = ? AND t.sequence = ?');
+		$stmt->execute([$uriParts[0], $uriParts[1], $uriParts[2], $uriParts[4], $uriParts[5]]);
+		if ($row = $stmt->fetch()) {
+			$id = (int) $row['team_id'];
+			/*if (isset(Team::$instanceCache[$id])) {
+				return Team::$instanceCache[$id];
+			} else {*/
+				$result = new Team();
+				$result->populateFromDbRow($row);
+				//$result->_year = (int) $uriParts[0];
+				//Round::$instanceCache[$id] = $result;
+				return $result;
+			//}
+		} else {
+			throw new ModelAccessException(ModelAccessException::BadTeamUrlName, $uri);
+		}
+	}
+
 	public static function loadById($id) {
 		global $Database;
 
@@ -53,17 +83,29 @@ class Team {
 	}
 
 	public function id() { return $this->_id; }
+	public function division() { return $this->_division; }
+	public function club() {
+		// TODO: refactor
+		if ($this->_club instanceof IdWrapper) $this->_club = Club::loadById($this->_club->id());
+		return $this->_club;
+	}
+	public function sequence() { return $this->_sequence; }
+	public function name() { return $this->_name; }
+	public function setDivision($division) { $this->_division = $division; }
+	public function setClub($club) { $this->_club = $club; }
+	public function setSequence($sequence) { $this->_sequence = $sequence; }
+	public function setName($name) { $this->_name = $name; }
 
-	public $division, $club, $sequence, $name, $status, $played, $won, $drawn, $lost, $gpd;
+	public $status, $played, $won, $drawn, $lost, $gpd;
 	public $rawPoints, $adjustedPoints, $tieBreak;
 
 	private function populateFromDbRow($row) {
 		$this->_id = $row['team_id'];
 		//$this->division = new IdWrapper($row['division_id']);
-		$this->division = Division::loadById($row['division_id']);
-		$this->club = new IdWrapper($row['club_id']);
-		$this->sequence = $row['sequence'];
-		$this->name = $row['name'];
+		$this->_division = Division::loadById($row['division_id']);
+		$this->_club = new IdWrapper($row['club_id']);
+		$this->_sequence = $row['sequence'];
+		$this->_name = $row['name'];
 		$this->status = $row['status'];
 		$this->played = $row['played'];
 		$this->won = $row['won'];
@@ -75,7 +117,7 @@ class Team {
 		$this->tieBreak = $row['tie_break'];
 	}
 
-	private $_id;
+	private $_id, $_division, $_club, $_sequence, $_name;
 
 	public function save($silentFail = false) {
 		global $Database;
@@ -84,7 +126,7 @@ class Team {
 			$stmt = $Database->prepare('
 				INSERT INTO team(division_id, club_id, sequence, name)
 				VALUES(?, ?, ?, ?)');
-			$stmt->execute([$this->division->id(), $this->club->id(), $this->sequence, $this->name]);
+			$stmt->execute([$this->_division->id(), $this->_club->id(), $this->_sequence, $this->_name]);
 			$this->_id = $Database->lastInsertId();
 
 		} else if (!$silentFail) {
@@ -98,8 +140,8 @@ class Team {
 	
 	// DEBUG
 	public function dump() {
-		echo "<p>Team ID: $this->_id; Club ID: ", $this->club->id(), "; Name: $this->name; ",
-			"Sequence: $this->sequence; Status: $this->status</p>";
+		echo "<p>Team ID: $this->_id; Club ID: ", $this->_club->id(), "; Name: $this->_name; ",
+			"Sequence: $this->_sequence; Status: $this->status</p>";
 	}
 
 	public function recursiveDump() {

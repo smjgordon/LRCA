@@ -21,4 +21,8 @@ try {
 
 $CanSendEmail = false;
 $GoogleMapKey = 'AIzaSyDVK5jT-tHmFw5nixdZHIS5kh96ztK2zcc';
+$UriBase = '/lrca2/';
+$UploadTempFolder = 'C:/windows/temp/';
+
+$DevNotices = [];
 ?>

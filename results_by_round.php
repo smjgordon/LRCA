@@ -4,31 +4,29 @@ require_once 'private_php/p_division.php';
 require_once 'private_php/v_html_division.php';
 require_once 'private_php/p_match.php';
 
-$roundID = @$_GET['rid'];
-if (!is_numeric($roundID)) errorPage(404);
-$roundID = (int) $roundID;
+try {
+	$round = Round::loadByUri($_SERVER['REQUEST_URI']);
+	$division = $round->division();
+	$divisionView = new HtmlDivisionView($division);
+	$subtitle = $round->name() . ' Results';
+} catch (ModelAccessException $ex) {
+	errorPage(HttpStatus::NotFound);
+}
 
-$stmt = $Database->prepare('SELECT name, division_id FROM round WHERE round_id = ?');
-$stmt->execute([$roundID]);
-$row = $stmt->fetch();
-if (!$row) errorPage(404);
-
-$division = new OldDivision($row['division_id']);
-$divisionId = $division->id();
-$divisionView = new HtmlDivisionView(Division::loadById($divisionId));
-$subtitle = $row['name'] . ' Results';
-
-pageHeader($subtitle . ' – ' . $division->headerTitle());
+pageHeader($subtitle . ' – ' . $divisionView->headerTitle());
 ?>
 
 <div id="subNav">
-	<?php $division->section->divisionIndex(); // TODO: figure out what to do with this ?>
-	<ul><li><a href='penalties.php?did=<?php echo $divisionId; ?>'>Penalties</a></li></ul>
+<?php
+	$sectionView = new HtmlSectionView($division->section());
+	$sectionView->showDivisionIndex();
+?>
+	<ul><li><a href="../penalties">Penalties</a></li></ul>
 	<?php echo $divisionView->breakdown(); ?>
 </div>
 
 <div id="subBody">
-	<h2><?php echo htmlspecialchars($division->bodyTitle()); ?></h2>
+	<h2><?php echo htmlspecialchars($divisionView->bodyTitle()); ?></h2>
 	<h3 class="sub"><?php echo $subtitle; ?></h3>
 
 <?php
@@ -37,7 +35,7 @@ pageHeader($subtitle . ' – ' . $division->headerTitle());
 		FROM fixture
 		WHERE round_id = ? AND status = 1
 		ORDER BY fixture_date DESC');
-	$stmt->execute([$roundID]);
+	$stmt->execute([$round->id()]);
 
 	$row = $stmt->fetch();
 	if ($row) {

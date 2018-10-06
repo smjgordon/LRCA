@@ -1,0 +1,3 @@
+<?php
+$UriBase = '/lrca2/';
+?>

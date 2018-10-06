@@ -3,39 +3,63 @@
 	margin: 0;
 	padding: 0;
 }
+body {
+	min-height: 100%;
+}
+
+/*#mainNav {
+	color: white;
+}*/
+
 #mainNav ul {
-	margin: 0 0 1em;
+	/*margin: 0 0 1em;*/
 	list-style: none;
 	padding: 0;
 }
-#mainNav1 {
-	float: left;
-}
-#mainNav2 {
-	float: right;
-}
-#mainNav li {
-	display: inline-block;
+
+#mainNav>ul>li {
 	margin: 0;
 }
+
 #mainNav li a {
 	text-decoration: none;
+	text-transform: uppercase;
+	font-size: 0.9em;
 	display: block;
-	color: black;
+	color: white;
+	/*color: black;
 	border-top: 2px solid white;
 	border-left: 2px solid white;
 	border-right: 2px solid #999999;
-	border-bottom: 2px solid #999999;
-	padding: 5px 10px;
-	background-color: #cccccc;
+	border-bottom: 2px solid #999999;*/
+	padding: 3px 7px;
+	/*background-color: #cccccc;*/
 }
+
 #mainNav+* {
 	clear: both;
 }
+
+#mainNav ul ul ul {
+	left: 100%;
+	top: 0em;
+	white-space: nowrap;
+}
+#mainNav ul ul {
+	visibility: hidden;
+	background: navy;
+	display: none;
+}
+
+#mainNav ul ul li {
+	margin: 0;
+}
+
 #mainNav li.loggedInUser {
 	position: absolute;
 	right: 0;
-	top: 0.75em;
+	top: 0;
+	margin-top: 0;
 }
 
 #mainBody {
@@ -44,13 +68,13 @@
 	/*width: 100%;*/
 	padding: 0 1em;
 }
-
+/*
 #subNav {
 	position: absolute;
 	left: 1em;
 	width: 13em;
 }
-
+*/
 #subNav ul {
 	list-style: none;
 	padding: 0;
@@ -59,29 +83,33 @@
 	margin: 0;
 }
 #subNav li a {
-	border-top: 1px solid #999999;
-	border-bottom: 1px solid #999999;
+	border-top: 1px solid #9999cc;
+	border-bottom: 1px solid #9999cc;
 	padding: 5px 0;
 	text-decoration: none;
 	display: block;
 	color: inherit;
 }
 #subNav li a:hover {
-	background-color: #cccccc;
+	background-color: #ccccff;
 	color: black;
 }
-#subNav ul+ul {
+#subNav ul+ul, #subNav ul+form {
 	margin-top: 2em;
 }
-
+/*
 #subBody {
 	position: absolute;
 	left: 15em;
 	right: 1em;
-}
+}*/
 /*#subNav p+p {
 	margin-top: 0.8em;
 }*/
+
+#head+* {
+	clear: both;
+}
 
 #clubVenue {
 	float: left;
@@ -120,11 +148,11 @@ th, td {
 
 .standings {
 	/*width: 100%;*/
-	border-top: 1px solid #999999;
-	border-bottom: 1px solid #999999;
+	border-top: 1px solid #9999cc;
+	border-bottom: 1px solid #9999cc;
 }
 .standings thead {
-	border-bottom: 1px solid #999999;
+	border-bottom: 1px solid #9999cc;
 }	
 .standings th, .standings td {
 	text-align: left;
@@ -137,7 +165,7 @@ th, td {
 	padding-right: 2em;
 }
 .standings th, .standings tr:nth-child(even) {
-	background-color: #dddddd;
+	background-color: #ddddff;
 }
 
 .fixtures td.division {
@@ -155,8 +183,8 @@ th, td {
 	width: 12em;
 }
 .result thead, .result tfoot {
-	border-top: 1px solid #999999;
-	border-bottom: 1px solid #999999;
+	border-top: 1px solid #9999ff;
+	border-bottom: 1px solid #9999ff;
 }
 
 .result td.board, .result td.colour, .result td.grade, .result td.score {
@@ -173,8 +201,8 @@ th, td {
 }
 
 .resultSubmit thead, .resultSubmit tfoot {
-	border-top: 1px solid #999999;
-	border-bottom: 1px solid #999999;
+	border-top: 1px solid #9999ff;
+	border-bottom: 1px solid #9999ff;
 }
 
 .resultSubmit td.board, .resultSubmit td.colour, .resultSubmit td.grade, .resultSubmit td.score {
@@ -228,14 +256,14 @@ td.dash {
 }
 
 .players, .barred, .contacts {
-	border-top: 1px solid #999999;
-	border-bottom: 1px solid #999999;
+	border-top: 1px solid #9999ff;
+	border-bottom: 1px solid #9999ff;
 }
 .players thead, .barred thead {
-	border-bottom: 1px solid #999999;
+	border-bottom: 1px solid #9999ff;
 }
 .players th, .players tr:nth-child(even), .barred tr:nth-child(even), .contacts tr:nth-child(even) {
-	background-color: #dddddd;
+	background-color: #ddddff;
 }
 .players .grade, .players .cat {
 	text-align: center;
@@ -271,16 +299,26 @@ td.dash {
 	display: inline-block;
 }
 
-h2+*{
+h2+*, *+h2, *+form h2 {
 	margin-top: 1em;
 }
 *+h3 {
 	margin-top: 1em;
-	margin-bottom: 0.5em;
+	margin-bottom: 0;
+}
+*+h4 {
+	margin-top: 0.5em;
 }
 h2+h3.sub {
 	margin-top: 0.1em;
 	margin-bottom: 1em;
+}
+h3+* {
+	margin-top: 0.5em;
+}
+h3+p.sub {
+	margin-top: 0.1em;
+	font-style: italic;
 }
 
 li {

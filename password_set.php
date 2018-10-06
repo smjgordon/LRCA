@@ -7,7 +7,7 @@ pageHeader('New Password Set');
 
 <p>You have successfully set a new password for your user account.</p>
 
-<p>You will need to use this new password to log in to the results website.</p>
+<p>You will need to use this new password to log in to the website.</p>
 
 <?php
 pageFooter();

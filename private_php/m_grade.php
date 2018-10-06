@@ -10,7 +10,7 @@ class Grade {
 			WHERE grade_id = ?');
 		$stmt->execute([$id]);
 
-		if ($row = $stmt->fetch()) {
+		if (!!($row = $stmt->fetch())) {
 			$result = new Grade(null, null, null, null);
 			$result->populateFromDbRow($row);
 			return $result;
@@ -34,7 +34,7 @@ class Grade {
 		//echo $stmt->rowCount(); // debug
 
 		// we only care about the 1st record (latest effective_from) returned, as this is the one effective as of $date
-		if ($row = $stmt->fetch()) {
+		if (!!($row = $stmt->fetch())) {
 			$result = new Grade($player, null, null, null);
 			$result->populateFromDbRow($row);
 			return $result;

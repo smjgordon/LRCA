@@ -4,6 +4,7 @@ require_once 'p_server.php';
 require_once 'p_exceptions.php';
 require_once 'm_fixture.php';
 require_once 'm_team.php';
+require_once 'm_contact.php';
 
 class Club {
 	public static function loadAll($activeOnly = true) {
@@ -16,7 +17,7 @@ class Club {
 		$sql .= ' ORDER BY name';
 
 		$stmt = $Database->query($sql);
-		while ($row = $stmt->fetch()) {
+		while (!!($row = $stmt->fetch())) {
 			$result[] = new Club($row);
 		}
 		return $result;
@@ -30,10 +31,39 @@ class Club {
 			WHERE name = ?');
 		$stmt->execute([$name]);
 
-		if ($row = $stmt->fetch()) {
+		if (!!($row = $stmt->fetch())) {
 			return new Club($row);
 		} else {
 			throw new ModelAccessException(ModelAccessException::BadClubName, $name);
+		}
+	}
+
+	public static function loadByUri($uri) {
+		global $Database;
+		
+		$uriParts = array_slice(explode('/', trim($uri, '/')), -2);
+		if (count($uriParts) != 2) {
+			throw new ModelAccessException(ModelAccessException::BadUrl, $uri);
+		} else if ($uriParts[1] == 'dtp') {
+			$urlName = $uriParts[0];
+		} else {
+			$urlName = $uriParts[1];
+		}
+		//if (count($uriParts) != 1) throw new ModelAccessException(ModelAccessException::BadUrl, $uri);
+		$stmt = $Database->prepare(' SELECT * FROM club WHERE url_name = ?');
+		//$stmt->execute($uriParts);
+		$stmt->execute([$urlName]);
+		if (!!($row = $stmt->fetch())) {
+			/*$id = (int) $row['club'];
+			if (isset(Division::$instanceCache[$id])) {
+				return Division::$instanceCache[$id];
+			} else {			*/
+				$result = new Club($row);
+				//Division::$instanceCache[$id] = $result;
+				return $result;
+			//}
+		} else {
+			throw new ModelAccessException(ModelAccessException::BadClubUrlName, $uriParts[0]);
 		}
 	}
 
@@ -45,7 +75,7 @@ class Club {
 			WHERE club_id = ?');
 		$stmt->execute([$id]);
 
-		if ($row = $stmt->fetch()) {
+		if (!!($row = $stmt->fetch())) {
 			return new Club($row);
 		} else {
 			throw new ModelAccessException(ModelAccessException::BadClubId, $id);
@@ -68,7 +98,7 @@ class Club {
 				WHERE ? IN (ht.club_id, at.club_id)
 				ORDER BY f.fixture_date, f.fixture_id');
 			$stmt->execute([$this->_id]);
-			while ($row = $stmt->fetch()) $this->fixtures[] = Fixture::loadById($row['fixture_id']);
+			while (!!($row = $stmt->fetch())) $this->fixtures[] = Fixture::loadById($row['fixture_id']);
 
 			$this->_fixturesLoaded = true;
 		}
@@ -82,10 +112,10 @@ class Club {
 			SELECT t.team_id
 			FROM team t JOIN division d ON t.division_id = d.division_id
 			WHERE t.club_id = ? AND d.year = ? AND d.section_id = ?
-			ORDER BY t.sequence');
-		$stmt->execute([$this->_id, $section->year, $section->id]);
+			ORDER BY d.sequence, t.sequence');
+		$stmt->execute([$this->_id, $section->year(), $section->id()]);
 		
-		while ($row = $stmt->fetch()) $teams[] = Team::loadById($row['team_id']);
+		while (!!($row = $stmt->fetch())) $teams[] = Team::loadById($row['team_id']);
 		return $teams;
 	}
 	
@@ -104,7 +134,7 @@ class Club {
 			ORDER BY f.fixture_date, f.fixture_id");
 		$stmt->execute([$this->_id, date('c')]);
 
-		while ($row = $stmt->fetch()) $fixtures[] = Fixture::loadById($row['fixture_id']);
+		while (!!($row = $stmt->fetch())) $fixtures[] = Fixture::loadById($row['fixture_id']);
 		return $fixtures;
 	}
 
@@ -123,7 +153,7 @@ class Club {
 			ORDER BY f.fixture_date, f.fixture_id");
 		$stmt->execute([$this->_id, date('c')]);
 
-		while ($row = $stmt->fetch()) $fixtures[] = Fixture::loadById($row['fixture_id']);
+		while (!!($row = $stmt->fetch())) $fixtures[] = Fixture::loadById($row['fixture_id']);
 		return $fixtures;
 	}
 
@@ -140,7 +170,7 @@ class Club {
 			ORDER BY f.fixture_date, f.fixture_id');
 		$stmt->execute([$this->_id]);
 
-		while ($row = $stmt->fetch()) $fixtures[] = Fixture::loadById($row['fixture_id']);
+		while (!!($row = $stmt->fetch())) $fixtures[] = Fixture::loadById($row['fixture_id']);
 		return $fixtures;
 	}
 
@@ -159,7 +189,7 @@ class Club {
 			ORDER BY f.fixture_date, f.fixture_id');
 		$stmt->execute([$this->_id]);
 
-		while ($row = $stmt->fetch()) {
+		while (!!($row = $stmt->fetch())) {
 			$fixtures[] = $fixture = Fixture::loadById($row['fixture_id']);
 			switch ($fixture->status) {
 				case MatchStatus::Unplayed:
@@ -172,8 +202,10 @@ class Club {
 		return $fixtures;
 	}
 
+	// TODO: refactor
 	private function __construct($row) {
 		$this->_id = $row['club_id'];
+		$this->_urlName = $row['url_name'];
 		$this->_name = $row['name'];
 		$this->_longName = $row['long_name'];
 		$this->_ecfCode = $row['ecf_code'];
@@ -201,10 +233,11 @@ class Club {
 		$this->_meetingEndTime = $row['meeting_end_time'];
 		$this->_sessionLength = $row['session_length'];
 		$this->_digitalClocks = $row['digital_clocks'];
-		$this->_websiteUrl = $row['website_url'];
+		$this->_websiteUri = $row['website_url'];
 	}
 
 	public function id() { return $this->_id; }
+	public function urlName() { return $this->_urlName; }
 	public function name() { return $this->_name; }
 	public function longName() { return $this->_longName; }
 	public function ecfCode() { return $this->_ecfCode; }
@@ -234,15 +267,15 @@ class Club {
 	}
 	public function meetingTime() { return $this->_meetingTime; }
 	public function meetingEndTime() { return $this->_meetingEndTime; }
-	public function websiteUrl() { return $this->_websiteUrl; }
+	public function websiteUrl() { return $this->_websiteUri; }
 	public function sessionLength() { return $this->_sessionLength; }
 	public function digitalClocks() { return $this->_digitalClocks; }
 
-	private $_id, $_name, $_longName, $_ecfCode, $_status;//, $_fixturesLoaded;
+	private $_id, $_urlName, $_name, $_longName, $_ecfCode, $_status;
 	private $_venueName, $_venueAddress, $_venuePostcode, $venueInfo;
 	private $_venueLatitude, $_venueLongitude, $_venuePlaceId;
 	private $_meetingDay, $_meetingTime, $_meetingEndTime, $_sessionLength, $_digitalClocks;
-	private $_websiteUrl;
+	private $_websiteUri;
 }
 
 abstract class ClubStatus {
@@ -261,7 +294,7 @@ abstract class DigitalClocks {
 	const Limited = 1;
 	const Yes = 2;
 }
-
+/*
 abstract class ContactType {
 	const Secretary = 1;
 	const EmailContact = 10;
@@ -349,5 +382,5 @@ class Contact {
 	private $_id, $_type, $_name, $_teamName, $_divisionName;
 	// TODO: logicalise
 	private $_emails, $_phoneNumbers;
-}
+}*/
 ?>

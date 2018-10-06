@@ -32,7 +32,7 @@ class Fixture {
 		$this->_id = $row['fixture_id'];
 
 		$this->round = Round::loadById($row['round_id']);
-		$this->division = $this->round->division;
+		$this->division = $this->round->division();
 		
 		$this->homeTeam = $row['home_team_id'] ? Team::loadById($row['home_team_id']) : null;
 		$this->awayTeam = $row['away_team_id'] ? Team::loadById($row['away_team_id']) : null;
@@ -83,8 +83,8 @@ class Fixture {
 
 	// DEBUG
 	public function dump() {
-		echo "<p>Fixture ID: $this->_id; Home team: ", $this->homeTeam->name, "; ",
-			"Away team: ", $this->awayTeam->name, "; Date: $this->date</p>";
+		echo "<p>Fixture ID: $this->_id; Home team: ", $this->homeTeam->name(), "; ",
+			"Away team: ", $this->awayTeam->name(), "; Date: $this->date</p>";
 	}
 
 	public function recursiveDump() {

@@ -23,4 +23,10 @@ try {
 
 $CanSendEmail = true;
 $GoogleMapKey = 'AIzaSyAO14roLN-8rzZzmab1xl9EYP-Zeu5PvoI';
+$UriBase = '/mockup/';
+$UploadTempFolder = '/tmp/';
+
+$DevNotices = [
+	null => 'This mockup was created as a preview of the new, reintegrated <a href="http://leicestershirechess.org/">LRCA website</a>, which is now live.&nbsp; Those who have been given access to post news can still log in in order to use this to test the news posting facility.'
+];
 ?>

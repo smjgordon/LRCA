@@ -6,7 +6,7 @@ $pageTitle = $userStatus == UserStatus::Active ? 'Password Recovery' : 'Password
 pageHeader($pageTitle);
 ?>
 
-<h1><?php echo htmlspecialchars($pageTitle); ?></h1>
+<h2><?php echo htmlspecialchars($pageTitle); ?></h2>
 
 <p>An email has been sent to your email address.</p>
 

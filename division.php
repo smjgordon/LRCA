@@ -2,14 +2,11 @@
 require_once 'private_php/p_global.php';
 require_once 'private_php/m_division.php';
 require_once 'private_php/v_html_division.php';
+require_once 'private_php/v_html_section.php';
 require_once 'private_php/u_text.php';
 
-$divisionId = @$_GET['did'];
-if (!is_numeric($divisionId)) errorPage(404);
-$divisionId = (int) $divisionId;
-
 try {
-	$division = Division::loadById($divisionId);
+	$division = Division::loadByUri($_SERVER['REQUEST_URI']);
 	$divisionView = new HtmlDivisionView($division);
 } catch (Exception $ex) {
 	errorPage(404);
@@ -19,8 +16,11 @@ pageHeader($divisionView->headerTitle());
 ?>
 
 <div id="subNav">
-	<?php $division->section->divisionIndex(); // TODO: figure out what to do with this ?>
-	<ul><li><a href='penalties.php?did=<?php echo $divisionId; ?>'>Penalties</a></li></ul>
+<?php
+	$sectionView = new HtmlSectionView($division->section());
+	$sectionView->showDivisionIndex();
+?>
+	<ul><li><a href="penalties">Penalties</a></li></ul>
 	<?php echo $divisionView->breakdown(); ?>
 </div>
 

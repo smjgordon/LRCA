@@ -6,13 +6,13 @@ require_once 'private_php/p_match.php';
 requireLogin(['can_submit']);
 
 $fixtureId = @$_REQUEST['fid'];
-if (!is_numeric($fixtureId)) errorPage(404);
+if (!is_numeric($fixtureId)) errorPage(HttpStatus::NotFound);
 $fixtureId = (int) $fixtureId;
 
 try {
 	$fixture = Fixture::loadById($fixtureId);
 } catch (Exception $ex) {
-	errorPage(404);
+	errorPage(HttpStatus::NotFound);
 }
 
 $fixtures = $CurrentUser->club()->fixturesPendingSubmission();
@@ -20,6 +20,7 @@ $loopFixture = null;
 foreach ($fixtures as $loopFixture) {
 	if ($loopFixture->id() == $fixtureId) break;
 }
+
 // TODO: distinguish failure scenarios:
 // - not the user's club
 // - approved
@@ -60,8 +61,8 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
 		$submissionBuilt = false;
 
 	} catch (Exception $ex) {
-		//$error = $ex->getMessage(); // debug
-		errorPage(500);
+		$error = $ex->getMessage(); // debug
+		//errorPage(500);
 	}
 }
 
@@ -74,9 +75,9 @@ pageHeader('Submit Result');
 	<p class="error"><?php echo htmlspecialchars($error); ?></p>
 <?php } ?>
 
-<form method="post" action="<?php echo htmlspecialchars($_SERVER['SCRIPT_NAME']); ?>">
+<form method="post" action="submit">
 	<?php if ($submissionBuilt) { ?>
-		<p>Please confirm that these details are correct.&nbsp; If you have made a mistake, please use your browser's Back button to return to the submission form.&nbsp; If you are happy that the result is complete and correct, please press Submit again to complete the submission.</p>
+		<p>Please confirm that these details are correct.&nbsp; If you have made a mistake, please use your browser's Back button to return to the submission form.&nbsp; If you are happy that the result is complete and correct, please press Submit to complete the submission.</p>
 		<?php $match->renderResult(); ?>
 		<p>
 			<?php carryForwardPostData(); ?>
@@ -91,7 +92,7 @@ pageHeader('Submit Result');
 	<?php } else { ?>
 		<p>Please enter the details of the match.</p>
 	<?php
-		$division = Division::loadById($fixture->round->division->id());
+		$division = Division::loadById($fixture->round->division()->id());
 		/*if ($division->minBoards < $division->maxBoards) {
 		?>	<p>If you used fewer than <?php echo $division->maxBoards; ?> boards, please fill in as many boards as you used, starting at the top, and leave the remainder blank.</p>
 		<?php
@@ -103,10 +104,10 @@ pageHeader('Submit Result');
 		<textarea style="width: 40em; max-width: 100%;" maxlength="1024" name="comments"><?php
 			echo htmlspecialchars(@$_POST['comments']);
 		?></textarea></p>
-	
+
 		<p>
 			<input type="hidden" name="fid" value="<?php echo $fixtureId; ?>" />
-			<input type="submit" value="Submit" />
+			<input type="submit" value="Next" />
 		</p>
 	<?php } ?>
 </form>

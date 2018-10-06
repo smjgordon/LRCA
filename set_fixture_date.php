@@ -51,8 +51,8 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
 			}
 
 			// generate email confirmation
-			$emailSubject = "Fixture date: " . $fixture->division->name . ' - '
-				. $fixture->homeTeam->name . ' v ' . $fixture->awayTeam->name;
+			$emailSubject = "Fixture date: " . $fixture->division->name() . ' - '
+				. $fixture->homeTeam->name() . ' v ' . $fixture->awayTeam->name();
 
 			$emailMessage = 'Hello,
 
@@ -60,9 +60,9 @@ A new date has been set for this fixture.
 
 It will be played on ' . formatDate($newDate, true) . '.';
 
-			$recipients = array_merge(User::loadByClub($fixture->homeTeam->club), User::loadByClub($fixture->awayTeam->club));
+			$recipients = array_merge(User::loadByClub($fixture->homeTeam->club()), User::loadByClub($fixture->awayTeam->club()));
 
-			emailConfirmation($emailSubject, $emailMessage, $recipients, 'fixture_date_set.php');
+			emailConfirmation($emailSubject, $emailMessage, $recipients, 'date_set');
 		}
 
 	} catch (ReportableException $ex) {
@@ -84,16 +84,16 @@ pageHeader('Set Fixture Date');
 	<p class="error"><?php echo htmlspecialchars($error); ?></p>
 <?php } ?>
 
-<form class="tabForm" method="post" action="<?php echo htmlspecialchars($_SERVER['SCRIPT_NAME']); ?>">
+<form class="tabForm" method="post" action="set_date">
 	<?php if ($newDate) { ?>
-		<p>Please confirm the date you have entered is correct.&nbsp; If you have made a mistake, please use your browser's Back button to return to the date entry form.&nbsp; If you are happy that the date is correct, please press Set Date again to register the date.</p>
+		<p>Please confirm the date you have entered is correct.&nbsp; If you have made a mistake, please use your browser's Back button to return to the date entry form.&nbsp; If you are happy that the date is correct, please press Set Date to register the date.</p>
 
 		<table class="fixtures">
 			<tr>
 				<td class="date"><?php echo formatDate($newDate); ?></td>
-				<td class="homeTeam"><?php echo $fixture->homeTeam ? htmlspecialchars($fixture->homeTeam->name) : 'bye'; ?></td>
+				<td class="homeTeam"><?php echo $fixture->homeTeam ? htmlspecialchars($fixture->homeTeam->name()) : 'bye'; ?></td>
 				<td class="homeScore"></td><td class="dash">v</td><td class="awayScore"></td>
-				<td class="awayTeam"><?php echo $fixture->awayTeam ? htmlspecialchars($fixture->awayTeam->name) : 'bye'; ?></td>
+				<td class="awayTeam"><?php echo $fixture->awayTeam ? htmlspecialchars($fixture->awayTeam->name()) : 'bye'; ?></td>
 			</tr>
 		</table>
 
@@ -110,7 +110,7 @@ pageHeader('Set Fixture Date');
 		<table class="fixtures">
 			<tr>
 				<td class="date"><?php echo formatDate($fixture->date); ?></td>
-				<td class="homeTeam"><?php echo $fixture->homeTeam ? htmlspecialchars($fixture->homeTeam->name) : 'bye'; ?></td>
+				<td class="homeTeam"><?php echo $fixture->homeTeam ? htmlspecialchars($fixture->homeTeam->name()) : 'bye'; ?></td>
 				<?php
 					switch ($fixture->status) {
 						case MatchStatus::Unplayed: ?>
@@ -127,7 +127,7 @@ pageHeader('Set Fixture Date');
 							errorPage(HttpStatus::InternalError);
 					}
 				?>
-				<td class="awayTeam"><?php echo $fixture->awayTeam ? htmlspecialchars($fixture->awayTeam->name) : 'bye'; ?></td>
+				<td class="awayTeam"><?php echo $fixture->awayTeam ? htmlspecialchars($fixture->awayTeam->name()) : 'bye'; ?></td>
 			</tr>
 		</table>
 
@@ -135,7 +135,7 @@ pageHeader('Set Fixture Date');
 
 		<p>
 			<input type="hidden" name="fid" value="<?php echo $fixtureId; ?>" />
-			<input type="submit" value="Set Date" />
+			<input type="submit" value="Next" />
 		</p>
 	<?php } ?>
 </form>

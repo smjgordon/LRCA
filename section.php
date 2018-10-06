@@ -4,16 +4,8 @@ require_once 'private_php/m_section.php';
 require_once 'private_php/v_html_section.php';
 require_once 'private_php/v_html_document.php';
 
-$year = @$_GET['year'];
-if (!is_numeric($year)) errorPage(404);
-$year = (int) $year;
-
-$sectionId = @$_GET['sid'];
-if (!is_numeric($sectionId)) errorPage(404);
-$sectionId = (int) $sectionId;
-
 try {
-	$section = Section::loadByYearAndId($year, $sectionId);
+	$section = Section::loadByUri($_SERVER['REQUEST_URI']);
 	$sectionView = new HtmlSectionView($section);
 } catch (ModelAccessException $ex) {
 	errorPage(404);

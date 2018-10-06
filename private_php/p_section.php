@@ -31,7 +31,7 @@ class OldSection {
 				return $this->year . ' ' . $this->name;
 		}
 	}
-
+/*
 	function divisionIndex() {
 		global $Database;
 
@@ -51,7 +51,7 @@ class OldSection {
 			return false;
 		}
 	}
-
+*/
 	function documentList() {
 		global $Database;
 		

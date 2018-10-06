@@ -4,12 +4,10 @@ require_once 'private_php/m_division.php';
 require_once 'private_php/v_html_division.php';
 require_once 'private_php/u_text.php';
 
-$divisionId = @$_GET['did'];
-if (!is_numeric($divisionId)) errorPage(404);
-$divisionId = (int) $divisionId;
+if (substr($_SERVER['REQUEST_URI'], -10) != '/penalties') errorPage(HttpStatus::InternalError);
 
 try {
-	$division = Division::loadById($divisionId);
+	$division = Division::loadByUri(substr($_SERVER['REQUEST_URI'], 0, -10));
 	$divisionView = new HtmlDivisionView($division);
 } catch (Exception $ex) {
 	errorPage(404);
@@ -19,8 +17,12 @@ pageHeader("Penalties – " . $divisionView->headerTitle());
 ?>
 
 <div id="subNav">
-	<?php $division->section->divisionIndex(); // TODO: figure out what to do with this ?>
-	<ul><li><a href='penalties.php?did=<?php echo $divisionId; ?>'>Penalties</a></li></ul>
+<?php
+	$section = $division->section();
+	$sectionView = new HtmlSectionView($section);
+	$sectionView->showDivisionIndex();
+?>
+	<ul><li><a href="penalties">Penalties</a></li></ul>
 	<?php echo $divisionView->breakdown(); ?>
 </div>
 
@@ -29,7 +31,7 @@ pageHeader("Penalties – " . $divisionView->headerTitle());
 	<h3 class="sub">Penalties</h3>
 	
 <?php
-	if ($division->section->year < ($division->section->season == Season::Winter ? 2016 : 2017)) {
+	if ($section->year() < ($section->season() == Season::Winter ? 2016 : 2017)) {
 	?>
 		<p class="devNotice">Penalties prior to the 2016–17 League season are not fully entered into the database.&nbsp; As such, this information may be inaccurate.</p>
 	<?php

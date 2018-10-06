@@ -1,19 +1,143 @@
-Redirect permanent /minor_league.html /division.php?did=76
-Redirect permanent /minor_league_results.html /division.php?did=76
-Redirect permanent /chapman.html /division.php?did=47
-Redirect permanent /chapman_results.html /results_by_round.php?rid=133
-Redirect permanent /wylie.html /division.php?did=68
-Redirect permanent /harrod.html /division.php?did=75
-Redirect permanent /players/index.html /players.php
-Redirect permanent /players/ashby.html /players.php?cid=17
-Redirect permanent /players/braunstone.html /players.php?cid=1
-Redirect permanent /players/heathcote.html /players.php?cid=2
-Redirect permanent /players/kirby.html /players.php?cid=16
-Redirect permanent /players/latimer.html /players.php?cid=19
-Redirect permanent /players/loughborough.html /players.php?cid=4
-Redirect permanent /players/mkt_harborough.html /players.php?cid=5
-Redirect permanent /players/melton.html /players.php?cid=6
-Redirect permanent /players/syston.html /players.php?cid=12
-Redirect permanent /players/wigston.html /players.php?cid=13
-Redirect permanent /new http://lrca.stewartsplace.org.uk
 ErrorDocument 404 /error_page.php
+
+# 2017/ back to homepage
+RedirectMatch 301 ^(.*/)2[0-9][0-9][0-9]/?$ $1
+
+# 2017/league/1/month/ back to division page
+RedirectMatch 301 ^(.*/2[0-9][0-9][0-9]/[^/]+/[^/]+/)month/?$ $1
+
+# 2017/league/1/round/ back to division page
+RedirectMatch 301 ^(.*/2[0-9][0-9][0-9]/[^/]+/[^/]+/)round/?$ $1
+
+# 2017/league/1/team/ back to division page
+RedirectMatch 301 ^(.*/2[0-9][0-9][0-9]/[^/]+/[^/]+/)team/?$ $1
+
+# 2017/league/1/team/loughborough/ back to division page
+RedirectMatch 301 ^(.*/2[0-9][0-9][0-9]/[^/]+/[^/]+/)team/[^/]+/?$ $1
+
+RewriteEngine On
+# 2017/league/
+RedirectMatch 301 ^(.*/2[0-9][0-9][0-9]/[^/]+)$ $1/
+RewriteRule ^2[0-9][0-9][0-9]/[^/]+/$ section.php
+
+# 2017/league/1/
+RedirectMatch 301 ^(.*/2[0-9][0-9][0-9]/[^/]+/[^/]+)$ $1/
+RewriteRule ^2[0-9][0-9][0-9]/[^/]+/[^/]+/$ division.php
+
+# 2017/league/1/month/10
+RewriteRule ^2[0-9][0-9][0-9]/[^/]+/[^/]+/month/[-0-9]+$ results_by_month.php
+
+# 2017/cups/chapman/round/1
+RewriteRule ^2[0-9][0-9][0-9]/[^/]+/[^/]+/round/[^/]+$ results_by_round.php
+
+# 2017/league/1/team/wigston/1
+RewriteRule ^2[0-9][0-9][0-9]/[^/]+/[^/]+/team/[^/]+/[0-9]+$ results_by_team.php
+
+# 2017/league/1/penalties
+RewriteRule ^2[0-9][0-9][0-9]/[^/]+/[^/]+/penalties$ penalties.php
+
+# archive/
+RedirectMatch 301 ^(.*/archive)$ $1/
+RewriteRule ^archive/$ archive.php
+
+# clubs/
+RedirectMatch 301 ^(.*/clubs)$ $1/
+RewriteRule ^clubs/$ clubs.php
+
+# clubs/loughborough/
+RedirectMatch 301 ^(.*/clubs/[^/]+)$ $1/
+RewriteRule ^clubs/[^/]+/$ club.php
+
+# clubs/loughborough/dtp/
+RedirectMatch ^(.*/clubs/[^/]+/dtp)$ $1/
+RewriteRule ^clubs/[^/]+/dtp/.*$ dtp.php
+
+# players/
+RedirectMatch 301 ^(.*/players)$ $1/
+RewriteRule ^players/$ players.php
+
+# players/123
+RewriteRule ^players/[0-9]+$ player.php
+
+# players/barred
+RewriteRule ^players/barred$ barred_players.php
+
+# login
+RewriteRule ^login$ login.php
+
+# logout
+RewriteRule ^logout$ logout.php
+
+# my_fixtures/
+RedirectMatch 301 ^(.*/my_fixtures)$ $1/
+RewriteRule ^my_fixtures/$ my_fixtures.php
+
+# my_fixtures/submit
+RewriteRule ^my_fixtures/submit$ submit.php
+
+# my_fixtures/submitted
+RewriteRule ^my_fixtures/submitted$ result_submitted.php
+
+# my_fixtures/approve
+RewriteRule ^my_fixtures/approve$ approve.php
+
+# my_fixtures/approved
+RewriteRule ^my_fixtures/approved$ result_approved.php
+
+# my_fixtures/set_date
+RewriteRule ^my_fixtures/set_date$ set_fixture_date.php
+
+# my_fixtures/date_set
+RewriteRule ^my_fixtures/date_set$ fixture_date_set.php
+
+# rpwd/
+RedirectMatch 301 ^(.*/rpwd)$ $1/
+RewriteRule ^rpwd/[^/]*$ rpwd.php
+
+# rpwd_generated
+RewriteRule ^rpwd_generated$ rpwd_generated.php
+
+# password_set
+RewriteRule ^password_set$ password_set.php
+
+# my_account/
+RedirectMatch 301 ^(.*/my_account)$ $1/
+RewriteRule ^my_account/$ my_account.php
+
+# my_account/change_password
+RewriteRule ^my_account/change_password$ change_password.php
+
+# my_account/password_set
+RewriteRule ^my_account/password_set$ password_set.php
+
+# my_account/create_user
+RewriteRule ^my_account/create_user$ create_user.php
+
+# my_account/user_created
+RewriteRule ^my_account/user_created$ user_created.php
+
+# captcha
+RewriteRule ^captcha$ captcha.php
+
+# news/post
+RewriteRule ^news/post$ post_news.php
+
+# news/posted
+RewriteRule ^news/posted$ posted_news.php
+
+# news/
+RedirectMatch 301 ^(.*/news)/?$ $1/main
+RewriteRule ^news/[^/]*$ news.php
+
+# news/att/
+RewriteRule ^news/att/(.*)$ att/$1
+
+# about
+RewriteRule ^about$ about.php
+
+# links
+RewriteRule ^links$ links.php
+
+# committee/policy
+RedirectMatch 301 ^(.*/committee)/?$ $1/principal
+RewriteRule ^committee/[^/]*$ committee.php

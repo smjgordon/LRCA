@@ -84,7 +84,7 @@ class User {
 	}*/
 
 	private function populateFromDbRow($row, $club = null) {
-		$permissionFields = ['administrator', 'can_submit', 'can_create_users'];
+		$permissionFields = ['administrator', 'can_submit', 'can_create_users', 'can_post_news'];
 		
 		$this->_id = $row['user_id'];
 		$this->_forename = $row['forename'];

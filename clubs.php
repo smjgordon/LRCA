@@ -24,7 +24,7 @@ foreach ($clubs as $club) {
 		if ($long > $maxLong) $maxLong = $long;
 		
 		$jsMapMarkers .= "
-			createMarker(map, $lat, $long, " . json_encode($club->id()) . ', '
+			createMarker(map, $lat, $long, " . json_encode($club->urlName()) . ', '
 				. json_encode($club->name()) . ');';
 	}
 }

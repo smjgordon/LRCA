@@ -1,18 +1,16 @@
 <?php
 require_once 'private_php/p_global.php';
 require_once 'private_php/v_html_club.php';
+require_once 'private_php/v_html_contact.php';
+require_once 'private_php/v_html_section.php';
 require_once 'private_php/p_html_functions.php';
 require_once 'private_php/c_captcha.php';
 
-$clubId = @$_GET['cid'];
-if (!is_numeric($clubId)) errorPage(404);
-$clubId = (int) $clubId;
-
 try {
-	$club = Club::loadById($clubId);
+	$club = Club::loadByUri($_SERVER['REQUEST_URI']);
 	$clubView = new HtmlClubView($club);
 } catch (Exception $ex) {
-	errorPage(404);
+	errorPage(HttpStatus::NotFound);
 }
 
 pageHeader($club->name() . ' – Club Profile');
@@ -20,6 +18,9 @@ pageHeader($club->name() . ' – Club Profile');
 
 <div id="subNav">
 	<?php echo clubNavBar(); ?>
+	<ul>
+		<li><a href="dtp">Declared Team Players</a></li>
+	</ul>
 </div>
 
 <div id="subBody">
@@ -111,43 +112,47 @@ pageHeader($club->name() . ' – Club Profile');
 	<?php
 	}
 	
-	// TODO: support other sections
-	$teams = $club->teamsInSection(new OldSection(1, SystemSettings::$winterYear));
+	$sections = Section::loadAllInProgress();
 	
-	if (!empty($teams)) {
-	?>
-		<h3>Teams and Captains</h3>
-		<table class="contacts"><?php
-			foreach ($teams as $team) {
-				$contacts = Contact::loadByTeam($team);
-				if (empty($contacts)) {
-				?>
-					<tr>
-						<td><?php echo $team->division->name; ?></td>
-						<td><?php echo $team->name; ?></td>
-						<?php echo showNoContact($showContactInfo); ?>
-					</tr>
-				<?php					
-				} else {
-					foreach ($contacts as $contact) {
+	foreach ($sections as $section) {
+		$sectionView = new HtmlSectionView($section);
+		$teams = $club->teamsInSection($section);
+	
+		if (!empty($teams)) {
+		?>
+			<h3><?php echo htmlspecialchars($sectionView->displayName()); ?></h3>
+			<table class="contacts"><?php
+				foreach ($teams as $team) {
+					$contacts = Contact::loadByTeam($team);
+					if (empty($contacts)) {
 					?>
 						<tr>
-							<td><?php echo $team->division->name; ?></td>
-							<td><?php echo $team->name; ?></td>
-							<?php echo showContact($contact, $showContactInfo); ?>
+							<td><?php echo $team->division()->name(); ?></td>
+							<td><?php echo $team->name(); ?></td>
+							<?php echo showNoContact($showContactInfo); ?>
 						</tr>
-					<?php
+					<?php					
+					} else {
+						foreach ($contacts as $contact) {
+						?>
+							<tr>
+								<td><?php echo $team->division()->name(); ?></td>
+								<td><?php echo $team->name(); ?></td>
+								<?php echo showContact($contact, $showContactInfo); ?>
+							</tr>
+						<?php
+						}
 					}
 				}
-			}
-		?>
-		</table>
-	<?php
+			?>
+			</table>
+		<?php
+		}
 	}
 ?>
 
 	<?php if (!$showContactInfo) { ?>
-		<p><a href="captcha.php">Show Contact Information</a></p>
+		<p><a href="../../captcha">Show Contact Information</a></p>
 	<?php } ?>
 
 </div>

@@ -31,10 +31,12 @@ function renderSelectOption($value, $selectedValue, $displayText) {
 	echo '>', htmlspecialchars($displayText), '</option>';
 }
 
-function carryForwardPostData() {
+function carryForwardPostData($exceptions = []) {
 	foreach ($_POST as $key => $value) {
-	?>	<input type="hidden" name="<?php echo htmlspecialchars($key); ?>" value="<?php echo htmlspecialchars($value); ?>" />
-	<?php
+		if (!in_array($key, $exceptions)) {
+		?>	<input type="hidden" name="<?php echo htmlspecialchars($key); ?>" value="<?php echo htmlspecialchars($value); ?>" />
+		<?php
+		}
 	}
 }
 
@@ -52,9 +54,9 @@ function encodeMultiLineArray($strings) {
 }
 
 function carryForwardReferrer() {
-	$referrer = @$_POST['referrer'] or $referrer = @$_SERVER['HTTP_REFERER'];
-	$urlPrefix = 'http://' . $_SERVER['HTTP_HOST'] . '/';
-	if ($referrer && substr($referrer, 0, strlen($urlPrefix)) == $urlPrefix) {
+	$referrer = @$_REQUEST['referrer'] or $referrer = @$_SERVER['HTTP_REFERER'];
+	$uriPrefix = 'http://' . $_SERVER['HTTP_HOST'] . '/';
+	if ($referrer && substr($referrer, 0, strlen($uriPrefix)) == $uriPrefix) {
 	?>	<input type="hidden" name="referrer" value="<?php echo htmlspecialchars($referrer); ?>" />
 	<?php
 	}

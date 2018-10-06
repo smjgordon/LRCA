@@ -46,15 +46,15 @@ pageHeader('Create User');
 <?php } ?>
 
 <form class="tabForm" enctype="multipart/form-data" method="post"
-		action="<?php echo htmlspecialchars($_SERVER['SCRIPT_NAME']); ?>">
+		action="create_user">
 	<p><label for="forename">Forename:</label> <input type="text" name="forename" id="forename" value="<?php echo $forename; ?>" /></p>
 	<p><label for="surname">Surname:</label> <input type="text" name="surname" id="surname" value="<?php echo $surname; ?>" /></p>
 	<p><label for="email1">Email address:</label> <input type="text" name="email1" id="email1" value="<?php echo $email1; ?>" /></p>
 	<p><label for="email2">Re-enter email address:</label> <input type="text" name="email2" id="email2"  value="<?php echo $email2; ?>"/></p>
 	<p>
-		<label for="cid">Club:</label>
+		<label for="club">Club:</label>
 		<input type="hidden" name="cid" value="<?php echo $CurrentUser->club()->id(); ?>" />
-		<?php echo htmlspecialchars($CurrentUser->club()->name()); ?>
+		<span id="club"><?php echo htmlspecialchars($CurrentUser->club()->name()); ?></span>
 	</p>
 
 	<p><input type="submit" name="action" value="Create" /></p>

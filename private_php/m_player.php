@@ -48,6 +48,15 @@ class Player {
 		}
 	}
 	
+	public static function loadByUri($uri) {
+		global $Database;
+		
+		$uriParts = array_slice(explode('/', trim($uri, '/')), -1);
+		if (count($uriParts) != 1) throw new ModelAccessException(ModelAccessException::BadUrl, $uri);
+		if (!is_numeric($uriParts[0])) throw new ModelAccessException(ModelAccessException::BadUrl, $uri);
+		return Player::loadById((int) $uriParts[0]);
+	}
+
 	public static function loadByEcfCode($code) {
 		global $Database;
 		

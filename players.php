@@ -16,7 +16,7 @@ if ($clubID) {
 	$clubID = (int) $clubID;
 	$stmt = $Database->prepare('SELECT name FROM club WHERE club_id = ?');
 	$stmt->execute([$clubID]);
-	if ($row = $stmt->fetch()) {
+	if (!!($row = $stmt->fetch())) {
 		$pageTitle = $row['name'] . ' Player List';
 	} else {
 		errorPage(404);
@@ -51,12 +51,14 @@ pageHeader($pageTitle);
 ?>
 
 <div id="subNav">
-	<form method="get" action="players.php">
+	<!--<ul><li><a href="barred">Barred Players</a></li></ul>-->
+	
+	<form method="get" action="./">
 		<p>Club:<br />
 			<select name="cid"><?php
 				renderSelectOption('', $clubID, 'All');
 				$stmt = $Database->query('SELECT club_id, name FROM club WHERE status = 1 ORDER BY name');
-				while ($row = $stmt->fetch()) {
+				while (!!($row = $stmt->fetch())) {
 					renderSelectOption($row['club_id'], $clubID, $row['name']);
 				}
 			?></select>
@@ -171,7 +173,7 @@ pageHeader($pageTitle);
 						}
 					?></td>
 					<td>
-						<a href="player.php?pid=<?php echo $player['player_id']; ?>">
+						<a href="<?php echo $player['player_id']; ?>">
 							<?php echo htmlspecialchars($player['surname']), ', ', htmlspecialchars($player['forename']); ?>
 						</a>
 					</td>

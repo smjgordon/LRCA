@@ -4,32 +4,35 @@ require_once 'private_php/p_division.php';
 require_once 'private_php/v_html_division.php';
 require_once 'private_php/p_match.php';
 
-$divisionId = @$_GET['did'];
-if (!is_numeric($divisionId)) errorPage(404);
-$divisionId = (int) $divisionId;
+$uriParts = explode('/month/', $_SERVER['REQUEST_URI']);
+if (count($uriParts) != 2) errorPage(HttpStatus::InternalError);
 
 try {
-	$division = new OldDivision($divisionId);
-	$divisionView = new HtmlDivisionView(Division::loadById($divisionId));
+	$division = Division::loadByUri($uriParts[0]);
+	$divisionView = new HtmlDivisionView($division);
 } catch (Exception $ex) {
-	errorPage(404);
+	errorPage(HttpStatus::NotFound);
 }
 
-$datePattern = $_GET['month'];
-if (!preg_match('/^[0-9][0-9][0-9][0-9]-[0-9][0-9]$/', $datePattern)) errorPage(404);
+//$datePattern = $_GET['month'];
+$datePattern = $uriParts[1];
+if (!preg_match('/^[0-9][0-9][0-9][0-9]-[0-9][0-9]$/', $datePattern)) errorPage(HttpStatus::NotFound);
 
 $subtitle = monthNameFromIso($datePattern) . ' Results';
-pageHeader($subtitle . ' – ' . $division->headerTitle());
+pageHeader($subtitle . ' – ' . $divisionView->headerTitle());
 ?>
 
 <div id="subNav">
-	<?php $division->section->divisionIndex(); // TODO: figure out what to do with this ?>
-	<ul><li><a href='penalties.php?did=<?php echo $divisionId; ?>'>Penalties</a></li></ul>
+<?php
+	$sectionView = new HtmlSectionView($division->section());
+	$sectionView->showDivisionIndex();
+?>
+	<ul><li><a href="../penalties">Penalties</a></li></ul>
 	<?php echo $divisionView->breakdown(); ?>
 </div>
 
 <div id="subBody">
-	<h2><?php echo htmlspecialchars($division->bodyTitle()); ?></h2>
+	<h2><?php echo htmlspecialchars($divisionView->bodyTitle()); ?></h2>
 	<h3 class="sub"><?php echo $subtitle; ?></h3>
 
 <?php
@@ -41,7 +44,7 @@ pageHeader($subtitle . ' – ' . $division->headerTitle());
 			AND f.fixture_date LIKE ?
 			AND f.status = 1
 		ORDER BY f.fixture_date DESC');
-	$stmt->execute([$divisionId, $datePattern . '%']);
+	$stmt->execute([$division->id(), $datePattern . '%']);
 
 	$row = $stmt->fetch();
 	if ($row) {

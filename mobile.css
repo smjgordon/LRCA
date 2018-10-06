@@ -1,0 +1,29 @@
+#head {
+	background-color: navy;
+	color: white;
+	border-bottom: 1px solid navy;
+}
+
+#head h1 {
+	background-image: url('logo.png');
+	background-repeat: no-repeat;
+	background-position: left;
+	min-height: 72px;
+	padding-left: 100px;
+}
+
+#mainNav li>a.dropdown:after {
+	content: '\25BC';
+	margin-left: 0.3em;
+	font-size: 0.7em;
+	float: right;
+	margin-top: 0.3em;
+}
+
+#mainNav ul ul {
+	margin-left: 1em;
+}
+
+#subBody {
+	margin-top: 1em;
+}

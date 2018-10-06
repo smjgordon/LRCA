@@ -7,9 +7,11 @@ pageHeader('My Account - Leicestershire and Rutland Chess Association');
 
 <h2>My Account</h2>
 
-<p><a href="change_password.php">Change password</a></p>
+<p><a href="change_password">Change password</a></p>
 
-<p><a href="create_user.php">Create a new user</a></p>
+<?php if ($CurrentUser->hasPermission('can_create_users')) { ?>
+<p><a href="create_user">Create a new user</a></p>
+<?php } ?>
 
 <?php
 pageFooter();

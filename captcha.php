@@ -10,7 +10,7 @@ pageHeader('Enable Contact Info');
 	<p class="error"><?php echo htmlspecialchars($error); ?></p>
 <?php } ?>
 
-<form method="post" action="<?php echo htmlspecialchars($_SERVER['SCRIPT_NAME']); ?>">
+<form method="post" action="captcha">
 	<p>To enable the display of club contact information on this website, please complete the following.</p>
 	<p>Registered users will also see club contact information when logged in.</p>
 	<p><img id="captcha" src="securimage/securimage_show.php" alt="[CAPTCHA Image]" /></p>
