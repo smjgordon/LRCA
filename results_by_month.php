@@ -45,15 +45,21 @@ pageHeader($subtitle . ' – ' . $divisionView->headerTitle());
 			AND f.status = 1
 		ORDER BY f.fixture_date DESC');
 	$stmt->execute([$division->id(), $datePattern . '%']);
+	$anyPenalties = false;
 
 	$row = $stmt->fetch();
 	if ($row) {
 		do {
 			$match = Match::load($row['fixture_id']);
-			$match->renderResult();
+			$anyPenalties |= $match->renderResult();
 		} while ($row = $stmt->fetch());
 	} else {
 		echo '<p>Sorry, no matches have been played in this division in this time period.</p>';
+	}
+	
+	if ($anyPenalties) {
+	?>	<p>* A penalty has been applied.  Please see the <a href="../penalties">penalties</a> page for details.</p>
+	<?php
 	}
 ?></div>
 

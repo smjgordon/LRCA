@@ -56,7 +56,7 @@ does not appear in My Fixtures when you log in, it is because somebody has
 taken care of it since this email was sent.
 
 Please be aware that any fixtures that are not submitted and approved
-within 7 days of the fixture date are liable to incur penalties."
+by 11pm on the Monday after the match are liable to incur penalties."
 			:
 "Hello,
 

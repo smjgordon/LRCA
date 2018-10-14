@@ -283,6 +283,64 @@ class HtmlDivisionView {
 	<?php
 	}
 	
+	public function showMatchPenalties() {
+		global $Database;
+		$anyPenalties = false;
+
+		$stmt = $Database->prepare('
+			SELECT f.fixture_date, ht.name AS home_team, at.name AS away_team, re.text AS reason, mp.exempt,
+				rex.text AS exempt_reason,
+				f.home_raw_score, f.away_raw_score, f.home_adjusted_score, f.away_adjusted_score
+
+			FROM match_penalty mp
+				JOIN fixture f ON mp.fixture_id = f.fixture_id
+					JOIN round r ON f.round_id = r.round_id
+				JOIN team ht ON f.home_team_id = ht.team_id
+				JOIN team at ON f.away_team_id = at.team_id
+				JOIN reason re ON mp.reason = re.reason_id
+				LEFT JOIN reason rex ON mp.exempt_reason = rex.reason_id
+
+			WHERE r.division_id = ?
+
+			ORDER BY f.fixture_date, f.fixture_id');
+		$stmt->execute([$this->_division->id()]);
+
+		while (!!($row = $stmt->fetch())) {
+			if (!$anyPenalties) {
+			?>	<h3>Match Penalties</h3>
+				<table class="defaults">
+				<?php
+					$anyPenalties = true;
+				}
+			?>
+				<tr>
+					<td class="date"><?php echo formatDate(strtotime($row['fixture_date'])); ?></td>
+					<td class="homeTeam"><?php echo htmlspecialchars($row['home_team']); ?></td>
+					<td class="homeScore"><?php echo formatScore($row['home_raw_score']); ?></td>
+					<td class="dash">–</td>
+					<td class="awayScore"><?php echo formatScore($row['away_raw_score']); ?></td>
+					<td class="dash">→</td>
+					<td class="homeScore"><?php echo formatScore($row['home_adjusted_score']); ?></td>
+					<td class="dash">–</td>
+					<td class="awayScore"><?php echo formatScore($row['away_adjusted_score']); ?></td>
+					<td class="awayTeam"><?php echo htmlspecialchars($row['away_team']); ?></td>
+					<td><?php echo htmlspecialchars($row['reason']); ?></td>
+					<td><?php
+						if ($row['exempt_reason']) {
+							echo 'Waived: ', htmlspecialchars($row['exempt_reason']);
+						}
+					?></td>
+				</tr>
+			<?php
+			}
+			if ($anyPenalties) {
+			?>
+			</table>
+		<?php
+		}
+		return $anyPenalties;
+	}
+	
 	private function sectionView() {
 		if (!$this->_sectionView) {
 			$this->_sectionView = new HtmlSectionView($this->_division->section());

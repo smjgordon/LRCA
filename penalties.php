@@ -36,11 +36,17 @@ pageHeader("Penalties – " . $divisionView->headerTitle());
 		<p class="devNotice">Penalties prior to the 2016–17 League season are not fully entered into the database.&nbsp; As such, this information may be inaccurate.</p>
 	<?php
 	}
+	$anyPenalties = false;
 
 	$divisionView->showStandings();
 	if ($divisionView->showBoardDefaults()) {
 		$divisionView->showDefaultTotals();
-	} else {
+		$anyPenalties = true;
+	}
+	
+	$anyPenalties |= $divisionView->showMatchPenalties();
+
+	if (!$anyPenalties) {
 	?>
 		<p>No penalties have been incurred in this division.</p>
 	<?php

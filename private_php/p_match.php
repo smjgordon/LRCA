@@ -113,6 +113,7 @@ abstract class Match {
 
 	// default implementation, suitable for standard and rapid-different formats
 	public function renderResult() {
+		$penalty = false;
 	?>
 		<table class="result sp">
 			<col class="board"/><col class="colour"/><col class="grade"/><col class="name"/>
@@ -154,7 +155,13 @@ abstract class Match {
 					<td colspan="4"></td>
 					<td class="homeScore"><?php echo formatScore($this->homeAdjustedScore); ?></td>
 					<td class="dash">–</td>
-					<td class="awayScore"><?php echo formatScore($this->awayAdjustedScore); ?></td>
+					<td class="awayScore"><?php
+						echo formatScore($this->awayAdjustedScore);
+						if ($this->homeAdjustedScore <> $this->homeRawScore || $this->awayAdjustedScore <> $this->awayRawScore) {
+							echo ' *';
+							$penalty = true;
+						}
+					?></td>
 					<td colspan="<?php echo $this->handicapScheme ? 3 : 2; ?>"></td>
 				</tr>
 			</tfoot>
@@ -178,6 +185,7 @@ abstract class Match {
 			</tbody>
 		</table>
 	<?php
+		return $penalty;
 	}
 
 	protected static function renderPlayerName($plannedPlayer, $actualPlayer) {
@@ -927,6 +935,7 @@ class StandardMatch extends Match {
 
 class RapidSameMatch extends Match {
 	public function renderResult() {
+		$penalty = false;
 		// TODO: support handicap display
 	?>
 		<table class="result rp">
@@ -948,7 +957,13 @@ class RapidSameMatch extends Match {
 				<tr><td colspan="3"></td>
 				<td colspan="3" class="homeScore"><?php echo formatScore($this->homeAdjustedScore); ?></td>
 				<td class="dash">–</td>
-				<td colspan="3" class="awayScore"><?php echo formatScore($this->awayAdjustedScore); ?></td>
+				<td colspan="3" class="awayScore"><?php
+					echo formatScore($this->awayAdjustedScore);
+					if ($this->homeAdjustedScore <> $this->homeRawScore || $this->awayAdjustedScore <> $this->awayRawScore) {
+						echo ' *';
+						$penalty = true;
+					}
+				?></td>
 				<td colspan="2"></td></tr>
 			</tfoot>
 			<tbody><?php
@@ -975,6 +990,7 @@ class RapidSameMatch extends Match {
 			?></tbody>
 		</table>
 	<?php
+		return $penalty;
 	}
 
 	public function renderSubmissionForm() {

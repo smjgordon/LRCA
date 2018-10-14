@@ -36,15 +36,21 @@ pageHeader($subtitle . ' – ' . $divisionView->headerTitle());
 		WHERE ? IN (home_team_id, away_team_id) AND status = 1
 		ORDER BY fixture_date DESC');
 	$stmt->execute([$team->id()]);
+	$anyPenalties = false;
 
 	$row = $stmt->fetch();
 	if ($row) {
 		do {
 			$match = Match::load($row['fixture_id']);
-			$match->renderResult();
+			$anyPenalties |= $match->renderResult();
 		} while (!!($row = $stmt->fetch()));
 	} else {
 		echo '<p>Sorry, no matches have yet been played by this team.</p>';
+	}
+
+	if ($anyPenalties) {
+	?>	<p>* A penalty has been applied.  Please see the <a href="../../penalties">penalties</a> page for details.</p>
+	<?php
 	}
 ?></div>
 

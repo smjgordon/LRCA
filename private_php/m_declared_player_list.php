@@ -3,10 +3,6 @@
 require_once 'p_server.php';
 require_once 'm_club.php';
 require_once 'u_text.php';
-//require_once 'p_exceptions.php';
-//require_once 'm_fixture.php';
-//require_once 'm_team.php';
-//require_once 'm_contact.php';
 
 class DeclaredPlayerList {
 	public static function loadByUri($uri) {
