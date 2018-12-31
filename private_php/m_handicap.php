@@ -18,17 +18,17 @@ class HandicapScheme {
 			$result->_gradeDifferenceCap = $row['grade_difference_cap'];
 			$result->_rules = [];
 			$result->_totalGradeDifference = 0;
-			
+
 			do {
 				$result->_rules[$row['min_grade_difference']] = $row['handicap_points'];
 			} while (!!($row = $stmt->fetch()));
-			
+
 			return $result;
 		} else {
 			throw new ModelAccessException(ModelAccessException::BadHandicapSchemeId, $id);
 		}
 	}
-	
+
 	public function addBoard(&$gradeDifference) {
 		if ($gradeDifference > $this->_gradeDifferenceCap) {
 			$gradeDifference = $this->_gradeDifferenceCap;
@@ -37,10 +37,10 @@ class HandicapScheme {
 		}
 		$this->_totalGradeDifference += $gradeDifference;
 	}
-	
+
 	public function handicapPoints(&$outGradeDifference, &$outHomeHandicap, &$outAwayHandicap) {
 		$outGradeDifference = $this->_totalGradeDifference;
-		
+
 		if ($outGradeDifference == 0) {
 			$outHomeHandicap = $outAwayHandicap = 0;
 			return;
@@ -50,14 +50,14 @@ class HandicapScheme {
 			$outHomeHandicap = 0;
 			$outPoints = &$outAwayHandicap;
 			$absGradeDifference = -$outGradeDifference;
-			
+
 		} else {
 			// away is higher graded, so home gets the handicap points
 			$outAwayHandicap = 0;
 			$outPoints = &$outHomeHandicap;
 			$absGradeDifference = $outGradeDifference;
 		}
-		
+
 		foreach ($this->_rules as $loopMinDifference => $loopPoints) {
 			//echo "rule: $loopMinDifference, $loopPoints"; // debug
 			if ($loopMinDifference <= $absGradeDifference) {
@@ -69,7 +69,7 @@ class HandicapScheme {
 		// we should never wind up here
 		throw new Exception('Bad handicap scheme');
 	}
-	
+
 	private $_gradeDifferenceCap, $_rules, $_totalGradeDifference;
 }
 ?>

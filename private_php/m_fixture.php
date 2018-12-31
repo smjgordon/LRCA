@@ -1,6 +1,8 @@
 <?php
 require_once 'p_server.php';
+require_once 'm_declared_player_list.php';
 require_once 'm_round.php';
+require_once 'm_section.php';
 require_once 'p_exceptions.php';
 require_once 'u_id_wrapper.php';
 
@@ -33,12 +35,12 @@ class Fixture {
 
 		$this->round = Round::loadById($row['round_id']);
 		$this->division = $this->round->division();
-		
+
 		$this->homeTeam = $row['home_team_id'] ? Team::loadById($row['home_team_id']) : null;
 		$this->awayTeam = $row['away_team_id'] ? Team::loadById($row['away_team_id']) : null;
 		$this->date = strtotime($row['fixture_date']);
 		$this->status = $row['status'];
-		
+
 		$this->isApproved = !!$row['approved_user_id'];
 
 		if ($this->status == MatchStatus::Played || $this->status == MatchStatus::Defaulted
@@ -77,6 +79,12 @@ class Fixture {
 		}
 	}
 
+	public function canCheckTeam() {
+		global $CurrentUser;
+		return $this->division->section()->barringSystem() == BarringSystem::DeclaredTeamSystem
+			&& count(DeclaredPlayerList::loadAllByClubAndDate($CurrentUser->club(), $this->date)) > 0;
+	}
+
 	public function recursiveSave() {
 		$this->save();
 	}
@@ -89,5 +97,6 @@ class Fixture {
 
 	public function recursiveDump() {
 		$this->dump();
-	}}
+	}
+}
 ?>

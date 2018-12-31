@@ -17,12 +17,12 @@ foreach ($clubs as $club) {
 	if ($club->hasMapCoordinates()) {
 		$lat = $club->venueLatitude();
 		$long = $club->venueLongitude();
-		
+
 		if ($lat < $minLat) $minLat = $lat;
 		if ($lat > $maxLat) $maxLat = $lat;
 		if ($long < $minLong) $minLong = $long;
 		if ($long > $maxLong) $maxLong = $long;
-		
+
 		$jsMapMarkers .= "
 			createMarker(map, $lat, $long, " . json_encode($club->urlName()) . ', '
 				. json_encode($club->name()) . ');';
@@ -36,7 +36,7 @@ foreach ($clubs as $club) {
 
 <div id="subBody">
 	<h2>Clubs</h2>
-	
+
 	<script type="text/javascript">
 	document.write('<div id="map" style="width: 100%; height: 500px;"></div>');
 
@@ -50,9 +50,9 @@ foreach ($clubs as $club) {
 		<?php echo $jsMapMarkers; ?>
 	}
 	</script>
-	
+
 	<script id="mapScript" src="https://maps.googleapis.com/maps/api/js?key=<?php echo $GoogleMapKey; ?>&amp;callback=clubMap"></script>
-	
+
 	<p>Please select a club to view.</p>
 </div>
 

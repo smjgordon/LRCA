@@ -13,7 +13,7 @@ abstract class HttpStatus {
 function errorPage($errorCode) {
 	http_response_code($errorCode);
 	pageHeaderNoDb("$errorCode Error - Leicestershire and Rutland Chess Association");
-	
+
 	switch ($errorCode) {
 		case HttpStatus::BadRequest:
 		?>
@@ -36,9 +36,9 @@ function errorPage($errorCode) {
 		case HttpStatus::InternalError:
 		?>
 			<p>Something went wrong.</p>
-			
+
 			<p>If you were in the middle of doing something, please check to see whether it has worked.&nbsp; If not, please try again.</p>
-			
+
 			<p>If the problem persists, please <a href="mailto:smjg@iname.com">email me</a> to let me know what you were trying to do.&nbsp; Please include in your email the URL of this page and a description of what you were trying to do.</p>
 		<?php
 			break;
@@ -46,7 +46,7 @@ function errorPage($errorCode) {
 		case HttpStatus::TemporarilyDown:
 		?>
 			<p>This website is undergoing a programming update and is temporarily unavailable.&nbsp; Please wait a few minutes and try reloading.</p>
-			
+
 			<p>If this error persists for more than 5 minutes, please <a href="mailto:smjg@iname.com">let me know</a>.</p>
 		<?php
 			break;

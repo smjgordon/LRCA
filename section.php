@@ -22,7 +22,7 @@ pageHeader($sectionView->displayName());
 
 <div id="subBody">
 	<h2><?php echo htmlspecialchars($sectionView->displayName()); ?></h2>
-	
+
 	<?php if (!$anyDivisions) { ?>
 		<p>Sorry, there is nothing to see in this section.</p>
 	<?php } else { ?>

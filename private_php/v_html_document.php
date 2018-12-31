@@ -3,7 +3,7 @@ require_once 'm_club.php';
 
 function showDocumentIndex($documents) {
 	global $UriBase;
-	
+
 	if (!empty($documents)) {
 	?>
 		<ul>

@@ -3,12 +3,12 @@ require_once 'p_html_functions.php';
 
 function validateCaptcha() {
 	global $Database;
-	
+
 	if ($_SERVER['REQUEST_METHOD'] == 'POST') {
 		session_start();
 		require_once 'securimage/securimage.php';
 		$securimage = new Securimage();
-		
+
 		if ($securimage->check($_POST['captcha_code'])) {
 			$activationTime = time();
 			$activationTimeStr = date('c', $activationTime);
@@ -37,7 +37,7 @@ function validateCaptcha() {
 
 function haveValidCaptcha() {
 	global $Database;
-	
+
 	$captchaKey = @$_COOKIE['captcha'];
 	if ($captchaKey) {
 		$stmt = $Database->prepare('SELECT * FROM captcha WHERE captcha_key = ?');

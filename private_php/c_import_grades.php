@@ -65,12 +65,12 @@ function importGrades($xml/*, $season, $effectiveDate*/) {
 			// make sure the same ECF code isn't processed again
 			unset($playersByEcf[$ecf]);
 		}
-		
+
 		// now save them all
 		foreach ($allPlayers as $player) {
 			$player->saveGrades();
 		}
-		
+
 		$Database->commit();
 
 	} catch (Exception $ex) {

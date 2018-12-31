@@ -3,6 +3,7 @@
 // TODO: consider handicapping for rapidplay (currently not needed, but who knows?)
 require_once 'p_enumerations.php';
 require_once 'p_server.php';
+require_once 'm_declared_player_list.php';
 require_once 'm_division.php';
 require_once 'm_handicap.php';
 require_once 'm_player.php';
@@ -23,7 +24,7 @@ abstract class Match {
 			WHERE f.fixture_id = ?');
 		$stmt->execute([$fixtureID]);
 		$row = $stmt->fetch();
-		if (!$row) throw new Exception('Fixture ID not found');
+		if (!$row) throw new ModelAccessException(ModelAccessException::BadFixtureId, $id);
 
 		switch ($row['match_style']) {
 			case MatchStyle::Standard:
@@ -195,7 +196,7 @@ abstract class Match {
 			return htmlspecialchars($actualPlayer->fullNameFiling()) . ' (sub)';
 		}
 	}
-	
+
 	// default implementation, suitable for standard and rapid-different formats
 	// TODO: implement for rapid-same
 	public function renderPlainTextResult() {
@@ -227,7 +228,7 @@ abstract class Match {
 			$result .= "\n$game->board $game->homeColour"
 				//. str_pad($game->homePlayerGrade, 7, ' ', STR_PAD_LEFT) . ' ' . str_pad($game->homePlayerName, 26);
 				. '   ' . padLeft($game->homePlayerGrade, 4) . ' ' . padRight($game->homePlannedPlayer->fullNameFiling(), 25);
-				
+
 			switch ($game->adjustedResult) {
 				case GameResult::HomeWin:
 					$result .= ($game->awayPlayer->id() == PlayerId::BoardDefault) ? ' 1 - 0d ' : ' 1 - 0  ';
@@ -565,6 +566,7 @@ $this->comments";
 		$playerId = @$_POST[$homeOrAway[0] . $iBoard];
 		if (!$playerId) return null;
 		if (!is_numeric($playerId)) {
+			if ($homeOrAway == 'b') $homeOrAway = ''; // using team checker
 			throw new ReportableException("Invalid player ID on $homeOrAway board $iBoard");
 		}
 		return Player::loadById($playerId); // TODO: handle exception
@@ -684,6 +686,34 @@ class Game {
 }
 
 class StandardMatch extends Match {
+	public function renderTeamCheckerForm() {
+		global $CurrentUser;
+
+		$club = $CurrentUser->club();
+		$homeTeam = Team::loadById($this->homeTeamID);
+		$awayTeam = Team::loadById($this->awayTeamID);
+		$myTeam = ($homeTeam->club()->id() == $club->id()) ? $homeTeam : $awayTeam;
+	?>
+		<table class="teamCheck">
+			<col class="board"/><col class="name"/>
+			<thead>
+				<tr>
+					<th><?php echo formatDate($this->date, false); ?></th>
+					<th><?php echo $homeTeam->name(), ' v ', $awayTeam->name(); ?></th>
+				</tr>
+			</thead>
+			<tbody>
+				<?php for ($iBoard = 1; $iBoard <= $this->division->maxBoards; ++$iBoard) { ?>
+					<tr>
+						<td class="board"><?php echo $iBoard; ?></td>
+						<td class="name"><?php $this->renderPlayerSelection('b' . $iBoard, $myTeam->id(), @$_POST['b' . $iBoard]); ?></td>
+					</tr>
+				<?php } ?>
+			</tbody>
+		</table>
+	<?php
+	}
+
 	public function renderSubmissionForm() {
 	?>
 		<table class="resultSubmit sp">
@@ -744,6 +774,149 @@ class StandardMatch extends Match {
 	<?php
 	}
 
+	public function checkTeam($club, $players) {
+		global $Database;
+
+		// TODO:
+		// complies with DTS
+		// first, see how many boards we have actually used
+		for ($iBoard = $this->division->maxBoards; $iBoard > $this->division->minBoards; --$iBoard) {
+			if ($players[$iBoard - 1] != null) break;
+		}
+		$nBoards = $iBoard;
+		$playersById = [];
+		$playerIds = null;
+
+		$defaultPlayerSelected = $defaultErrorRaised = false;
+		$lastGrade = INF;
+		$lastGradePlayer = null;
+		$errors = [];
+
+		$homeTeam = Team::loadById($this->homeTeamID);
+		$awayTeam = Team::loadById($this->awayTeamID);
+		$theTeam = ($homeTeam->club()->id() == $club->id()) ? $homeTeam : $awayTeam;
+
+		// now go through them
+		for ($iBoard = 1; $iBoard <= $nBoards; ++$iBoard) {
+
+			// check player has been set, is not a duplicate, and is an active, graded (if needed) player for the club
+			$player = $players[$iBoard - 1];
+			if (!$player) {
+				$errors[] = "Missing player on board $iBoard";
+				continue;
+			}
+
+			if ($player->id() == PlayerId::BoardDefault) {
+				$defaultPlayerSelected = true;
+				continue;
+			}
+
+			$player->loadGrades($this->date, $this->division->section()->season());
+			if ($player->club->id() != $club->id()) {
+				$errors[] = "Player on board $iBoard does not play for this club";
+			} else if (isset($playersById[$player->id()])) {
+				$errors[] = "Duplicate player on board $iBoard";
+			} else if (!$this->division->canPlayPlayer($player)) {
+				$errors[] = "Home player on board $iBoard is not eligible to play in this match";
+			} else {
+				// for duplicate checking and use by DTS checking later
+				$playersById[$player->id()] = $player;
+				if ($playerIds == null) {
+					$playerIds = (string) $player->id();
+				} else {
+					$playerIds .= ',' . (string) $player->id();
+				}
+			}
+
+			// check for illegal default order
+			// if we reach this point, we know that this player is a non-default
+			if ($defaultPlayerSelected && !$defaultErrorRaised) {
+				$errors[] = '(Default) option valid only on bottom board(s).  If you cannot raise a full team, you ' .
+					'must default the bottom board.  Any deviations from this will be at the discretion of the opposing captain.';
+				$defaultErrorRaised = true;
+			}
+
+			// check for illegal board order based on grades
+			// HACK: for generality, should check whether to use standard or rapid grade, and whether the division requires a grade at all
+			// moreover, the maximum grade overlap should be db-driven
+			$grade = $player->standardGrade->grade;
+			if ($grade > $lastGrade + 7) {
+				$errors[] = $player->fullName() . ' (' . $grade . ') is graded more than 7 points above '
+					. $lastGradePlayer->fullName() . ' (' . $lastGrade . ').  Hence this is an illegal board order.';
+			}
+			if ($grade <= $lastGrade) {
+				$lastGrade = $grade;
+				$lastGradePlayer = $player;
+			}
+		}
+
+		if ($this->division->section()->barringSystem() == BarringSystem::DeclaredTeamSystem && $playerIds != null) {
+			// check for DTS infractions
+			$dtsLists = DeclaredPlayerList::loadAllByClubAndDate($club, $this->date);
+
+			if (count($dtsLists) == 0) throw new Exception('No DTS list for ' . $club->name() . ' covering ' . formatDate($this->date));
+			$foundValidList = false;
+			$allDtsErrors = [];
+
+			foreach ($dtsLists as $list) {
+				$dtsErrors = [];
+				$categoryAPlayers = $categoryBPlayers = 0;
+
+				$sql = '
+					SELECT p.player_id, dp.category, t.sequence, t.name AS team_name
+					FROM player p
+						LEFT JOIN declared_player dp ON p.player_id = dp.player_id AND dp.list_id = ' . $list->id() . '
+						LEFT JOIN team t ON dp.team_id = t.team_id
+					WHERE p.player_id IN (' . $playerIds . ')
+					ORDER BY Field(' . $list->id() . ', ' . $playerIds . ');';
+				$stmt = $Database->query($sql);
+
+				while (!!($row = $stmt->fetch())) {
+					$player = $playersById[$row['player_id']];
+					if ($row['sequence'] == null) {
+						$dtsErrors[] = $player->fullName() . ' is not in the DTS list.';
+					} else if ($row['sequence'] < $theTeam->sequence() - 1) {
+						$dtsErrors[] = $player->fullName() . " is a declared player for $row[team_name] and is therefore not eligible to play in this match.";
+					} else if ($row['sequence'] == $theTeam->sequence() - 1) {
+						$higherTeamName = $row['team_name'];
+						switch ($row['category']) {
+							case 'A': ++$categoryAPlayers; break;
+							case 'B': ++$categoryBPlayers;
+						}
+					}
+				}
+
+				if ($categoryAPlayers > 1 && $categoryBPlayers > 1) {
+					$dtsErrors[] = "Team contains $categoryAPlayers category A players and $categoryBPlayers category B players for $higherTeamName.";
+				} else if ($categoryAPlayers > 1 && $categoryBPlayers == 1) {
+					$dtsErrors[] = "Team contains $categoryAPlayers category A players and 1 category B player for $higherTeamName.";
+				} else if ($categoryAPlayers == 1 && $categoryBPlayers > 1) {
+					$dtsErrors[] = "Team contains 1 category A player and $categoryBPlayers category B players for $higherTeamName.";
+				} else if ($categoryAPlayers == 1 && $categoryBPlayers == 1) {
+					$dtsErrors[] = "Team contains 1 category A player and 1 category B player for $higherTeamName.";
+				} else if ($categoryAPlayers > 1) {
+					$dtsErrors[] = "Team contains $categoryAPlayers category A players for $higherTeamName.";
+				} else if ($categoryBPlayers > 2) {
+					$dtsErrors[] = "Team contains $categoryBPlayers category B players for $higherTeamName.";
+				}
+
+				if (count($dtsErrors) == 0) {
+					$foundValidList = true;
+					break;
+				}
+
+				$allDtsErrors[] = 'From declared team list effective ' . formatDate($list->startDate()) . ' to ' . formatDate($list->endDate() - 3 * 86400) . ':';
+				$allDtsErrors = array_merge($allDtsErrors, $dtsErrors);
+			}
+
+			if (!$foundValidList) {
+				$errors = array_merge($errors, $allDtsErrors);
+			}
+		}
+
+		return $errors;
+	}
+
 	public function buildSubmission() {
 		$homeTeam = Team::loadById($this->homeTeamID);
 		$awayTeam = Team::loadById($this->awayTeamID);
@@ -766,7 +939,7 @@ class StandardMatch extends Match {
 		}
 
 		$homeDefaultPlayerSelected = $awayDefaultPlayerSelected = false;
-		
+
 		// now go through them
 		for ($iBoard = 1; $iBoard <= $nBoards; ++$iBoard) {
 
@@ -823,7 +996,7 @@ class StandardMatch extends Match {
 				throw new ReportableException('(Default) option valid only on bottom board(s).  If the player was a '
 					. "no-show, please select that player's name and enter a '0d' score.");
 			}
-			
+
 			/*$scoreStr = @$_POST['s' . $iBoard];
 			switch ($scoreStr) {
 				case '':

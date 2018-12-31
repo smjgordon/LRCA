@@ -21,7 +21,7 @@ $stmtPlayers = $Database->prepare("
 	WHERE bp.team_id = ?
 		AND bp.start_date <= ?
 		AND (bp.end_date >= ? OR bp.end_date IS NULL)
-	ORDER BY p.surname, p.forename");	
+	ORDER BY p.surname, p.forename");
 
 pageHeader('Barred Players');
 ?>
@@ -35,7 +35,7 @@ pageHeader('Barred Players');
 		if ($lastTeam['club_id'] == $currentTeam['club_id']) {
 			$today = date('c');
 			$stmtPlayers->execute([$lastTeam['team_id'], $today, $today]);
-			
+
 		?>	<tr>
 				<td><?php echo htmlspecialchars($lastTeam['name']); ?></td>
 				<td><?php

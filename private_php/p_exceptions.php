@@ -5,7 +5,7 @@ class ReportableException extends Exception {
 		parent::__construct($message, $code, $previous);
 		$this->customData = $customData;
 	}
-	
+
 	public $customData;
 }
 
@@ -30,81 +30,81 @@ class ModelAccessException extends Exception {
 	const BadNewsFeedUrlName  = 120;
 	const BadNewsFeedId       = 121;
 	const BadDplDate          = 130;
-	
+
 	public function __construct($code, $customData = null, $previous = null) {
 		switch ($code) {
 			case self::BadClubId:
 				$message = "Club ID not found: $customData";
 				break;
-				
+
 			case self::BadClubName:
 				$message = "Club name not found: $customData";
 				break;
-				
+
 			case self::BadClubUrlName:
 				$message = "Club URL name not found: $customData";
 				break;
-				
+
 			case self::BadTeamId:
 				$message = "Team ID not found: $customData";
 				break;
-				
+
 			case self::BadTeamUrlName:
 				$message = "Team URL name not found: $customData";
 				break;
-				
+
 			case self::BadDivisionId:
 				$message = "Division ID not found: $customData";
 				break;
-				
+
 			case self::BadRoundId:
 				$message = "Round ID not found: $customData";
 				break;
-				
+
 			case self::BadRoundUrlName:
 				$message = "Round URL name not found: $customData";
 				break;
-			
+
 			case self::BadFixtureId:
 				$message = "Fixture ID not found: $customData";
 				break;
-				
+
 			case self::BadPlayerId:
 				$message = "Player ID not found: $customData";
 				break;
-				
+
 			case self::BadPlayerEcfCode:
 				$message = "Player ECF code not found: $customData";
 				break;
-				
+
 			case self::BadGradeId:
 				$message = "Grade ID not found: $customData";
 				break;
-			
+
 			case self::BadUserId:
 				$message = "User ID not found: $customData";
 				break;
-			
+
 			case self::BadHandicapSchemeId:
 				$message = "Handicap scheme ID not found: $customData";
 				break;
-			
+
 			case self::BadSectionId:
 				$message = "SectionID not found: $customData";
 				break;
-			
+
 			case self::BadSectionUrlName:
 				$message = "Section URL name not found: $customData";
 				break;
-			
+
 			case self::BadUrl:
 				$message = "Malformed URL: $customData";
 				break;
-				
+
 			case self::BadNewsFeedUrlName:
 				$message = "News feed URL name not found: $customData";
 				break;
-				
+
 			case self::BadNewsFeedId:
 				$message = "News feed ID not found: $customData";
 				break;
@@ -113,7 +113,7 @@ class ModelAccessException extends Exception {
 				$message = "No declared team list found for club and date: $customData";
 				break;
 		}
-		
+
 		parent::__construct($message, $code, $previous);
 	}
 }
@@ -126,9 +126,9 @@ class UserInputException extends Exception {
 	const NewsPostAttachmentWithoutDisplayName = 23;
 	const NewsPostDisplayNameWithoutAttachment = 24;
 	const IllegalUri                           = 30;
-	
+
 	public $customData;
-	
+
 	public function __construct($code, $customData = null, $previous = null) {
 		switch ($code) {
 			case self::MissingOwnEmail:
@@ -153,7 +153,7 @@ class UserInputException extends Exception {
 				$message = 'Only http or https URLs are allowed';
 				break;
 		}
-		
+
 		parent::__construct($message, $code, $previous);
 		$this->customData = $customData;
 	}

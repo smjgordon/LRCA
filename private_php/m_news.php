@@ -215,7 +215,7 @@ class NewsAttachment {
 	//public mimeType { return $this->_mimeType; }
 	//public tmpName { return $this->_tmpName; }
 	public function displayName() { return $this->_displayName; }
-	
+
 	private $_id, $_post, $_sequence, $_fileName, $_mimeType, $_tmpName, $_displayName;
 
 	public function save() {

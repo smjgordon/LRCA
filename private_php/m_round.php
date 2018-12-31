@@ -7,10 +7,10 @@ require_once 'u_id_wrapper.php';
 
 class Round {
 	private static $instanceCache = [];
-	
+
 	public static function loadById($id) {
 		global $Database;
-		
+
 		if (isset(Round::$instanceCache[$id])) {
 			return Round::$instanceCache[$id];
 		} else {
@@ -34,7 +34,7 @@ class Round {
 
 	static public function loadByUri($uri) {
 		global $Database;
-		
+
 		$uriParts = array_slice(explode('/', trim($uri, '/')), -5);
 		if (count($uriParts) != 5) throw new ModelAccessException(ModelAccessException::BadUrl, $uri);
 		$stmt = $Database->prepare('
@@ -49,7 +49,7 @@ class Round {
 			$id = (int) $row['round_id'];
 			if (isset(Round::$instanceCache[$id])) {
 				return Round::$instanceCache[$id];
-			} else {			
+			} else {
 				$result = new Round();
 				$result->populateFromDbRow($row);
 				//$result->_year = (int) $uriParts[0];

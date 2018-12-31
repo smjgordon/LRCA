@@ -93,9 +93,9 @@ pageHeader('Post News');
 			<textarea style="width: 100%; height: 10em;" name="detailText" id="detailText"><?php
 				echo htmlspecialchars($controller->detailText());
 		?></textarea></p>
-	
+
 		<p><label><input type="checkbox" name="attach" /> Tick here if you wish to attach one or more files to the article.</label></p>
-	
+
 		<p><input type="submit" value="Next" /></p>
 	</form>
 

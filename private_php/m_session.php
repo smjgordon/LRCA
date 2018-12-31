@@ -30,11 +30,11 @@ unset($sessionKey);
 
 function requireLogin($permissionsNeeded = null) {
 	global $CurrentUser, $UriBase;
-	
+
 	if (!$CurrentUser) {
 		redirect(303, $UriBase . 'login?uri=' . urlencode($_SERVER['REQUEST_URI']));
 	}
-	
+
 	if ($permissionsNeeded) {
 		foreach ($permissionsNeeded as $perm) {
 			if (!$CurrentUser->hasPermission($perm)) {

@@ -29,7 +29,7 @@ class User {
 
 		$sql = 'SELECT * FROM user WHERE user_id = ?';
 		if (!$includeInactive) $sql .= ' AND status <> 0';
-		
+
 		$stmt = $Database->prepare($sql);
 		$stmt->execute([$userId]);
 		if ($row = $stmt->fetch()) {
@@ -45,12 +45,12 @@ class User {
 
 	static public function loadByClub($club, $permission = null) {
 		global $Database;
-		
+
 		$result = [];
-		
-		$stmt = $Database->prepare('SELECT * FROM user WHERE club_id = ? AND status <> 0 ORDER BY surname, forename, user_id');	
+
+		$stmt = $Database->prepare('SELECT * FROM user WHERE club_id = ? AND status <> 0 ORDER BY surname, forename, user_id');
 		$stmt->execute([$club->id()]);
-		
+
 		while ($row = $stmt->fetch()) {
 			//$user = new User($row['user_id']);
 			$user = new User();
@@ -59,7 +59,7 @@ class User {
 		}
 		return $result;
 	}
-	
+
 	/*public function __construct($userId) {
 		global $Database;
 
@@ -85,7 +85,7 @@ class User {
 
 	private function populateFromDbRow($row, $club = null) {
 		$permissionFields = ['administrator', 'can_submit', 'can_create_users', 'can_post_news'];
-		
+
 		$this->_id = $row['user_id'];
 		$this->_forename = $row['forename'];
 		$this->_surname = $row['surname'];
@@ -93,7 +93,7 @@ class User {
 		//$this->_clubID = $row['club_id'];
 		//$this->_clubName = $row['club_name'];
 		$this->_status = $row['status'];
-		
+
 		if ($club) {
 			// if this is passed in, just store it, rather than accessing the db to load it again
 			$this->_club = $club;
@@ -106,7 +106,7 @@ class User {
 			if ($row[$perm] == 1) $this->_permissions[] = $perm;
 		}
 	}
-	
+
 	public function id() { return $this->_id; }
 	public function forename() { return $this->_forename; }
 	public function surname() { return $this->_surname; }
@@ -166,7 +166,7 @@ class User {
 		}
 		return password_verify($password, $row['hashed_password']);
 	}
-		
+
 	public function logIn($password) {
 		global $Database;
 /*
@@ -204,7 +204,7 @@ class User {
 
 			$stmt = $Database->prepare('UPDATE user SET last_login = ? WHERE user_id = ?');
 			$stmt->execute([$loginTimeStr, $this->_id]);
-				
+
 			//$Database->commit();
 
 			// TODO: move into controller
@@ -249,7 +249,7 @@ class PasswordResetKey {
 
 		if ($row = $stmt->fetch()) {
 			$result = new PasswordResetKey();
-			
+
 			$result->_key = $key;
 			$result->_id = $row['reset_key_id'];
 			$result->_status = $row['key_status'];
@@ -287,7 +287,7 @@ class PasswordResetKey {
 		} else {
 			throw new Exception('Password reset key not found');
 		}
-		
+
 		return $result;
 	}
 
@@ -303,7 +303,7 @@ class PasswordResetKey {
 		//$Database->beginTransaction();
 		$stmt = $Database->prepare('UPDATE user SET hashed_password = ?, status = 1 WHERE user_id = ?');
 		$stmt->execute([$hashedPassword, $this->_user->id()]);*/
-		
+
 		$this->_user->setNewPassword($password);
 
 		$stmt = $Database->prepare('UPDATE password_reset_key SET status = 1 WHERE reset_key_id = ?');
@@ -318,18 +318,18 @@ class PasswordResetKey {
 class UserAccountException extends Exception {
 	const BadEmail          = 10;
 	const IncorrectPassword = 20;
-	
+
 	public function __construct($code, $customData = null, $previous = null) {
 		switch ($code) {
 			case self::BadEmail:
 				$message = "Sorry, no user account has been found for email address: $customData";
 				break;
-				
+
 			case self::IncorrectPassword:
 				$message = 'The password you entered was not correct.  Please try again.';
 				break;
 		}
-		
+
 		parent::__construct($message, $code, $previous);
 	}
 }

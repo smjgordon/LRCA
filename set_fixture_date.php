@@ -39,7 +39,7 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
 		if (@$_POST['confirm'] == 'yes') {
 			$fixture->status = MatchStatus::Unplayed;
 			$fixture->date = $newDate;
-			
+
 			$Database->beginTransaction();
 			try {
 				$fixture->save();
@@ -117,7 +117,7 @@ pageHeader('Set Fixture Date');
 							<td class="homeScore"></td><td class="dash">v</td><td class="awayScore"></td>
 						<?php
 							break;
-						
+
 						case MatchStatus::Postponed: ?>
 							<td class="homeScore">P</td><td class="dash">–</td><td class="awayScore">P</td>
 						<?php

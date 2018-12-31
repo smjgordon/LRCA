@@ -16,12 +16,13 @@ try {
 	unset($dsn);
 	unset($opt);
 } catch (Exception $ex) {
+	echo $ex->getMessage();
 	errorPage(500);
 }
 
 $CanSendEmail = false;
 $GoogleMapKey = 'AIzaSyDVK5jT-tHmFw5nixdZHIS5kh96ztK2zcc';
-$UriBase = '/lrca2/';
+$UriBase = '/lrca/';
 $UploadTempFolder = 'C:/windows/temp/';
 
 $DevNotices = [];

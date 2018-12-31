@@ -3,7 +3,7 @@ require_once 'm_committee.php';
 
 function committeeNavBar() {
 	$committees = Committee::loadAll();
-	
+
 	$backToIndex = backToLevel(1);
 
 	$result = '<ul>';

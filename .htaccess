@@ -90,6 +90,9 @@ RewriteRule ^my_fixtures/set_date$ set_fixture_date.php
 # my_fixtures/date_set
 RewriteRule ^my_fixtures/date_set$ fixture_date_set.php
 
+# my_fixtures/check_team
+RewriteRule ^my_fixtures/check_team$ check_team.php
+
 # rpwd/
 RedirectMatch 301 ^(.*/rpwd)$ $1/
 RewriteRule ^rpwd/[^/]*$ rpwd.php

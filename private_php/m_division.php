@@ -30,10 +30,10 @@ class Division {
 			}
 		}
 	}
-	
+
 	static public function loadByUri($uri) {
 		global $Database;
-		
+
 		$uriParts = array_slice(explode('/', trim($uri, '/')), -3);
 		if (count($uriParts) != 3) throw new ModelAccessException(ModelAccessException::BadUrl, $uri);
 		$stmt = $Database->prepare('
@@ -46,7 +46,7 @@ class Division {
 			$id = (int) $row['division_id'];
 			if (isset(Division::$instanceCache[$id])) {
 				return Division::$instanceCache[$id];
-			} else {			
+			} else {
 				$result = new Division();
 				$result->populateFromDbRow($row);
 				//$result->_year = (int) $uriParts[0];
@@ -62,12 +62,12 @@ class Division {
 		global $Database;
 
 		$result = [];
-		
+
 		$stmt = $Database->prepare('
 			SELECT * FROM division
 			WHERE section_id = ? AND year = ?');
 		$stmt->execute([$section->id(), $section->year()]);
-		
+
 		while (!!($row = $stmt->fetch())) {
 			$divisionId = (int) $row['division_id'];
 			if (isset(Division::$instanceCache[$divisionId])) {

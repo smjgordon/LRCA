@@ -10,7 +10,7 @@ class PostNewsController {
 		$this->_detailText = trim(@$_POST['detailText']) or $this->_detailText = '';
 		$this->_attach = (@$_POST['attach'] == 'on');
 		$this->_confirm = (@$_POST['confirm'] == 'yes');
-		
+
 		$this->_newAttachments = $this->_attachmentDisplayNames = [];
 		for ($i = 0; $i < 5; ++$i) {
 			if (isset($_FILES["att$i"])) {
@@ -72,7 +72,7 @@ class PostNewsController {
 			$post->setTitle($this->_title);
 			$post->setHomepageText($this->_homepageText);
 			$post->setDetailText($this->_detailText);
-			
+
 			$attachmentFolder = $UploadTempFolder . 'lrca_' . $_COOKIE['session'] . '/';
 
 			// new attachments
@@ -85,22 +85,22 @@ class PostNewsController {
 						throw new UserInputException(UserInputException::NewsPostDisplayNameWithoutAttachment, $post);
 					}
 				}
-				
+
 				$this->_pulledAttachments = [];
-				
+
 				if (!is_dir($attachmentFolder)) mkdir($attachmentFolder);
-				
+
 				foreach ($this->_newAttachments as $i => $att) if ($att != null) {
 					$tmpName = $att['tmp_name'];
 					move_uploaded_file($tmpName, $attachmentFolder . basename($tmpName));
 					$att['display_name'] = $this->_attachmentDisplayNames[$i];
 					$this->_pulledAttachments[] = $att;
-					
+
 					// for the preview
 					$post->addAttachment($att['name'], $att['type'], $att['tmp_name'], $att['display_name']);
 				}
 			}
-			
+
 			if ($this->_confirm) {
 				foreach ($this->_pulledAttachments as $att) {
 					if (!is_file($attachmentFolder . $att['tmp_name'])) {
@@ -138,7 +138,7 @@ class PostNewsController {
 			}
 		}
 	}
-	
+
 	private $_feedId, $_title, $_homepageText, $_detailText, $_confirm, $_attach;
 	private $_newAttachments, $_attachmentDisplayNames, $_pulledAttachments;
 

@@ -56,7 +56,7 @@ pageHeader($subtitle . ' – ' . $divisionView->headerTitle());
 	} else {
 		echo '<p>Sorry, no matches have been played in this division in this time period.</p>';
 	}
-	
+
 	if ($anyPenalties) {
 	?>	<p>* A penalty has been applied.  Please see the <a href="../penalties">penalties</a> page for details.</p>
 	<?php

@@ -153,7 +153,7 @@ th, td {
 }
 .standings thead {
 	border-bottom: 1px solid #9999cc;
-}	
+}
 .standings th, .standings td {
 	text-align: left;
 }
@@ -200,12 +200,12 @@ th, td {
 	width: 13em;
 }
 
-.resultSubmit thead, .resultSubmit tfoot {
+.resultSubmit thead, .resultSubmit tfoot, .teamCheck thead {
 	border-top: 1px solid #9999ff;
 	border-bottom: 1px solid #9999ff;
 }
 
-.resultSubmit td.board, .resultSubmit td.colour, .resultSubmit td.grade, .resultSubmit td.score {
+.resultSubmit td.board, .resultSubmit td.colour, .resultSubmit td.grade, .resultSubmit td.score, .teamCheck td.board {
 	text-align: center;
 }
 .resultSubmit .board, .resultSubmit .colour {
@@ -216,6 +216,12 @@ th, td {
 }
 .resultSubmit .name {
 	width: 13em;
+}
+.teamCheck .board {
+	width: 4em;
+}
+.teamCheck .name {
+	width: 25em;
 }
 
 .defaults .date {

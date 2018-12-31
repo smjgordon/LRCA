@@ -16,37 +16,57 @@ class DeclaredPlayerList {
 		} else if ($uriParts[2] == 'dtp') {
 			$clubUrlName = $uriParts[1];
 		}
-		
+
 		$club = Club::loadByUri('clubs/' . $clubUrlName);
 		if ($dateStr !== null) {
 			$date = parseDate($dateStr);
 		} else {
 			$date = time();
 		}
-		
+
 		return self::loadByClubAndDate($club, $date);
 	}
-	
+
 	public static function loadByClubAndDate($club, $date) {
 		global $Database;
-		
+
 		$stmt = $Database->prepare('
 			SELECT * FROM declared_player_list
 			WHERE club_id = ? AND start_date <= ? AND (end_date IS NULL OR end_date > ?)
 			ORDER BY start_date DESC');
 		$dateStr = date('c', $date);
 		$stmt->execute([$club->id(), $dateStr, $dateStr]);
-		
+
 		if (!!($row = $stmt->fetch())) {
-			$result = new DeclaredPlayerList();
-			$result->_club = $club;
-			$result->populateFromDbRow($row); 
-			return $result;
+			$list = new DeclaredPlayerList();
+			$list->_club = $club;
+			$list->populateFromDbRow($row);
+			return $list;
 		} else {
 			throw new ModelAccessException(ModelAccessException::BadDplDate, $club->name() . date(' c', $date));
 		}
 	}
-	
+
+	public static function loadAllByClubAndDate($club, $date) {
+		global $Database;
+
+		$stmt = $Database->prepare('
+			SELECT * FROM declared_player_list
+			WHERE club_id = ? AND start_date <= ? AND (end_date IS NULL OR end_date > ?)
+			ORDER BY start_date DESC');
+		$dateStr = date('c', $date);
+		$stmt->execute([$club->id(), $dateStr, $dateStr]);
+
+		$result = [];
+		while (!!($row = $stmt->fetch())) {
+			$list = new DeclaredPlayerList();
+			$list->_club = $club;
+			$list->populateFromDbRow($row);
+			$result[] = $list;
+		}
+		return $result;
+	}
+
 	private function populateFromDbRow($row) {
 		$this->_id = $row['list_id'];
 		$this->_startDate = strtotime($row['start_date']);

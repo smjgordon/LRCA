@@ -19,7 +19,7 @@ class HtmlDivisionView {
 
 	public function breakdown() {
 		$backToDivision = backToLevel(3);
-		
+
 		switch ($this->_division->breakdown) {
 			case Breakdown::ByMonth:
 				$months = $this->_division->playedMatchMonths();
@@ -220,7 +220,7 @@ class HtmlDivisionView {
 				</tr>
 			<?php
 			}
-			
+
 			if ($anyDefaults) {
 			?>
 			</table>
@@ -246,7 +246,7 @@ class HtmlDivisionView {
 			HAVING n > 0
 			ORDER BY t.name');
 		$stmt->execute([$this->_division->id()]);
-		
+
 		// no penalties in this division
 		if (!($this->_division->boardDefaultPenaltyEvery)) return;
 	?>
@@ -282,7 +282,7 @@ class HtmlDivisionView {
 		</table>
 	<?php
 	}
-	
+
 	public function showMatchPenalties() {
 		global $Database;
 		$anyPenalties = false;
@@ -340,7 +340,7 @@ class HtmlDivisionView {
 		}
 		return $anyPenalties;
 	}
-	
+
 	private function sectionView() {
 		if (!$this->_sectionView) {
 			$this->_sectionView = new HtmlSectionView($this->_division->section());

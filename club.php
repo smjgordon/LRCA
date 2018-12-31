@@ -85,13 +85,13 @@ pageHeader($club->name() . ' – Club Profile');
 			?></td>
 		</tr>
 	</table>
-	
+
 	<p><?php echo encodeMultiLine($club->venueInfo()); ?></p>
 
 <?php
 	$contacts = Contact::loadNonTeamByClub($club);
 	$showContactInfo = ($CurrentUser != null || haveValidCaptcha());
-	
+
 	if (!empty($contacts)) {
 	?>	<table class="contacts">
 			<?php foreach ($contacts as $contact) { ?>
@@ -111,13 +111,13 @@ pageHeader($club->name() . ' – Club Profile');
 		</table>
 	<?php
 	}
-	
+
 	$sections = Section::loadAllInProgress();
-	
+
 	foreach ($sections as $section) {
 		$sectionView = new HtmlSectionView($section);
 		$teams = $club->teamsInSection($section);
-	
+
 		if (!empty($teams)) {
 		?>
 			<h3><?php echo htmlspecialchars($sectionView->displayName()); ?></h3>
@@ -131,7 +131,7 @@ pageHeader($club->name() . ' – Club Profile');
 							<td><?php echo $team->name(); ?></td>
 							<?php echo showNoContact($showContactInfo); ?>
 						</tr>
-					<?php					
+					<?php
 					} else {
 						foreach ($contacts as $contact) {
 						?>

@@ -13,7 +13,7 @@ abstract class XmlUtils {
 		if (!is_numeric($value)) throw new ReportableException($exceptionMessage);
 		return (int) $value;
 	}
-	
+
 	public static function readDate($attribute, $exceptionMessage) {
 		$dateStr = (string) $attribute;
 		if ($dateStr == '') throw new ReportableException($exceptionMessage);

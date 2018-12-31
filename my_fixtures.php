@@ -84,7 +84,7 @@ if ($fixtures) {
 						<td class="homeScore"></td><td class="dash">v</td><td class="awayScore"></td>
 					<?php
 						break;
-					
+
 					case MatchStatus::Postponed: ?>
 						<td class="homeScore">P</td><td class="dash">–</td><td class="awayScore">P</td>
 					<?php
@@ -115,12 +115,13 @@ if ($fixtures) {
 			if ($fixture->date != $lastFixtureDate && $fixturesSoFar > SystemSettings::$upcomingFixturesToShow) break;
 		?>	<tr>
 				<td class="division"><?php echo $fixture->division->name(); ?></td>
-				<td class="date"><?php
-					echo formatDate($fixture->date);
-				?></td>
+				<td class="date"><?php echo formatDate($fixture->date); ?></td>
 				<td class="homeTeam"><?php echo $fixture->homeTeam ? htmlspecialchars($fixture->homeTeam->name()) : 'bye'; ?></td>
 				<td class="homeScore"></td><td class="dash">v</td><td class="awayScore"></td>
 				<td class="awayTeam"><?php echo $fixture->awayTeam ? htmlspecialchars($fixture->awayTeam->name()) : 'bye'; ?></td>
+				<td><?php if ($fixture->canCheckTeam()) { ?>
+					<a href="check_team?fid=<?php echo $fixture->id(); ?>">Check Team</a>
+				<?php } ?></td>
 			</tr>
 		<?php
 			$lastFixtureDate = $fixture->date;

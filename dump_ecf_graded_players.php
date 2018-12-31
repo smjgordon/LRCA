@@ -9,29 +9,29 @@ $allPlayers = Player::loadAll();
 foreach ($allPlayers as $player) {
 	if ($player->status == PlayerStatus::Active) {
 		$player->loadGrades(time(), Season::Winter);
-		
+
 		if (($player->standardGrade && $player->standardGrade->category)
 				|| ($player->rapidGrade && $player->rapidGrade->category)) {
 			echo $player->club->name(), ',', $player->ecfGradingCode, ',', $player->forename, ',', $player->surname, ',';
-			
+
 			$grade = $player->standardGrade;
-			
+
 			if ($grade && $grade->category) {
 				echo $grade->grade, ',', $grade->category, ',';
 			} else {
 				echo ',,';
 			}
-			
+
 			$grade = $player->rapidGrade;
-			
+
 			if ($grade && $grade->category) {
 				echo $grade->grade, ',', $grade->category, ',';
 			} else {
 				echo ',,';
 			}
-			
+
 			$grade = $player->lrcaRapidGrade;
-			
+
 			if ($grade) {
 				echo $grade->grade;
 			}

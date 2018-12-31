@@ -11,7 +11,7 @@ if (isset($_POST['action'])) {
 	$surname = trim($_POST['surname']);
 	$email = trim($_POST['email']);
 	$clubId = $_POST['cid'];
-	
+
 	if (!$forename) {
 		$error = 'Missing forename';
 	} else if (!$surname) {

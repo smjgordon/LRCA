@@ -49,7 +49,7 @@ pageHeader($club->name() . ' – Declared Team Players');
 		$sections = Section::loadAllInProgress();
 		$anyData = false;
 
-		// TODO: optimise and MVC-separate this		
+		// TODO: optimise and MVC-separate this
 		$stmt = $Database->prepare("
 			SELECT Concat(p.surname, ', ', p.forename) AS name, dp.rank, t.name AS team_name, dp.category, p.forename, p.surname,
 				(

@@ -33,13 +33,13 @@ pageHeader($committee->longName());
 <?php
 	$contacts = Contact::loadByCommittee($committee);
 	$showContactInfo = ($CurrentUser != null || haveValidCaptcha());
-	
+
 	if (!empty($contacts)) {
 	?>	<table class="contacts">
 			<?php foreach ($contacts as $contact) { ?>
 				<tr>
 					<td><?php
-						echo htmlspecialchars($contact->type()); 
+						echo htmlspecialchars($contact->type());
 						if ($contact->exOfficio()) echo ' <i>(ex officio)</i>';
 					?></td>
 					<?php if ($contact->id() > 0) { ?>
@@ -52,7 +52,7 @@ pageHeader($committee->longName());
 		</table>
 	<?php
 	}
-?>	
+?>
 	<?php if (!$showContactInfo) { ?>
 		<p><a href="../captcha">Show Contact Information</a></p>
 	<?php } ?>

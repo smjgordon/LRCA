@@ -22,7 +22,7 @@ class Team {
 
 	static public function loadByUri($uri) {
 		global $Database;
-		
+
 		$uriParts = array_slice(explode('/', trim($uri, '/')), -6);
 		if (count($uriParts) != 6) throw new ModelAccessException(ModelAccessException::BadUrl, $uri);
 		$stmt = $Database->prepare('
@@ -77,7 +77,7 @@ class Team {
 		if ($team1->gpd < $team2->gpd) return 1;
 		return 0;
 	}
-	
+
 	public function __construct() {
 		$this->status = TeamStatus::Active;
 	}
@@ -121,7 +121,7 @@ class Team {
 
 	public function save($silentFail = false) {
 		global $Database;
-		
+
 		if ($this->_id == 0) {
 			$stmt = $Database->prepare('
 				INSERT INTO team(division_id, club_id, sequence, name)
@@ -133,11 +133,11 @@ class Team {
 			throw new Exception('Saving to an existing team not implemented');
 		}
 	}
-	
+
 	public function recursiveSave() {
 		$this->save();
 	}
-	
+
 	// DEBUG
 	public function dump() {
 		echo "<p>Team ID: $this->_id; Club ID: ", $this->_club->id(), "; Name: $this->_name; ",

@@ -37,7 +37,7 @@ $error = null;
 if ($_SERVER['REQUEST_METHOD'] == 'POST') {
 	try {
 		if (@$_POST['confirm'] == 'yes') {
-			
+
 			$Database->beginTransaction();
 			try {
 				$match->buildSubmission();
@@ -48,7 +48,7 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
 				$Database->rollBack();
 				throw $ex;
 			}
-			
+
 			$match->generateEmailConfirmation();
 
 		} else {
@@ -61,8 +61,8 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
 		$submissionBuilt = false;
 
 	} catch (Exception $ex) {
-		$error = $ex->getMessage(); // debug
-		//errorPage(500);
+		//$error = $ex->getMessage(); // debug
+		errorPage(500);
 	}
 }
 
@@ -84,7 +84,7 @@ pageHeader('Submit Result');
 			<input type="hidden" name="confirm" value="yes" />
 			<input type="submit" value="Submit" />
 		</p>
-		
+
 		<?php if ($_POST['comments']) { ?>
 			<p>Comments:<br />
 			<?php echo encodeMultiLine($_POST['comments']); ?></p>

@@ -37,7 +37,7 @@ function pageHeader($title, $javascripts = null) {
 		?></div>
 	<?php } ?>
 	<div id="mainNav">
-		<ul id="mainNav1"><?php 
+		<ul id="mainNav1"><?php
 			//echo headerLink('Home', '');
 			echo headerLink('Home', '', 'home',
 				headerLink('Home Page', '') .
@@ -45,34 +45,34 @@ function pageHeader($title, $javascripts = null) {
 				headerLink('Committees', 'committee/principal') .
 				headerLink('Juniors', 'http://www.leicestershirejuniorchess.com/') .
 				headerLink('Links', 'links'));
-				
+
 			// news feed links
 			$feedLinks = '';
-			
+
 			foreach (NewsFeed::loadAll() as $feed) {
 				if (!isset($firstNewsFeed)) $firstNewsFeed = $feed;
 				$feedLinks .= headerLink($feed->name(), 'news/' . $feed->urlName());
 			}
-			
+
 			echo headerLink('News', 'news/main', 'news', $feedLinks);
 			echo headerLink('Clubs', 'clubs/');
-			
+
 			// section links
 			$sections = Section::loadAllCurrent();
 			foreach ($sections as $section) {
 				$sectionUrl = $section->year() . '/' . $section->urlName() . '/';
-				
+
 				$documents = '';
 				foreach ($section->documents() as $document) {
 					$documents .= headerLink($document->displayName(), 'docs/' . $document->fileName());
 				}
 				if ($documents != '') $documents = headerLink('Documents', $sectionUrl, $section->urlName() . '.docs', $documents);
-				
+
 				$divisions = '';
 				foreach ($section->divisions() as $division) {
 					$divisions .= headerLink($division->name(), $sectionUrl . $division->urlName() . '/');
 				}
-				
+
 				echo headerLink($section->name(), $sectionUrl, $section->urlName(), $documents . $divisions);
 			}
 
@@ -88,8 +88,8 @@ function pageHeader($title, $javascripts = null) {
 				if ($CurrentUser->hasPermission('can_post_news')) echo headerLink('Post News', 'news/post');
 				if ($CurrentUser->hasPermission('can_submit')) echo headerLink('Fixtures', 'my_fixtures/');
 				echo headerLink('Log Out', 'logout', null, true);
-			} else { 
-				echo headerLink('Captain Login', 'login', null, true); 
+			} else {
+				echo headerLink('Captain Login', 'login', null, true);
 			}
 		?></ul>
 		<div style="clear: both;"></div>
@@ -112,9 +112,9 @@ function pageHeader($title, $javascripts = null) {
 
 function headerLink($title, $uri, $submenuName = null, $children = null, $noFollow = false) {
 	global $UriBase;
-	
+
 	if (strpos($uri, ':') === FALSE) $uri = $UriBase . $uri;
-	
+
 	$result = '<li><a href="' . htmlspecialchars($uri) . '"';
 	if ($noFollow) $result .= ' rel="nofollow"';
 	if ($submenuName) {
@@ -125,7 +125,7 @@ function headerLink($title, $uri, $submenuName = null, $children = null, $noFoll
 	$result .= '</a>';
 	if ($submenuName) $result .= '<ul id="' . $submenuName . '">' . $children . '</ul>';
 	$result .= '</li>';
-	
+
 	return $result;
 }
 

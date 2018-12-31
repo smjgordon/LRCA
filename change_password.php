@@ -12,7 +12,7 @@ if ($userId) {
 	$oldPassword = @$_POST['pwd0'];
 	$password1 = @$_POST['pwd1'];
 	$password2 = @$_POST['pwd2'];
-	
+
 	if (!$CurrentUser->checkPassword($oldPassword)) {
 		$error = 'You did not enter your current password correctly.  Please try again.';
 	} else if ($password1 != $password2) {

@@ -54,7 +54,7 @@ class OldSection {
 */
 	function documentList() {
 		global $Database;
-		
+
 		$stmt = $Database->prepare('
 			SELECT file_name, display_name
 			FROM section_document sd
@@ -62,7 +62,7 @@ class OldSection {
 			WHERE section_id = ? AND year = ?
 			ORDER BY sd.sequence');
 		$stmt->execute([$this->id, $this->year]);
-		
+
 		$row = $stmt->fetch();
 		if ($row) {
 			echo '<ul>';

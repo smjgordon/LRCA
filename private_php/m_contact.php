@@ -84,7 +84,7 @@ class Contact {
 		}
 		$this->_emails = [];
 		$this->_phoneNumbers = [];
-		
+
 		if (isset($row['ex_officio'])) {
 			$this->_exOfficio = !!$row['ex_officio'];
 		}

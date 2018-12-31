@@ -52,7 +52,7 @@ pageHeader($pageTitle);
 
 <div id="subNav">
 	<!--<ul><li><a href="barred">Barred Players</a></li></ul>-->
-	
+
 	<form method="get" action="./">
 		<p>Club:<br />
 			<select name="cid"><?php
@@ -160,7 +160,7 @@ pageHeader($pageTitle);
 					AND g2.grade_id IS NULL');
 
 			$today = date('c');
-			
+
 			while ($player = $stmtPlayer->fetch()) {
 				$stmtGrade->execute([$today, $today, $player['player_id'], $season]);
 				$grade = $stmtGrade->fetch();

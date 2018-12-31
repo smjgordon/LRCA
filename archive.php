@@ -20,7 +20,7 @@ while ($row = $stmt->fetch()) {
 	$sectionID = $row['section_id'];
 	$sectionName = $row['name'];
 	$season = $row['season'];
-	
+
 	if ($sectionName != $lastSectionName) {
 		if ($inList) {
 			echo '</ul>';
@@ -33,7 +33,7 @@ while ($row = $stmt->fetch()) {
 		echo '<ul>';
 		$inList = true;
 	}
-	
+
 	// now display the list entry
 	switch ($season) {
 		case Season::Winter:

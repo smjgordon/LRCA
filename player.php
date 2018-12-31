@@ -141,7 +141,7 @@ if ($game) {
 			</tr>
 		<?php } while ($game = $stmt->fetch()); ?>
 	</table>
-	
+
 	<p>Note: The actual over-the-board result of each game is displayed here, ignoring any penalties applied.&nbsp; Board defaults are not shown.</p>
 <?php
 } else {

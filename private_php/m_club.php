@@ -40,7 +40,7 @@ class Club {
 
 	public static function loadByUri($uri) {
 		global $Database;
-		
+
 		$uriParts = array_slice(explode('/', trim($uri, '/')), -2);
 		if (count($uriParts) != 2) {
 			throw new ModelAccessException(ModelAccessException::BadUrl, $uri);
@@ -81,7 +81,7 @@ class Club {
 			throw new ModelAccessException(ModelAccessException::BadClubId, $id);
 		}
 	}
-	
+
 	/*
 	public $fixtures;
 
@@ -106,7 +106,7 @@ class Club {
 
 	public function teamsInSection($section) {
 		global $Database;
-		
+
 		$teams = [];
 		$stmt = $Database->prepare('
 			SELECT t.team_id
@@ -114,11 +114,11 @@ class Club {
 			WHERE t.club_id = ? AND d.year = ? AND d.section_id = ?
 			ORDER BY d.sequence, t.sequence');
 		$stmt->execute([$this->_id, $section->year(), $section->id()]);
-		
+
 		while (!!($row = $stmt->fetch())) $teams[] = Team::loadById($row['team_id']);
 		return $teams;
 	}
-	
+
 	public function fixturesPendingSubmission() {
 		global $Database;
 
@@ -221,7 +221,7 @@ class Club {
 		$this->_venueLatitude = $row['venue_latitude'];
 		$this->_venueLongitude = $row['venue_longitude'];
 		$this->_venuePlaceId = $row['venue_google_place_id'];
-		
+
 		$this->_venueInfo = $row['venue_info_1'];
 		for ($iLine = 2; $iLine <= 3; ++$iLine) {
 			$infoLine = $row["venue_info_$iLine"];
@@ -246,14 +246,14 @@ class Club {
 	public function venueAddress() { return $this->_venueAddress; }
 	public function venuePostcode() { return $this->_venuePostcode; }
 	public function venueInfo() { return $this->_venueInfo; }
-	
+
 	public function hasMapCoordinates() {
 		return $this->_venueLatitude !== null && $this->_venueLongitude !== null;
 	}
 	public function venueLatitude() { return $this->_venueLatitude; }
 	public function venueLongitude() { return $this->_venueLongitude; }
 	public function venueGooglePlaceId() { return $this->_venuePlaceId; }
-	
+
 	/*public function mapUrl() {
 		if ($this->hasMapCoordinates()) {
 			return "https://www.google.com/maps/search/?api=1&query=$this->_venueLatitude,$this->_venueLongitude";
@@ -261,7 +261,7 @@ class Club {
 			return null;
 		}
 	}*/
-	
+
 	public function meetingDay() {
 		return array('Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday')[$this->_meetingDay];
 	}
@@ -321,7 +321,7 @@ class Contact {
 		}
 		return $result;
 	}
-	
+
 	public static function loadByTeam($team) {
 		global $Database;
 
@@ -346,7 +346,7 @@ class Contact {
 
 	private function populateFromDbRow($row) {
 		global $Database;
-		
+
 		$this->_id = $row['contact_id'];
 		$this->_type = $row['type'];
 		$this->_name = $row['contact'];
@@ -356,28 +356,28 @@ class Contact {
 		}
 		$this->_emails = [];
 		$this->_phoneNumbers = [];
-		
+
 		// TODO: logicalise
 		$stmt = $Database->prepare('SELECT email, email_type FROM contact_email WHERE contact_id = ?');
 		$stmt->execute([$this->_id]);
 		while (!!($row = $stmt->fetch())) {
 			$this->_emails[] = [$row['email'], $row['email_type']];
 		}
-		
+
 		$stmt = $Database->prepare('SELECT phone, phone_type FROM contact_phone WHERE contact_id = ?');
 		$stmt->execute([$this->_id]);
 		while (!!($row = $stmt->fetch())) {
 			$this->_phoneNumbers[] = [$row['phone'], $row['phone_type']];
 		}
 	}
-	
+
 	public function id() { return $this->_id; }
 	public function type() { return $this->_type; }
 	public function name() { return $this->_name; }
 	public function teamName() { return $this->_teamName; }
 	public function divisionName() { return $this->_divisionName; }
 	public function emails() { return $this->_emails; }
-	public function phoneNumbers() { return $this->_phoneNumbers; }	
+	public function phoneNumbers() { return $this->_phoneNumbers; }
 
 	private $_id, $_type, $_name, $_teamName, $_divisionName;
 	// TODO: logicalise

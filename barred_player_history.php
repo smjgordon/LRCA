@@ -20,7 +20,7 @@ $stmtPlayers = $Database->prepare("
 	FROM barred_player bp
 		JOIN player p ON bp.player_id = p.player_id
 	WHERE bp.team_id = ?
-	ORDER BY bp.start_date, bp.end_date, p.surname, p.forename");	
+	ORDER BY bp.start_date, bp.end_date, p.surname, p.forename");
 
 pageHeader('Barred Player History');
 ?>
@@ -43,7 +43,7 @@ pageHeader('Barred Player History');
 			if ($lastTeam['club_id'] == $currentTeam['club_id']) {
 				$today = date('c');
 				$stmtPlayers->execute([$lastTeam['team_id']]);
-				
+
 				while (!!($player = $stmtPlayers->fetch())) {
 				?>
 					<tr>

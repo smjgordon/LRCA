@@ -16,14 +16,14 @@ function createUser($forename, $surname, $email, $clubId) {
 	}
 
 	$Database->beginTransaction();
-	try {		
+	try {
 		// check that a user with this email doesn't already exist
 		$stmt = $Database->prepare('SELECT * FROM user WHERE Lower(email) = ?');
 		$stmt->execute([strtolower($email)]);
 		if ($row = $stmt->fetch()) {
 			throw new ReportableException("Sorry, a user already exists with email address $email.");
 		}
-		
+
 		// now actually create the user!
 		$stmt = $Database->prepare('
 			INSERT INTO user(forename, surname, email, club_id, created_user_id,

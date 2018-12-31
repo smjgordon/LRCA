@@ -28,14 +28,14 @@ function formatDate($timestamp, $withYear = true) {
 function parseDate($string) {
 	$string = trim($string);
 	if ($string == '') throw new ReportableException('Missing date');
-	
+
 	$validFormat
 		= preg_match('/^20[0-9][0-9]-[01][0-9]-[0123][0-9]$/', $string)
 		|| preg_match('/^[0123]?[0-9][- .,\/]*[A-Za-z][A-Za-z][A-Za-z][- .,\/]*20[0-9][0-9]$/', $string);
 	$result = strtotime($string);
 
 	if (!$validFormat || !$result) throw new ReportableException("Invalid date: $string");
-	
+
 	// now make sure it's *actually* valid
 	$strippedInput = strtolower(strtr($string, [' ' => '', '-' => '', '/' => '', '.' => '', ',' => '']));
 	if ($strippedInput != strtolower(date('dMY', $result))            // dd mmm yyyy

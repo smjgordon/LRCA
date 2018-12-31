@@ -9,7 +9,7 @@ class OldDivision {
 	public $section, $format;
 
 	public function id() { return $this->id; }
-	
+
 	function __construct($divisionID) {
 		global $Database;
 
@@ -36,7 +36,7 @@ class OldDivision {
 	function headerTitle() {
 		return $this->name . ' – ' . $this->section->displayName();
 	}
-	
+
 	function breakdown() {
 		global $Database;
 

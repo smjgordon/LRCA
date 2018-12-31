@@ -12,7 +12,7 @@ if (isset($_POST['action'])) {
 	$email1 = trim($_POST['email1']);
 	$email2 = trim($_POST['email2']);
 	$clubId = $_POST['cid'];
-	
+
 	if (!$forename) {
 		$error = 'Missing forename';
 	} else if (!$surname) {

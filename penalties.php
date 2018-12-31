@@ -29,7 +29,7 @@ pageHeader("Penalties – " . $divisionView->headerTitle());
 <div id="subBody">
 	<h2><?php echo htmlspecialchars($divisionView->bodyTitle()); ?></h2>
 	<h3 class="sub">Penalties</h3>
-	
+
 <?php
 	if ($section->year() < ($section->season() == Season::Winter ? 2016 : 2017)) {
 	?>
@@ -43,7 +43,7 @@ pageHeader("Penalties – " . $divisionView->headerTitle());
 		$divisionView->showDefaultTotals();
 		$anyPenalties = true;
 	}
-	
+
 	$anyPenalties |= $divisionView->showMatchPenalties();
 
 	if (!$anyPenalties) {

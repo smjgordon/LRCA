@@ -5,21 +5,21 @@ class HtmlNewsPostView {
 	public function __construct($post) {
 		$this->_post = $post;
 	}
-	
+
 	public function fullPost() {
 		$post = $this->_post;
 		$result = '<h3 id="p' . $post->id() . '">' . htmlspecialchars($post->title()) . '</h3>';
 		$result .= '<p class="sub">' . htmlspecialchars($post->user()->fullName()) . ' ' . formatDate($post->date()) . '</p>';
 		$result .= $this->formatArticleText($post->homepageText());
 		$result .= $this->formatArticleText($post->detailText());
-		
+
 		if ($post->attachments()) foreach ($post->attachments() as $att) {
 			$result .= '<p><a href="' . backToLevel(0) . 'news/att/' . htmlspecialchars($att->fileName()) . '">'
 				. htmlspecialchars($att->displayName()) . '</a></p>';
 		}
 		return $result;
 	}
-	
+
 	public function homePagePost() {
 		$post = $this->_post;
 		if ($post->feed()->id() == 1) {
@@ -38,16 +38,16 @@ class HtmlNewsPostView {
 		}
 		return $result;
 	}
-	
+
 	private $_post;
-	
+
 	private function formatArticleText($text, $closeParagraph = true) {
 		if ($text == '') return '';
-		
+
 		$lines = explode("\n", $text);
 		$newParagraph = true;
 		$result = '';
-		
+
 		foreach ($lines as $line) {
 			$line = htmlspecialchars(trim($line));
 			if ($line == '') {
@@ -62,7 +62,7 @@ class HtmlNewsPostView {
 				} else {
 					$result .= '<br />';
 				}
-				
+
 				// translate markup
 				// [[url|link text]]
 				$line = preg_replace('/\[\[([^|]+)\|([^]]+)\]\]/', '<a href="$1">$2</a>', $line);
@@ -70,7 +70,7 @@ class HtmlNewsPostView {
 				$line = preg_replace('/\*\*((\*?[^*])+)\*\*/', '<strong>$1</strong>', $line);
 				// __emphasised text__
 				$line = preg_replace('/__((_?[^_])+)__/', '<em>$1</em>', $line);
-				
+
 				$result .= $line;
 			}
 		}

@@ -21,7 +21,7 @@ class Committee {
 
 	public static function loadByUri($uri) {
 		global $Database;
-		
+
 		$uriParts = array_slice(explode('/', trim($uri, '/')), -1);
 		if (count($uriParts) != 1) throw new ModelAccessException(ModelAccessException::BadUrl, $uri);
 		$stmt = $Database->prepare(' SELECT * FROM committee WHERE url_name = ?');
@@ -46,7 +46,7 @@ class Committee {
 	public function urlName() { return $this->_urlName; }
 	public function name() { return $this->_name; }
 	public function longName() { return $this->_longName; }
-	
+
 	private $_id, $_urlName, $_name, $_longName;
 }
 ?>

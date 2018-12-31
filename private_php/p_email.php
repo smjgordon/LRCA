@@ -21,15 +21,15 @@ Content-Type: text/plain; charset=utf-8';
 
 	} else {
 		pageHeaderNoDb("Email Confirmation Test");
-	
+
 	?>
 		<p>From: <?php echo htmlspecialchars(SystemSettings::$fromEmail); ?></p>
 		<p>To: <?php echo htmlspecialchars($toHeader); ?></p>
 		<p>Subject: <?php echo htmlspecialchars($subject); ?></p>
 		<p>Reply-To: <?php echo htmlspecialchars(SystemSettings::$replyEmail); ?></p>
-	
+
 		<pre><?php echo htmlspecialchars($message); ?></pre>
-		
+
 		<p><a href="<?php echo htmlspecialchars($redirectUri); ?>">Continue</a></p>
 	<?php
 		pageFooterNoDb();

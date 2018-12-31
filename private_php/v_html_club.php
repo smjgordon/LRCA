@@ -3,7 +3,7 @@ require_once 'm_club.php';
 
 function clubNavBar() {
 	$clubs = Club::loadAll();
-	
+
 	$backToIndex = backToLevel(1);
 
 	$result = '<ul>';
@@ -22,12 +22,12 @@ class HtmlClubView {
 	public function __construct($club) {
 		$this->_club = $club;
 	}
-	
+
 	public function mapLink() {
 		if ($this->_club->hasMapCoordinates()) {
 			$mapUrl = 'https://www.google.com/maps/search/?api=1&query='
 				. $this->_club->venueLatitude() . ',' . $this->_club->venueLongitude();
-				
+
 			if ($this->_club->venueGooglePlaceId()) {
 				$mapUrl .= '&query_place_id=' . $this->_club->venueGooglePlaceId();
 			}
